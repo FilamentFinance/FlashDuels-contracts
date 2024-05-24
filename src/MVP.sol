@@ -76,28 +76,37 @@ contract Betting {
         if(bets[battleId][msg.sender].amount>0){
             require(bets[battleId][msg.sender].heroIndexinBattle==heroIndex,"You have already placed bet on other hero");
         }
-        require(battle.heropool[heroIndex]+msg.value<=uint256(uint128(type(int128).max)),"Bet amount is too high");
-        
-        if(heroIndex>1){
+        uint inBattleHeroIndex;
+        if(battle.heroIndex[1]==heroIndex){
+            inBattleHeroIndex=1;
+        }else if(battle.heroIndex[0]==heroIndex){
+            inBattleHeroIndex=0;
+        }else{
             revert InvalidHeroIndex ( battleId , heroIndex );
         }
+        require(battle.heropool[inBattleHeroIndex]+msg.value<=uint256(uint128(type(int128).max)),"Bet amount is too high");
+        
 
         uint[2] memory currentPrice=getcurrentPrice(battleId);
 
         payable(PROTOCOL_ADDRESS).transfer(msg.value*PROTOCOL_FEE_PERCENTAGE/100);
         uint betValue=msg.value*(100-PROTOCOL_FEE_PERCENTAGE)/100;
-        uint shareAsPerCurrentPrice=betValue*100/currentPrice[heroIndex];
+        uint shareAsPerCurrentPrice=betValue*100/currentPrice[inBattleHeroIndex];
 
-        battle.totalPool                    += betValue;
-        battle.heropool[heroIndex]          += betValue;
-        battle.heroSharepool[heroIndex]     += shareAsPerCurrentPrice;
+
+        battle.totalPool                      += betValue;
+        battle.heropool[inBattleHeroIndex]    += betValue;
+        battle.heroSharepool[inBattleHeroIndex] += shareAsPerCurrentPrice;
         bets[battleId][msg.sender].battleId  = battleId;
-        bets[battleId][msg.sender].heroIndexinBattle = heroIndex;
-        bets[battleId][msg.sender].amount   = betValue;
+        bets[battleId][msg.sender].heroIndexinBattle = inBattleHeroIndex;
+        bets[battleId][msg.sender].amount   += betValue;
         bets[battleId][msg.sender].share    = shareAsPerCurrentPrice;
-        bets[battleId][msg.sender].bettor   = msg.sender;
 
+        if(bets[battleId][msg.sender].bettor==address(0)){
+        bets[battleId][msg.sender].bettor   = msg.sender;
         battleIdtoBettor[battleId].push(msg.sender);
+        }
+
 
         emit BetPlaced(battleId, msg.sender, heroIndex, msg.value);
     }
