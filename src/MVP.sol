@@ -73,6 +73,7 @@ contract Betting {
     function placeBet(uint256 battleId, uint heroIndex) external isWindowOpen(battleId) payable {
         Battle storage battle = battles[battleId];
         require(msg.value > 0  ,   "Bet amount must be greater than 0");
+        require(battle.finalized == false, "Battle has ended"   );
         if(bets[battleId][msg.sender].amount>0){
             require(bets[battleId][msg.sender].heroIndexinBattle==heroIndex,"You have already placed bet on other hero");
         }
