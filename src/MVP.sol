@@ -88,10 +88,12 @@ contract Betting {
         
 
         uint[2] memory currentPrice=getcurrentPrice(battleId);
+        uint betValue=msg.value*(100-PROTOCOL_FEE_PERCENTAGE)/100;
+
+        require(betValue*10000>currentPrice[inBattleHeroIndex],"need to bet atleast 0.01% of current price");
 
         payable(PROTOCOL_ADDRESS).transfer(msg.value*PROTOCOL_FEE_PERCENTAGE/100);
-        uint betValue=msg.value*(100-PROTOCOL_FEE_PERCENTAGE)/100;
-        uint shareAsPerCurrentPrice=betValue*100/currentPrice[inBattleHeroIndex];
+        uint shareAsPerCurrentPrice=betValue*10000/currentPrice[inBattleHeroIndex];
 
 
         battle.totalPool                      += betValue;
@@ -145,8 +147,8 @@ contract Betting {
 
         uint TOTAL=exp(qA)+exp(qB);
 
-        uint PriceA = exp(qA)*1 ether/TOTAL;
-        uint PriceB = exp(qB)*1 ether/TOTAL;
+        uint PriceA = exp(qA)*0.001 ether/TOTAL;
+        uint PriceB = exp(qB)*0.001 ether/TOTAL;
 
         return [PriceA,PriceB];
     }
