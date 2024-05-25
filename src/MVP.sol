@@ -51,9 +51,9 @@ contract Betting {
 
     error InvalidHeroIndex(uint battleId,uint heroIndex);
 
-    function createBattle(uint hero1Index, uint hero2Index ) external payable {
+    function createBattle(uint hero1Index, uint hero2Index,uint betonheroIndex ) external payable {
 
-        require(msg.value == CREATION_FEE, "Creation fee is 0.002 ETH");
+        require(msg.value >= CREATION_FEE, "Creation fee is 0.002 ETH");
 
         battleCount++;
         Battle storage battle = battles[battleCount];
@@ -65,6 +65,22 @@ contract Betting {
         battle.finalized = false;
 
         payable(PROTOCOL_ADDRESS).transfer(CREATION_FEE-(2*POOL_INITIALIZATION));
+
+        uint betonhero1;
+        if(hero2Index==betonheroIndex){
+            betonhero1=1;
+        }else if(hero1Index!=betonheroIndex){
+            revert("Betting on Invalid Hero");
+        }
+
+        uint[2] memory pricepershare=getcurrentPrice(battleCount);
+
+        uint betshareAsPerCurrentPrice=(msg.value-CREATION_FEE)*10000/pricepershare[betonhero1];
+        battle.heropool[betonhero1]+=msg.value-CREATION_FEE;
+        battle.heroSharepool[betonhero1]+=betshareAsPerCurrentPrice;
+        battle.totalPool+=msg.value-CREATION_FEE;
+        
+
 
         emit BattleCreated(battleCount, msg.sender, hero1Index, hero2Index, block.timestamp);
     }
