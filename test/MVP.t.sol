@@ -38,7 +38,7 @@ contract CounterTest is Test {
         vm.prank(makeAddr('Better1onzero'));
         betting.placeBet{value:betammountfor1share_1[0] }(1,100);
 
-        skip(30 minutes); // 60 min (30 in battle time)
+        skip(35 minutes); // 65 min (35 in battle time)
 
         uint[2] memory betammountfor1share_2=getcurrentPrice(1);
         console.log("betammountfor1share_2[0] ",betammountfor1share_2[0]/.000001 ether);
@@ -77,7 +77,7 @@ contract CounterTest is Test {
         vm.prank(makeAddr('Better2onzero'));
         betting.placeBet{value:betammountfor1share_2[0]*2}(1,100); // should get  2 share
 
-        skip(20 minutes); // 60 min(30 in battle time)
+        skip(25 minutes); // 65 min(35 in battle time)
 
         uint[2] memory betammountfor1share_3=getcurrentPrice(1);
         vm.deal(makeAddr('Better1onOne'),betammountfor1share_3[1]);

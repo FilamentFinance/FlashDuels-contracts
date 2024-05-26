@@ -133,7 +133,6 @@ contract Betting {
     function finalizeBattle (uint256 battleId,uint winnerIndex,address cardHolder) onlyBattleFinalizer canbeFinalized(battleId) external {
         require(battles[battleId].creator != address(0),"Battle is not prepered yet");
         require(!battles[battleId].finalized,"Battle has Ended");
-        require(block.timestamp > battles[battleId].startTime + BATTLE_DURATION, "Battle has not ended yet");
 
         Battle storage battle = battles[battleId];
         battle.finalized = true;
@@ -184,10 +183,12 @@ contract Betting {
 
     modifier isWindowOpen(uint256 battleId){
         require(block.timestamp - battles[battleId].startTime < BATTLE_DURATION+BATTLE_WAITING_TIME, "Battle has ended");
-        require(30 minutes <=block.timestamp - battles[battleId].startTime , "Battle has not started yet");
+        if(block.timestamp - battles[battleId].startTime >BATTLE_WAITING_TIME){
         uint windowtime= block.timestamp - battles[battleId].startTime-BATTLE_WAITING_TIME;
         require( 0<=windowtime&&windowtime<=10 minutes ||
-            30 minutes<=windowtime&&windowtime<=40 minutes , "Wait for Win");
+            35 minutes<=windowtime&&windowtime<=40 minutes ||
+            55 minutes<=windowtime&&windowtime<=60  minutes , "Wait till betting window opens");
+        }
         _;
     }
     modifier isBattleLive(uint256 battleId){
