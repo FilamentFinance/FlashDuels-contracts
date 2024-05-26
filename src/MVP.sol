@@ -68,7 +68,7 @@ contract Betting {
 
         payable(PROTOCOL_ADDRESS).transfer(CREATION_FEE-(2*POOL_INITIALIZATION));
 
-        uint betonhero1;
+        uint betonhero1=0;
         if(hero2Index==betonheroIndex){
             betonhero1=1;
         }else if(hero1Index!=betonheroIndex){
@@ -81,6 +81,13 @@ contract Betting {
         battle.heropool[betonhero1]+=msg.value-CREATION_FEE;
         battle.heroSharepool[betonhero1]+=betshareAsPerCurrentPrice;
         battle.totalPool+=msg.value-CREATION_FEE;
+
+        bets[battleCount][msg.sender].battleId  = battleCount;
+        bets[battleCount][msg.sender].heroIndexinBattle = betonhero1;
+        bets[battleCount][msg.sender].amount   += msg.value-CREATION_FEE;
+        bets[battleCount][msg.sender].share    += betshareAsPerCurrentPrice;
+
+
         
 
 
