@@ -54,6 +54,8 @@ contract Betting {
     function createBattle(uint hero1Index, uint hero2Index,uint betonheroIndex ) external payable {
 
         require(msg.value >= CREATION_FEE, "Creation fee is 0.002 ETH");
+        require(hero1Index != hero2Index, "Both heroes cannot be same");
+        
 
         battleCount++;
         Battle storage battle = battles[battleCount];
