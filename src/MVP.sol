@@ -55,7 +55,7 @@ contract Betting {
 
         require(msg.value >= CREATION_FEE, "Creation fee is 0.002 ETH");
         require(hero1Index != hero2Index, "Both heroes cannot be same");
-        
+
 
         battleCount++;
         Battle storage battle = battles[battleCount];
@@ -63,7 +63,7 @@ contract Betting {
         battle.heroIndex = [hero1Index,hero2Index];
         battle.heropool = [POOL_INITIALIZATION,POOL_INITIALIZATION]; //    0.0004 ether,0.004 ether
         battle.startTime = block.timestamp;
-        battle.totalPool = 0;
+        battle.totalPool = 2*POOL_INITIALIZATION;
         battle.finalized = false;
 
         payable(PROTOCOL_ADDRESS).transfer(CREATION_FEE-(2*POOL_INITIALIZATION));
