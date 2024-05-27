@@ -99,9 +99,6 @@ contract Betting {
         Battle storage battle = battles[battleId];
         require(msg.value > 0  ,   "Bet amount must be greater than 0");
         require(battle.finalized == false, "Battle has ended"   );
-        if(bets[battleId][msg.sender].amount>0){
-            require(bets[battleId][msg.sender].heroIndexinBattle==heroIndex,"You have already placed bet on other hero");
-        }
         uint inBattleHeroIndex;
         if(battle.heroIndex[1]==heroIndex){
             inBattleHeroIndex=1;
@@ -111,6 +108,9 @@ contract Betting {
             revert InvalidHeroIndex ( battleId , heroIndex );
         }
         require(battle.heropool[inBattleHeroIndex]+msg.value<=uint256(uint128(type(int128).max)),"Bet amount is too high");
+        if(bets[battleId][msg.sender].amount>0){
+            require(bets[battleId][msg.sender].heroIndexinBattle==inBattleHeroIndex,"You have already placed bet on other hero");
+        }
         
 
         uint[2] memory currentPrice=getcurrentPrice(battleId);

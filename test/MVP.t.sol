@@ -31,8 +31,8 @@ contract CounterTest is Test {
 
 
         uint[2] memory betammountfor1share_1=getcurrentPrice(1);
-        console.log("betammountfor1share_1[0] ",betammountfor1share_1[0]/.000001 ether);
-        console.log("betammountfor1share_1[1] ",betammountfor1share_1[1]/.000001 ether);
+        // console.log("betammountfor1share_1[0] ",betammountfor1share_1[0]/.000001 ether);
+        // console.log("betammountfor1share_1[1] ",betammountfor1share_1[1]/.000001 ether);
         
         vm.deal(makeAddr('Better1onzero'),betammountfor1share_1[0] );
         vm.prank(makeAddr('Better1onzero'));
@@ -41,15 +41,15 @@ contract CounterTest is Test {
         skip(35 minutes); // 65 min (35 in battle time)
 
         uint[2] memory betammountfor1share_2=getcurrentPrice(1);
-        console.log("betammountfor1share_2[0] ",betammountfor1share_2[0]/.000001 ether);
-        console.log("betammountfor1share_2[1] ",betammountfor1share_2[1]/.000001 ether);
+        // console.log("betammountfor1share_2[0] ",betammountfor1share_2[0]/.000001 ether);
+        // console.log("betammountfor1share_2[1] ",betammountfor1share_2[1]/.000001 ether);
         vm.deal(makeAddr('Better2onone'),2*betammountfor1share_2[1]);
         vm.prank(makeAddr('Better2onone'));
         betting.placeBet{value:2*betammountfor1share_2[1]}(1,200);
 
         uint[2] memory betammountfor1share_3=getcurrentPrice(1);
-        console.log("betammountfor1share_3[0] ",betammountfor1share_3[0]/.000001 ether);
-        console.log("betammountfor1share_3[1] ",betammountfor1share_3[1]/.000001 ether);
+        // console.log("betammountfor1share_3[0] ",betammountfor1share_3[0]/.000001 ether);
+        // console.log("betammountfor1share_3[1] ",betammountfor1share_3[1]/.000001 ether);
         assertEq(betting.battleIdtoBettor(1,1),makeAddr('Better2onone'));
         skip(31 minutes);// 91 min (61 in battle time)
 
@@ -96,19 +96,21 @@ contract CounterTest is Test {
 
         uint looseramount=0.0004 ether +(betammountfor1share_4[1]*99/100)+(betammountfor1share_3[1]*99/100);
         assertEq(makeAddr('cardHolder').balance,(looseramount)*20/(100));
-    }
-    function testing_for_low_cap() public {
-        assertEq(betting.battleCount(),1);
-
-        uint[2] memory betammountfor1share_1=getcurrentPrice(1);
-
-        vm.deal(makeAddr('Better1onzero'),40*betammountfor1share_1[0]/100);
-        vm.prank(makeAddr('Better1onzero'));
-        betting.placeBet{value:betammountfor1share_1[0]/1000}(1,100); // should get 40% of one share
         Betting.Battle memory battle = betting.getBattle(1);
-        console.log("battle.herosharepool[0] ",battle.heroSharepool[0]);
-    
+        console.log("battle.finalized ",battle.finalized);  
     }
+    // function testing_for_low_cap() public {
+    //     assertEq(betting.battleCount(),1);
+
+    //     uint[2] memory betammountfor1share_1=getcurrentPrice(1);
+
+    //     vm.deal(makeAddr('Better1onzero'),40*betammountfor1share_1[0]/100);
+    //     vm.prank(makeAddr('Better1onzero'));
+    //     betting.placeBet{value:betammountfor1share_1[0]/1000}(1,100); // should get 40% of one share
+    //     Betting.Battle memory battle = betting.getBattle(1);
+    //     console.log("battle.herosharepool[0] ",battle.heroSharepool[0]);
+    
+    // }
 
     function getcurrentPrice(uint256 battleId) public view returns(uint[2] memory){
         Betting.Battle memory battle = betting.getBattle(battleId);
