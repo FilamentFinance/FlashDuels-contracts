@@ -87,9 +87,7 @@ contract Betting {
         bets[battleCount][msg.sender].amount   += msg.value-CREATION_FEE;
         bets[battleCount][msg.sender].share    += betshareAsPerCurrentPrice;
 
-
-        
-
+        battleIdtoBettor[battleCount].push(msg.sender);
 
         emit BattleCreated(battleCount, msg.sender, hero1Index, hero2Index, block.timestamp);
     }
