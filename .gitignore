@@ -17,8 +17,6 @@ docs/
 # Dotenv file
 .env
 
-node_modules
-.env
 
 # Hardhat files
 /cache
@@ -35,5 +33,6 @@ node_modules
 # Hardhat Ignition default folder for deployments against a local node
 ignition/deployments/chain-31337
 
-cache_hardhat
 lib/forge-std
+cache_forge
+cache_hardhat
