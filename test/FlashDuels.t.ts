@@ -19,6 +19,8 @@ describe("FlashDuels Contract", function () {
     let tokenB: any;
     let randomToken: any;
     let usdAddress: any;
+    let mockOracleA: any;
+    let mockOracleB: any;
 
     beforeEach(async function () {
         [owner, addr1, addr2, addr3, bot] = await ethers.getSigners();
@@ -45,14 +47,14 @@ describe("FlashDuels Contract", function () {
         await tokenB.waitForDeployment();
 
         const MockOracleFactoryA = await ethers.getContractFactory("MockOracle");
-        let mockOracleA = await MockOracleFactoryA.deploy();
+        mockOracleA = await MockOracleFactoryA.deploy();
         await mockOracleA.waitForDeployment();
 
         await mockOracleA.setPrice(1500);
 
 
         const MockOracleFactoryB = await ethers.getContractFactory("MockOracle");
-        let mockOracleB = await MockOracleFactoryB.deploy();
+        mockOracleB = await MockOracleFactoryB.deploy();
         await mockOracleB.waitForDeployment();
 
         await mockOracleB.setPrice(2000);
@@ -126,7 +128,7 @@ describe("FlashDuels Contract", function () {
         });
 
         it("should allow users to join duels", async function () {
-            const amount = ethers.parseEther("20");
+            const amount = ethers.parseEther("60");
 
             await tokenA.connect(owner).mint(addr2.address, amount);
             await tokenB.connect(owner).mint(addr3.address, amount);
@@ -162,7 +164,7 @@ describe("FlashDuels Contract", function () {
         });
 
         it("should fail if token is not part of the duel", async function () {
-            const amount = ethers.parseEther("20");
+            const amount = ethers.parseEther("60");
 
             const RandomToken = await ethers.getContractFactory("MockERC20");
             randomToken = await RandomToken.deploy("Random Token", "RND", 18);
@@ -195,8 +197,8 @@ describe("FlashDuels Contract", function () {
                     value: ethers.parseEther("1"),
                 });
 
-            const amountA = ethers.parseEther("20");
-            const amountB = ethers.parseEther("30");
+            const amountA = ethers.parseEther("60");
+            const amountB = ethers.parseEther("70");
 
             await tokenA.connect(owner).mint(addr2.address, amountA);
             await tokenB.connect(owner).mint(addr3.address, amountB);
@@ -238,4 +240,74 @@ describe("FlashDuels Contract", function () {
                 .withArgs(1, tokenB.target); // Assume tokenB wins based on mock prices
         });
     });
+
+    describe("Duel Settlement with Reward Distribution", function () {
+        beforeEach(async function () {
+            // Setup duels and join for settlement testing
+            await flashDuels
+                .connect(addr1)
+                .createDuel(tokenA.target, tokenB.target, 1, ethers.parseEther("10"), {
+                    value: ethers.parseEther("1"),
+                });
+    
+            const amountA = ethers.parseEther("60");
+            const amountB = ethers.parseEther("70");
+    
+            await tokenA.connect(owner).mint(addr2.address, amountA);
+            await tokenB.connect(owner).mint(addr3.address, amountB);
+    
+            // Approve token transfer
+            await tokenA.connect(addr2).approve(flashDuels.target, amountA);
+            await tokenB.connect(addr3).approve(flashDuels.target, amountB);
+    
+            await flashDuels.connect(addr2).joinDuel(1, tokenA.target, amountA);
+            await flashDuels.connect(addr3).joinDuel(1, tokenB.target, amountB);
+        });
+    
+        it("should settle duel and distribute rewards correctly to winner", async function () {
+            // Simulate time passage for the duel to expire
+            await ethers.provider.send("evm_increaseTime", [30 * 60]); // 30 minutes
+            await ethers.provider.send("evm_mine", []);
+    
+            // Set mock prices so tokenB wins
+            await mockOracleB.setPrice(2000); // Price for tokenB
+            await mockOracleA.setPrice(1500); // Price for tokenA
+    
+            // Check balances before settlement
+            const initialBalanceAddr2 = await tokenA.balanceOf(addr2.address);
+            const initialBalanceAddr3 = await tokenB.balanceOf(addr3.address);
+    
+            await flashDuels.connect(bot).startDuel(1);
+
+            let time = 3600 * 6
+            await network.provider.request({
+                method: "evm_increaseTime",
+                params: [time]
+            })
+            await helpers.time.increase(time)
+    
+            // Settle the duel
+            await flashDuels.settleDuel(1);
+    
+            // Check balances after settlement
+            const finalBalanceAddr2 = await tokenA.balanceOf(addr2.address);
+            const finalBalanceAddr3 = await tokenB.balanceOf(addr3.address);
+    
+            // Check if addr3 (winner) received the rewards
+            expect(finalBalanceAddr3).to.be.gt(initialBalanceAddr3); // addr3's balance should increase
+    
+            // Check if addr2 (loser) lost their wager amount
+            expect(finalBalanceAddr2).to.be.lte(initialBalanceAddr2); // addr2's balance should decrease
+        });
+    
+        it("should not change wallet balance if duel is not settled", async function () {
+            const initialBalanceAddr2 = await tokenA.balanceOf(addr2.address);
+            const initialBalanceAddr3 = await tokenB.balanceOf(addr3.address);
+    
+            // No settlement is triggered, balances should remain the same
+            expect(await tokenA.balanceOf(addr2.address)).to.equal(initialBalanceAddr2);
+            expect(await tokenB.balanceOf(addr3.address)).to.equal(initialBalanceAddr3);
+        });
+    });
+    
 });

@@ -16,7 +16,7 @@ contract FlashDuels is
 {
     error FlashDuels__InvalidBot();
 
-    uint256 public constant minThreshold = 50_000_000; // $50
+    uint256 public constant minThreshold = 50 * 1e18; // $50 or 50 SEI can be configurred
 
     /// @notice Struct to store details of each duel
     struct Duel {
@@ -116,7 +116,7 @@ contract FlashDuels is
         __UUPSUpgradeable_init();
         usdc = _usdc;
         bot = _bot;
-        createDuelFee = 1 * 10 ** 18;
+        createDuelFee = 1 * 1e18;
         protocolFeePercentage = 200;
         creatorFeePercentage = 200;
         bootstrapPeriod = 30 minutes;
@@ -240,6 +240,8 @@ contract FlashDuels is
             "Invalid token for this duel"
         );
         require(_amount >= duel.minWager, "Wager below minimum");
+        // or, if native token
+        // require(msg.value >= duel.minWager, "Wager below minimum");
 
         if (_token == duel.tokenA) {
             duel.wagersA[msg.sender] += _amount;
