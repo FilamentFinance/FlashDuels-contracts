@@ -48,6 +48,11 @@
     },
     {
         "inputs": [],
+        "name": "FlashDuels__InvalidBot",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "InvalidInitialization",
         "type": "error"
     },
@@ -289,6 +294,10 @@
         "type": "event"
     },
     {
+        "stateMutability": "payable",
+        "type": "fallback"
+    },
+    {
         "inputs": [],
         "name": "UPGRADE_INTERFACE_VERSION",
         "outputs": [
@@ -296,30 +305,6 @@
                 "internalType": "string",
                 "name": "",
                 "type": "string"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_duelId",
-                "type": "uint256"
-            }
-        ],
-        "name": "_getPriceDelta",
-        "outputs": [
-            {
-                "internalType": "int256",
-                "name": "",
-                "type": "int256"
-            },
-            {
-                "internalType": "int256",
-                "name": "",
-                "type": "int256"
             }
         ],
         "stateMutability": "view",
@@ -352,6 +337,19 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "bot",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "address",
@@ -364,8 +362,8 @@
                 "type": "address"
             },
             {
-                "internalType": "enum FlashDuels.ExpiryTime",
-                "name": "_expiryTime",
+                "internalType": "enum FlashDuels.DuelDuration",
+                "name": "_duelDuration",
                 "type": "uint8"
             },
             {
@@ -545,6 +543,11 @@
             {
                 "internalType": "address",
                 "name": "_usdc",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_bot",
                 "type": "address"
             }
         ],
@@ -801,5 +804,9 @@
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "receive"
     }
 ]
