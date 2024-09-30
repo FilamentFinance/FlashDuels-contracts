@@ -8,122 +8,233 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
+/// @title FlashDuels
+/// @notice This contract allows users to create and participate in duels by betting on one of two tokens.
+/// @dev Uses Chainlink price feeds and OpenZeppelin upgradeable contracts for functionality and security.
 contract FlashDuels is
     UUPSUpgradeable,
     OwnableUpgradeable,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
 {
+    /// @notice Thrown when the bot address is invalid
     error FlashDuels__InvalidBot();
 
-    uint256 public constant minThreshold = 50 * 1e18; // $50 or 50 SEI can be configurred
+    /// @notice Thrown when the duel ID is invalid
+    error FlashDuels__InvalidDuel();
 
-    /// @notice Struct to store details of each duel
+    /// @notice Thrown when trying to start a duel that has already begun
+    error FlashDuels__DuelAlreadyStarted();
+
+    /// @notice The minimum threshold for wagering, set to 50 USDC (or configurable)
+    uint256 public constant minThreshold = 50 * 1e6; // $50 or 50 SEI can be configured
+
+    /// @notice Struct that stores details of each duel
     struct Duel {
-        /// @notice Address of the creator of the duel
+        /// @notice Address of the duel creator
         address creator;
         /// @notice Address of the first token used in the duel
         address tokenA;
         /// @notice Address of the second token used in the duel
         address tokenB;
-        /// @notice Create time of the duel in UNIX timestamp
+        /// @notice Topic description for token A
+        string topicA;
+        /// @notice Topic description for token B
+        string topicB;
+        /// @notice UNIX timestamp when the duel was created
         uint256 createTime;
-        /// @notice Expiry time of the duel in UNIX timestamp
+        /// @notice UNIX timestamp when the duel expires
         uint256 expiryTime;
-        /// @notice Minimum wager amount for the duel
+        /// @notice Minimum wager amount in the duel
         uint256 minWager;
         /// @notice Total amount wagered on token A
         uint256 totalWagerA;
         /// @notice Total amount wagered on token B
         uint256 totalWagerB;
-        /// @notice Status indicating if the duel is live
-        bool isLive;
-        /// @notice Status indicating if the duel is settled
-        bool isSettled;
-        /// @notice Start time of the duel in UNIX timestamp
+        /// @notice Status of the duel
+        DuelStatus duelStatus;
+        /// @notice Category of the duel
+        DuelCategory category;
+        /// @notice UNIX timestamp when the duel starts
         uint256 startTime;
-        /// @notice Starting price of token A at the beginning of the duel
+        /// @notice Price of token A at the start of the duel
         int256 startPriceA;
-        /// @notice Starting price of token B at the beginning of the duel
+        /// @notice Price of token B at the start of the duel
         int256 startPriceB;
-        /// @notice Duel user of token A
+        /// @notice List of users betting on token A
         address[] duelUsersA;
-        /// @notice Duel user of token B
+        /// @notice List of users betting on token B
         address[] duelUsersB;
-        /// @notice Mapping of addresses to their wager amounts on token A
+        /// @notice Mapping of wagers on token A by user
         mapping(address => uint256) wagersA;
-        /// @notice Mapping of addresses to their wager amounts on token B
+        /// @notice Mapping of wagers on token B by user
         mapping(address => uint256) wagersB;
     }
 
-    /// @notice USDC contract address
+    /// @notice USDC token contract address used for payments and fees
     address public usdc;
-    /// @notice Bot address for starting duel
+
+    /// @notice Address of the bot responsible for starting duels
     address public bot;
-    /// @notice Counter for the total number of duels created
-    uint256 public duelCounter;
-    /// @notice Fee in wei to create a duel (default 1 SEI token equivalent)
+
+    /// @notice Protocol address to receive fees
+    address public protocolAddress;
+
+    /// @notice Fee in USDC required to create a duel
     uint256 public createDuelFee;
-    /// @notice Protocol fee percentage (2% by default)
+
+    /// @notice Protocol fee percentage taken from the winnings (default 2%)
     uint256 public protocolFeePercentage;
-    /// @notice Creator fee percentage (2% by default)
+
+    /// @notice Fee percentage given to the duel creator (default 2%)
     uint256 public creatorFeePercentage;
-    /// @notice Bootstrap period duration before the duel goes live (30 minutes)
+
+    /// @notice Time period for bootstrapping before a duel goes live (30 minutes by default)
     uint256 public bootstrapPeriod;
-    /// @notice Mapping from duel ID to the Duel struct
-    mapping(uint256 => Duel) public duels;
+
+    /// @notice Total protocol fees generated by the contract
+    uint256 public totalProtocolFeesGenerated;
+
+    /// @notice Nonce used to generate unique duel IDs
+    uint256 private nonce;
+
+    /// @notice Mapping of duel IDs to duel information
+    mapping(string => Duel) public duels;
+
+    /// @notice Tracks valid duel IDs to prevent duplicates
+    mapping(string => bool) public isValidDuelId;
+
     /// @notice Mapping of supported token addresses
     mapping(address => bool) public supportedTokens;
-    /// @notice Mapping of supported token addresses to aggregator
+
+    /// @notice Mapping of token addresses to their price aggregators
     mapping(address => address) public priceAggregator;
 
-    /// @notice Enum representing the supported duel duration
+    /// @notice Tracks total fees earned by duel creators
+    mapping(address => uint256) public totalCreatorFeeEarned;
+
+    /// @notice Tracks total earnings for participants
+    mapping(address => uint256) public allTimeEarnings;
+
+    /// @notice Mapping of creator address and topic to duel ID
+    mapping(address => mapping(string => mapping(string => string)))
+        public creatorTopicsToDuelId;
+
+    /// @notice Enum representing different possible duel durations
     enum DuelDuration {
         ThreeHours,
         SixHours,
         TwelveHours
     }
 
+    /// @notice Enum representing the current status of a duel
+    enum DuelStatus {
+        NotStarted,
+        BootStrapped,
+        Live,
+        Settled
+    }
+
+    /// @notice Enum representing categories a duel can belong to
+    enum DuelCategory {
+        Any,
+        Crypto,
+        Politics,
+        Sports,
+        Twitter,
+        NFTs,
+        News
+    }
+
+    /// @notice Emitted when a new duel is created
+    /// @param duelId The unique ID of the duel
+    /// @param creator The address of the duel creator
+    /// @param tokenA The address of token A
+    /// @param tokenB The address of token B
+    /// @param topicA The description of token A
+    /// @param topicB The description of token B
+    /// @param createTime The time the duel was created
+    /// @param expiryTime The time the duel will expire
+    /// @param createDuelFee The fee paid for creating the duel
+    /// @param category The category of the duel
     event DuelCreated(
-        uint256 indexed duelId,
-        address indexed creator,
+        string duelId,
+        address creator,
         address tokenA,
         address tokenB,
+        string topicA,
+        string topicB,
         uint256 createTime,
-        uint256 expiryTime
+        uint256 expiryTime,
+        uint256 createDuelFee,
+        DuelCategory category
     );
+
+    /// @notice Emitted when a participant joins a duel
+    /// @param duelId The ID of the duel being joined
+    /// @param participant The address of the participant
+    /// @param token The token being wagered on
+    /// @param topic The topic related to the token
+    /// @param amount The amount wagered
+    /// @param joinTime The time the participant joined the duel
     event DuelJoined(
-        uint256 indexed duelId,
-        address indexed participant,
+        string duelId,
+        address participant,
         address token,
+        string topic,
         uint256 amount,
         uint256 joinTime
     );
-    event DuelStarted(uint256 indexed duelId, uint256 startTime);
-    event DuelSettled(uint256 indexed duelId, address indexed winningToken);
+
+    /// @notice Emitted when a duel starts
+    /// @param duelId The ID of the duel that started
+    /// @param startTime The time the duel started
+    event DuelStarted(string duelId, uint256 startTime);
+
+    /// @notice Emitted when a duel is settled and the winner is determined
+    /// @param duelId The ID of the duel that was settled
+    /// @param winningTopic The topic associated with the winning token
+    event DuelSettled(string duelId, string winningTopic);
+
+    /// @notice Emitted when a user withdraws their earnings
+    /// @param user The address of the user withdrawing earnings
+    /// @param amount The amount withdrawn
+    event WithdrawEarning(address user, uint256 amount);
+
+    /// @notice Emitted when a duel creator withdraws their creator fees
+    /// @param user The address of the duel creator
+    /// @param creatorFee The fee withdrawn by the creator
+    event WithdrawCreatorEarning(address user, uint256 creatorFee);
+
+    /// @notice Emitted when protocol fees are withdrawn
+    /// @param user The address of the protocol
+    /// @param protocolBalance The amount withdrawn as protocol fees
+    event WithdrawProtocolFee(address user, uint256 protocolBalance);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    /// @notice Initialize the contract with the USDC token address
+    /// @notice Initializes the contract with the USDC token address and bot address
+    /// @dev This function can only be called once as it uses the initializer modifier
     /// @param _usdc The address of the USDC token contract
-    /// @param _bot The address of the bot for starting duel
+    /// @param _bot The address of the bot responsible for starting duels
     function initialize(address _usdc, address _bot) public initializer {
         __Ownable_init(msg.sender);
         __Pausable_init();
         __UUPSUpgradeable_init();
         usdc = _usdc;
         bot = _bot;
-        createDuelFee = 1 * 1e18;
-        protocolFeePercentage = 200;
-        creatorFeePercentage = 200;
+        createDuelFee = 10 * 1e6; // 10 USDC
+        protocolFeePercentage = 200; // 2%
+        creatorFeePercentage = 200; // 2%
         bootstrapPeriod = 30 minutes;
     }
 
     /**
-     * @dev Modifier to restrict function access to only the bot address.
+     * @notice Restricts the function to only the bot address
+     * @dev Throws FlashDuels__InvalidBot if the caller is not the bot address
      */
     modifier onlyBot() {
         require(bot == msg.sender, FlashDuels__InvalidBot());
@@ -132,25 +243,61 @@ contract FlashDuels is
 
     // ========================== External Functions ========================== //
 
-    /// @notice Pause the contract, disabling certain functions
-    /// @dev Can only be called by the owner
+    /// @notice Pauses the contract, disabling certain critical functions
+    /// @dev Can only be called by the owner to prevent further operations during an emergency
     function pause() external onlyOwner {
         _pause();
     }
 
-    /// @notice Unpause the contract, enabling certain functions
-    /// @dev Can only be called by the owner
+    /// @notice Unpauses the contract, enabling previously disabled functions
+    /// @dev Can only be called by the owner to resume normal contract operations
     function unpause() external onlyOwner {
         _unpause();
     }
 
-    function addSupportedToken(address _token) external onlyOwner {
+    /**
+     * @notice Marks a token as supported in the contract
+     * @dev Can only be called by the owner to add tokens that can be used in duels
+     * @param _token The address of the token to be supported
+     */
+    function setSupportedToken(address _token) external onlyOwner {
         supportedTokens[_token] = true;
     }
 
     /**
-     * @notice Set the price aggregator for a specific token
-     * @param _token The address of the token
+     * @notice Sets the fee required to create a duel.
+     * @dev This function can only be called by the contract owner.
+     * It updates the createDuelFee variable with the new fee value.
+     * @param _fee The new fee amount to set for creating a duel.
+     */
+    function setCreateDuelFee(uint256 _fee) external onlyOwner {
+        createDuelFee = _fee;
+    }
+
+    /**
+     * @notice Sets the address of the bot.
+     * @dev This function can only be called by the contract owner.
+     * It updates the bot variable with the specified address.
+     * @param _bot The address of the bot to set.
+     */
+    function setBotAddress(address _bot) external onlyOwner {
+        bot = _bot;
+    }
+
+    /**
+     * @notice Sets the address of the protocol.
+     * @dev This function can only be called by the contract owner.
+     * It updates the protocolAddress variable with the new address.
+     * @param _protocolAddress The address of the protocol to set.
+     */
+    function setProtocolAddress(address _protocolAddress) external onlyOwner {
+        protocolAddress = _protocolAddress;
+    }
+
+    /**
+     * @notice Sets the Chainlink price aggregator for a specific token
+     * @dev Can only be called by the owner to set up a price feed for supported tokens
+     * @param _token The address of the token for which the aggregator is being set
      * @param _aggregator The address of the Chainlink price feed aggregator for the token
      */
     function setPriceAggregator(
@@ -163,29 +310,41 @@ contract FlashDuels is
         priceAggregator[_token] = _aggregator;
     }
 
-    /// @notice Creates a new duel with the specified parameters
-    /// @dev Allows any user to create a duel using two supported tokens and a predefined duel duration.
-    ///      A SEI fee is required for duel creation. The duel starts after the bootstrap period.
-    /// @param _tokenA The address of the first token used in the duel (e.g., WIF).
-    /// @param _tokenB The address of the second token used in the duel (e.g., PEPE).
-    /// @param _duelDuration The predefined duration for the duel: 3 hours, 6 hours, or 12 hours after the start.
-    /// @param _minWager The minimum wager amount required for the duel.
-    /// @notice Requires a minimum of 1 SEI token as a fee to create a duel.
-    /// @notice The duel will start after a 30-minute bootstrap period and remain active for the selected expiry duration.
+    /**
+     * @notice Creates a new duel with the specified parameters
+     * @dev Allows any user to create a duel using two supported tokens and a predefined duel duration.
+     *      A USDC fee is required for duel creation, and the duel starts after the bootstrap period.
+     * @param _tokenA The address of the first token used in the duel (e.g., WIF)
+     * @param _tokenB The address of the second token used in the duel (e.g., PEPE)
+     * @param _topicA A string representing the topic or title for token A in the duel
+     * @param _topicB A string representing the topic or title for token B in the duel
+     * @param _duelDuration The predefined duration for the duel: 3 hours, 6 hours, or 12 hours after the start
+     * @param _minWager The minimum wager amount required for the duel
+     * @param _category The category of the duel (e.g., Crypto, other categories may be added later)
+     * @return _duelId The generated ID for the created duel
+     */
     function createDuel(
         address _tokenA,
         address _tokenB,
+        string memory _topicA,
+        string memory _topicB,
         DuelDuration _duelDuration,
-        uint256 _minWager
-    ) external payable nonReentrant whenNotPaused {
+        uint256 _minWager,
+        DuelCategory _category
+    ) external nonReentrant whenNotPaused returns (string memory) {
+        if (_category == DuelCategory.Crypto) {
+            require(
+                supportedTokens[_tokenA] && supportedTokens[_tokenB],
+                "Unsupported tokens"
+            );
+        }
+
+        // Transfer USDC fee for duel creation
         require(
-            supportedTokens[_tokenA] && supportedTokens[_tokenB],
-            "Unsupported tokens"
+            IERC20(usdc).transferFrom(msg.sender, address(this), createDuelFee),
+            "USDC transfer failed"
         );
-        require(
-            msg.value >= 1 * 10 ** 18,
-            "Minimum 1 SEI required to create a duel"
-        );
+        totalProtocolFeesGenerated = totalProtocolFeesGenerated + createDuelFee;
 
         // Determine the expiry duration based on the selected enum value
         uint256 duelDuration;
@@ -199,51 +358,68 @@ contract FlashDuels is
             revert("Invalid expiry time");
         }
 
-        duelCounter++;
-        Duel storage duel = duels[duelCounter];
+        string memory _duelId = generateDuelId(msg.sender);
+        Duel storage duel = duels[_duelId];
         duel.creator = msg.sender;
+        duel.topicA = _topicA;
+        duel.topicB = _topicB;
         duel.tokenA = _tokenA;
         duel.tokenB = _tokenB;
         duel.createTime = block.timestamp;
         duel.expiryTime = block.timestamp + bootstrapPeriod + duelDuration;
-        duel.minWager = _minWager;
-        duel.isLive = false;
-        duel.isSettled = false;
+        duel.minWager = _minWager; // let's say 10 USDC, will be stored in 10 * 1e6
+        duel.duelStatus = DuelStatus.BootStrapped;
+        duel.category = _category;
+
+        creatorTopicsToDuelId[msg.sender][_topicA][_topicB] = _duelId;
 
         emit DuelCreated(
-            duelCounter,
+            _duelId,
             msg.sender,
             _tokenA,
             _tokenB,
+            _topicA,
+            _topicB,
             duel.createTime,
-            duel.expiryTime
+            duel.expiryTime,
+            createDuelFee,
+            _category
         );
+        return _duelId;
     }
 
     /// @notice Allows a user to join an existing duel by placing a wager on one of the two sides.
-    /// @dev Users must choose one of the tokens used in the duel and place a wager. The function ensures that the duel exists,
-    ///      is live, and the token selected is valid for the duel.
+    /// @dev This function checks if the duel exists and is live, ensures that the selected token
+    ///      is valid for the duel, and validates the wager amount against the minimum required.
+    ///      Users must choose one of the tokens used in the duel and place a wager.
+    ///      If the wager is on Topic A, the wager is recorded in `wagersA`; otherwise, it's recorded in `wagersB`.
     /// @param _duelId The ID of the duel to join.
     /// @param _token The address of the token to wager (must be either token A or token B of the duel).
+    /// @param isTopicA A boolean indicating whether the wager is placed on Topic A (true) or Topic B (false).
     /// @param _amount The amount of the token to wager in the duel.
-    /// @notice The user must join the duel before it expires. The duel must meet the minimum threshold to go live.
     function joinDuel(
-        uint256 _duelId,
+        string memory _duelId,
         address _token,
+        bool isTopicA,
         uint256 _amount
     ) external nonReentrant whenNotPaused {
         Duel storage duel = duels[_duelId];
-        require(_duelId != 0 && duel.createTime != 0, "Duel doesn't exist");
-        require(block.timestamp < duel.expiryTime, "Duel expired");
         require(
-            _token == duel.tokenA || _token == duel.tokenB,
-            "Invalid token for this duel"
+            isValidDuelId[_duelId] && duel.createTime != 0,
+            "Duel doesn't exist"
         );
+        require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
+        require(block.timestamp < duel.expiryTime, "Duel expired");
+        if (duel.category == DuelCategory.Crypto) {
+            require(
+                _token == duel.tokenA || _token == duel.tokenB,
+                "Invalid token for this duel"
+            );
+        }
         require(_amount >= duel.minWager, "Wager below minimum");
-        // or, if native token
-        // require(msg.value >= duel.minWager, "Wager below minimum");
 
-        if (_token == duel.tokenA) {
+        // Increment wager for the selected topic
+        if (isTopicA) {
             duel.wagersA[msg.sender] += _amount;
             duel.totalWagerA += _amount;
             duel.duelUsersA.push(msg.sender);
@@ -252,24 +428,44 @@ contract FlashDuels is
             duel.totalWagerB += _amount;
             duel.duelUsersB.push(msg.sender);
         }
-        // @note - whether to recieve in tokens or usdc
+
+        // Transfer the wager amount in USDC to the contract
         require(
-            IERC20(_token).transferFrom(msg.sender, address(this), _amount),
+            IERC20(usdc).transferFrom(msg.sender, address(this), _amount),
             "Token transfer failed"
         );
 
-        emit DuelJoined(_duelId, msg.sender, _token, _amount, block.timestamp);
+        string memory _topic = isTopicA ? duel.topicA : duel.topicB;
+        emit DuelJoined(
+            _duelId,
+            msg.sender,
+            _token,
+            _topic,
+            _amount,
+            block.timestamp
+        );
     }
+    /**
+     * @notice Starts the duel once the bootstrap period has ended and both sides have met the minimum wager requirements.
+     * @dev This function performs several checks before starting the duel:
+     *      - Verifies that the duel exists.
+     *      - Ensures that the bootstrap period has ended.
+     *      - Confirms that both sides of the duel have met the minimum wager thresholds.
+     *      - Fetches the initial prices for both tokens involved in the duel from an oracle (if it's a crypto duel).
+     *      - Marks the duel as live and records the start time.
+     *      Only callable by the bot when the contract is not paused, and non-reentrant.
+     * @param _duelId The ID of the duel to be started.
+     * Emits a {DuelStarted} event upon successful execution.
+     */
 
-    /// @notice Starts the duel once the bootstrap period has ended and minimum wagers have been met on both sides.
-    /// @dev The duel must have met the minimum wager requirements for both tokens, and the bootstrap period must have ended.
-    ///      The function fetches the initial prices for both tokens from an oracle and marks the duel as live.
-    /// @param _duelId The ID of the duel to start.
     function startDuel(
-        uint256 _duelId
+        string memory _duelId
     ) external nonReentrant whenNotPaused onlyBot {
         Duel storage duel = duels[_duelId];
-        require(_duelId != 0 && duel.createTime != 0, "Duel doesn't exist");
+        require(
+            isValidDuelId[_duelId] && duel.createTime != 0,
+            "Duel doesn't exist"
+        );
 
         // Ensure the bootstrap period has ended
         require(
@@ -278,143 +474,193 @@ contract FlashDuels is
         );
 
         // Ensure the duel is not already live
-        require(!duel.isLive, "Duel already live");
+        require(
+            duel.duelStatus == DuelStatus.BootStrapped,
+            "Duel hasn't started"
+        );
 
         // Ensure both tokens have met the minimum wager requirements
         require(
             duel.totalWagerA >= minThreshold &&
                 duel.totalWagerB >= minThreshold,
-            "Threshold not reach to start the duel"
+            "Threshold not reached to start the duel"
         );
 
         // Fetch initial prices from oracle for both tokens (implementation depends on oracle)
-        duel.startPriceA = getOraclePrice(duel.tokenA);
-        duel.startPriceB = getOraclePrice(duel.tokenB);
+        if (duel.category == DuelCategory.Crypto) {
+            require(
+                supportedTokens[duel.tokenA] && supportedTokens[duel.tokenB],
+                "Invalid token for this duel"
+            );
+
+            duel.startPriceA = getOraclePrice(duel.tokenA);
+            duel.startPriceB = getOraclePrice(duel.tokenB);
+        }
 
         // Record the start time and mark the duel as live
         duel.startTime = block.timestamp;
         uint256 duelDuration = duel.expiryTime -
             (duel.createTime + bootstrapPeriod);
         duel.expiryTime = block.timestamp + duelDuration;
-        duel.isLive = true;
+        duel.duelStatus = DuelStatus.Live;
 
         emit DuelStarted(_duelId, duel.startTime);
     }
 
-    function settleDuel(uint256 _duelId) external nonReentrant {
+    /**
+     * @notice Settles the duel after it has expired, distributing the winnings to the correct side.
+     * @dev This function checks if the duel is live and has expired before proceeding.
+     *      It calculates the winning side based on price deltas (for Crypto duels) and distributes
+     *      the winnings after deducting the protocol and creator fees.
+     *      Only callable by the bot.
+     * @param _duelId The ID of the duel to settle.
+     * Emits a {DuelSettled} event with the duel ID and the winning topic.
+     */
+    function settleDuel(string memory _duelId) external nonReentrant onlyBot {
         Duel storage duel = duels[_duelId];
-        require(duel.isLive, "Duel not live");
+
+        // Ensure the duel is live and not yet settled
+        require(
+            duel.duelStatus == DuelStatus.Live,
+            "Duel not live or already settled"
+        );
+        // Ensure the duel has expired
         require(block.timestamp >= duel.expiryTime, "Duel not expired");
-        require(!duel.isSettled, "Duel already settled");
 
-        (int256 deltaA, int256 deltaB) = _getPriceDelta(_duelId);
+        string memory winningTopic;
+        bool isTopicAwin;
 
-        address winningToken = deltaA > deltaB ? duel.tokenA : duel.tokenB;
+        // Determine the winner for Crypto duels based on price deltas
+        if (duel.category == DuelCategory.Crypto) {
+            (int256 deltaA, int256 deltaB) = _getPriceDelta(_duelId);
+            isTopicAwin = deltaA > deltaB;
+        }
 
-        // Calculate and distribute winnings
         uint256 protocolFee;
         uint256 creatorFee;
         uint256 payout;
 
-        if (winningToken == duel.tokenA) {
+        // If Topic A wins, calculate the fees and distribute winnings accordingly
+        if (isTopicAwin) {
+            winningTopic = duel.topicA;
             protocolFee = (duel.totalWagerB * protocolFeePercentage) / 10000;
             creatorFee = (duel.totalWagerB * creatorFeePercentage) / 10000;
             payout = duel.totalWagerB - protocolFee - creatorFee;
 
-            distributeWinnings(duel, true, payout);
+            totalProtocolFeesGenerated += protocolFee;
+            totalCreatorFeeEarned[duel.creator] += creatorFee;
+
+            _distributeWinnings(duel, true, payout);
         } else {
+            // If Topic B wins, calculate the fees and distribute winnings accordingly
+            winningTopic = duel.topicB;
             protocolFee = (duel.totalWagerA * protocolFeePercentage) / 10000;
             creatorFee = (duel.totalWagerA * creatorFeePercentage) / 10000;
             payout = duel.totalWagerA - protocolFee - creatorFee;
 
-            distributeWinnings(duel, false, payout);
-        }
-        duel.isLive = false;
-        duel.isSettled = true;
+            totalProtocolFeesGenerated += protocolFee;
+            totalCreatorFeeEarned[duel.creator] += creatorFee;
 
-        emit DuelSettled(_duelId, winningToken);
+            _distributeWinnings(duel, false, payout);
+        }
+
+        // Mark the duel as settled
+        duel.duelStatus = DuelStatus.Settled;
+
+        // Emit event indicating that the duel has been settled
+        emit DuelSettled(_duelId, winningTopic);
     }
 
-    // Fallback and receive functions
+    /**
+     * @notice Withdraws earnings for the caller.
+     * @param _amount The amount to withdraw.
+     */
+    function withdrawEarnings(uint256 _amount) external {
+        uint256 _allTimeEarnings = allTimeEarnings[msg.sender];
+        require(
+            _amount <= _allTimeEarnings,
+            "Amount should be less than equal earnings"
+        );
+        IERC20(usdc).transfer(msg.sender, _amount);
+        emit WithdrawEarning(msg.sender, _amount);
+    }
+
+    /**
+     * @notice Withdraws creator fees for the caller.
+     */
+    function withdrawCreatorFee() external {
+        uint256 creatorFee = totalCreatorFeeEarned[msg.sender];
+        require(creatorFee > 0, "No funds available");
+        IERC20(usdc).transfer(msg.sender, creatorFee);
+        emit WithdrawCreatorEarning(msg.sender, creatorFee);
+    }
+    /**
+     * @notice Withdraws protocol fees by the owner.
+     */
+
+    function withdrawProtocolFees() external onlyOwner {
+        uint256 protocolBalance = totalProtocolFeesGenerated;
+        require(protocolBalance > 0, "No funds available");
+        IERC20(usdc).transfer(msg.sender, protocolBalance);
+        emit WithdrawProtocolFee(msg.sender, protocolBalance);
+    }
+
+    /**
+     * @notice Fallback function that receives Ether.
+     */
     fallback() external payable {}
+
+    /**
+     * @notice Receive function that receives Ether.
+     */
     receive() external payable {}
 
+    // ========================== View Functions ========================== //
+
     /**
-     * @notice Distributes winnings to the users who bet on the winning side.
-     * @dev This function calculates and distributes both the winning token and a portion of the losing token to the winners.
-     * It transfers the respective amounts based on each user's wager proportionally.
-     * @param duel The duel for which the winnings are being distributed.
-     * @param isTokenAWinner A boolean indicating if token A is the winning token. If true, token A is the winner, else token B is.
-     * @param payout The total amount of the winning token to be distributed among the winners.
+     * @notice Retrieves the details of a specific duel.
+     * @param _duelId The ID of the duel to retrieve details for.
+     * @return _duelStatus The status of the duel.
+     * @return _duelUsersA The list of users who wagered on topic A.
+     * @return _duelUsersB The list of users who wagered on topic B.
      */
-    function distributeWinnings(
-        Duel storage duel,
-        bool isTokenAWinner,
-        uint256 payout
-    ) internal {
-        // Determine the winning and losing tokens based on the outcome of the duel
-        address winningToken = isTokenAWinner ? duel.tokenA : duel.tokenB;
-        address losingToken = isTokenAWinner ? duel.tokenB : duel.tokenA;
-
-        // Get the list of winners and their respective wagers based on the outcome
-        address[] storage winners = isTokenAWinner
-            ? duel.duelUsersA
-            : duel.duelUsersB;
-        mapping(address => uint256) storage winningWagers = isTokenAWinner
-            ? duel.wagersA
-            : duel.wagersB;
-
-        // Total amounts wagered by both sides
-        uint256 totalWinningWagers = isTokenAWinner
-            ? duel.totalWagerA
-            : duel.totalWagerB;
-        uint256 totalLosingWagers = isTokenAWinner
-            ? duel.totalWagerB
-            : duel.totalWagerA;
-
-        // Iterate over all winners to calculate and distribute their winnings
-        for (uint256 i = 0; i < winners.length; i++) {
-            address winner = winners[i];
-            uint256 winnerWager = winningWagers[winner];
-
-            // Calculate the proportion of the total wagered amount contributed by the winner
-            uint256 winnerShare = (winnerWager * 1e18) / totalWinningWagers;
-
-            // Calculate the winner's share of the winning token
-            uint256 winnerWinningTokenAmount = (winnerShare * payout) / 1e18;
-
-            // Calculate the winner's share of the losing token
-            uint256 winnerLosingTokenAmount = (winnerShare *
-                totalLosingWagers) / 1e18;
-
-            // Transfer the winning token amount to the winner
-            require(
-                IERC20(winningToken).transfer(winner, winnerWinningTokenAmount),
-                "Winning token transfer failed"
-            );
-
-            // Transfer the losing token amount to the winner
-            require(
-                IERC20(losingToken).transfer(winner, winnerLosingTokenAmount),
-                "Losing token transfer failed"
-            );
-        }
-    }
-
-    function withdrawFees() external onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
-    }
-
-    function withdrawFunds() external onlyOwner {
-        uint256 balance = IERC20(usdc).balanceOf(address(this));
-        require(balance > 0, "No funds available");
-        IERC20(usdc).transfer(msg.sender, balance);
+    function getDuelDetails(
+        string memory _duelId
+    )
+        public
+        view
+        returns (
+            DuelStatus _duelStatus,
+            address[] memory _duelUsersA,
+            address[] memory _duelUsersB
+        )
+    {
+        Duel storage _duel = duels[_duelId];
+        _duelStatus = _duel.duelStatus;
+        _duelUsersA = _duel.duelUsersA;
+        _duelUsersB = _duel.duelUsersB;
     }
 
     /**
-     * @notice Get the price from the oracle for a specific token
-     * @param _token The address of the token
-     * @return int256 The latest price from the oracle, in 8 decimals
+     * @notice Gets the wager amount deposited by a user in a duel.
+     * @param _duelId The ID of the duel.
+     * @param _user The address of the user whose wager amount is being queried.
+     * @return wagerAmountA The amount wagered by the user on topic A.
+     * @return wagerAmountB The amount wagered by the user on topic B.
+     */
+    function getWagerAmountDeposited(
+        string memory _duelId,
+        address _user
+    ) public view returns (uint256 wagerAmountA, uint256 wagerAmountB) {
+        Duel storage duel = duels[_duelId];
+        wagerAmountA = duel.wagersA[_user];
+        wagerAmountB = duel.wagersB[_user];
+    }
+
+    /**
+     * @notice Gets the price from the oracle for a specific token.
+     * @param _token The address of the token.
+     * @return int256 The latest price from the oracle, in 8 decimals.
      */
     function getOraclePrice(address _token) public view returns (int256) {
         address aggregator = priceAggregator[_token];
@@ -425,14 +671,119 @@ contract FlashDuels is
     }
 
     /**
-     * @notice Calculates the price delta for tokens in a duel
-     * @param _duelId The ID of the duel
-     * @return (int256, int256) The price delta for the tokens
+     * @notice Calculates the price delta for tokens in a duel.
+     * @param _duelId The ID of the duel.
+     * @return (int256, int256) The price delta for the tokens.
      */
     function getPriceDelta(
-        uint256 _duelId
+        string memory _duelId
     ) public view returns (int256, int256) {
         return _getPriceDelta(_duelId);
+    }
+
+    // ========================== Internal Functions ========================== //
+
+    /**
+     * @notice Generates a unique duel ID based on user and block details
+     * @dev Uses the user address, block data, and a nonce to generate a unique ID via keccak256 hashing
+     * @param userAddress The address of the user creating the duel
+     * @return duelIdStr A string representing the unique duel ID
+     */
+    function generateDuelId(
+        address userAddress
+    ) internal returns (string memory) {
+        nonce++; // Increment nonce to ensure uniqueness
+
+        // Generate a new duel ID using keccak256
+        bytes32 newId = keccak256(
+            abi.encodePacked(
+                block.timestamp,
+                block.prevrandao,
+                userAddress,
+                nonce,
+                blockhash(block.number - 1)
+            )
+        );
+
+        // Convert the bytes32 ID to a string
+        string memory duelIdStr = toHexString(newId);
+
+        // Ensure the generated ID is unique
+        require(!isValidDuelId[duelIdStr], "ID collision detected");
+
+        // Mark the ID as used
+        isValidDuelId[duelIdStr] = true;
+
+        return duelIdStr;
+    }
+
+    /**
+     * @notice Converts a bytes32 value to its hexadecimal string representation
+     * @dev Used for converting the keccak256 hash to a readable string
+     * @param _bytes The bytes32 value to be converted to a string
+     * @return A string representing the hexadecimal version of the bytes32 input
+     */
+    function toHexString(bytes32 _bytes) internal pure returns (string memory) {
+        bytes memory hexChars = "0123456789abcdef";
+        bytes memory str = new bytes(64); // Each byte takes 2 hex characters (32 bytes = 64 hex characters)
+
+        for (uint256 i = 0; i < 32; i++) {
+            str[i * 2] = hexChars[uint8(_bytes[i] >> 4)]; // First nibble (4 bits)
+            str[1 + i * 2] = hexChars[uint8(_bytes[i] & 0x0f)]; // Second nibble (4 bits)
+        }
+
+        return string(str);
+    }
+
+    /**
+     * @notice Distributes winnings to the users who bet on the winning side.
+     * @dev This function calculates and distributes both the winning token and a portion of the losing token to the winners.
+     * It transfers the respective amounts based on each user's wager proportionally.
+     * @param duel The duel for which the winnings are being distributed.
+     * @param isTopicAWinner A boolean indicating if topicA is the winning topic. If true, topicA is the winning topic, else topicB is.
+     * @param payout The total amount of the winning token to be distributed among the winners.
+     */
+    function _distributeWinnings(
+        Duel storage duel,
+        bool isTopicAWinner,
+        uint256 payout
+    ) internal {
+        address[] storage winners = isTopicAWinner
+            ? duel.duelUsersA
+            : duel.duelUsersB;
+        mapping(address => uint256) storage winningWagers = isTopicAWinner
+            ? duel.wagersA
+            : duel.wagersB;
+
+        uint256 totalWinningWagers = isTopicAWinner
+            ? duel.totalWagerA
+            : duel.totalWagerB;
+        uint256 totalLosingWagers = isTopicAWinner
+            ? duel.totalWagerB
+            : duel.totalWagerA;
+
+        for (uint256 i = 0; i < winners.length; i++) {
+            address winner = winners[i];
+            uint256 winnerWager = winningWagers[winner];
+
+            uint256 winnerShare = (winnerWager * 1e18) / totalWinningWagers;
+            uint256 winnerWinningTokenAmount = (winnerShare * payout) / 1e18;
+            uint256 winnerLosingTokenAmount = (winnerShare *
+                totalLosingWagers) / 1e18;
+
+            allTimeEarnings[winner] += winnerWinningTokenAmount;
+            // Transfer the winning token amount to the winner
+            // require(
+            //     IERC20(usdc).transfer(winner, winnerWinningTokenAmount),
+            //     "Winning token transfer failed"
+            // );
+            allTimeEarnings[winner] += winnerLosingTokenAmount;
+            // Transfer the losing token amount to the winner
+            // require(
+            //     IERC20(usdc).transfer(winner, winnerLosingTokenAmount),
+            //     "Losing token transfer failed"
+            // );
+        }
     }
 
     /**
@@ -442,9 +793,17 @@ contract FlashDuels is
      * @return deltaB The price change of tokenB.
      */
     function _getPriceDelta(
-        uint256 _duelId
+        string memory _duelId
     ) internal view returns (int256 deltaA, int256 deltaB) {
         Duel storage duel = duels[_duelId];
+        require(
+            duel.category == DuelCategory.Crypto,
+            "Duel Category should be Crypto"
+        );
+        require(
+            supportedTokens[duel.tokenA] && supportedTokens[duel.tokenB],
+            "Invalid supported tokens"
+        );
         int256 endPriceA = getOraclePrice(duel.tokenA);
         int256 endPriceB = getOraclePrice(duel.tokenB);
 

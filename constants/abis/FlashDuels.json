@@ -48,7 +48,17 @@
     },
     {
         "inputs": [],
+        "name": "FlashDuels__DuelAlreadyStarted",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "FlashDuels__InvalidBot",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuels__InvalidDuel",
         "type": "error"
     },
     {
@@ -108,13 +118,13 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
-                "internalType": "uint256",
+                "indexed": false,
+                "internalType": "string",
                 "name": "duelId",
-                "type": "uint256"
+                "type": "string"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "creator",
                 "type": "address"
@@ -133,6 +143,18 @@
             },
             {
                 "indexed": false,
+                "internalType": "string",
+                "name": "topicA",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topicB",
+                "type": "string"
+            },
+            {
+                "indexed": false,
                 "internalType": "uint256",
                 "name": "createTime",
                 "type": "uint256"
@@ -142,6 +164,18 @@
                 "internalType": "uint256",
                 "name": "expiryTime",
                 "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "createDuelFee",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum FlashDuels.DuelCategory",
+                "name": "category",
+                "type": "uint8"
             }
         ],
         "name": "DuelCreated",
@@ -151,13 +185,13 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
-                "internalType": "uint256",
+                "indexed": false,
+                "internalType": "string",
                 "name": "duelId",
-                "type": "uint256"
+                "type": "string"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "participant",
                 "type": "address"
@@ -167,6 +201,12 @@
                 "internalType": "address",
                 "name": "token",
                 "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
             },
             {
                 "indexed": false,
@@ -188,16 +228,16 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
-                "internalType": "uint256",
+                "indexed": false,
+                "internalType": "string",
                 "name": "duelId",
-                "type": "uint256"
+                "type": "string"
             },
             {
-                "indexed": true,
-                "internalType": "address",
-                "name": "winningToken",
-                "type": "address"
+                "indexed": false,
+                "internalType": "string",
+                "name": "winningTopic",
+                "type": "string"
             }
         ],
         "name": "DuelSettled",
@@ -207,10 +247,10 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
-                "internalType": "uint256",
+                "indexed": false,
+                "internalType": "string",
                 "name": "duelId",
-                "type": "uint256"
+                "type": "string"
             },
             {
                 "indexed": false,
@@ -294,6 +334,63 @@
         "type": "event"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "creatorFee",
+                "type": "uint256"
+            }
+        ],
+        "name": "WithdrawCreatorEarning",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "WithdrawEarning",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "protocolBalance",
+                "type": "uint256"
+            }
+        ],
+        "name": "WithdrawProtocolFee",
+        "type": "event"
+    },
+    {
         "stateMutability": "payable",
         "type": "fallback"
     },
@@ -314,13 +411,19 @@
         "inputs": [
             {
                 "internalType": "address",
-                "name": "_token",
+                "name": "",
                 "type": "address"
             }
         ],
-        "name": "addSupportedToken",
-        "outputs": [],
-        "stateMutability": "nonpayable",
+        "name": "allTimeEarnings",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -362,6 +465,16 @@
                 "type": "address"
             },
             {
+                "internalType": "string",
+                "name": "_topicA",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_topicB",
+                "type": "string"
+            },
+            {
                 "internalType": "enum FlashDuels.DuelDuration",
                 "name": "_duelDuration",
                 "type": "uint8"
@@ -370,11 +483,22 @@
                 "internalType": "uint256",
                 "name": "_minWager",
                 "type": "uint256"
+            },
+            {
+                "internalType": "enum FlashDuels.DuelCategory",
+                "name": "_category",
+                "type": "uint8"
             }
         ],
         "name": "createDuel",
-        "outputs": [],
-        "stateMutability": "payable",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -404,13 +528,29 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "duelCounter",
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "name": "creatorTopicsToDuelId",
         "outputs": [
             {
-                "internalType": "uint256",
+                "internalType": "string",
                 "name": "",
-                "type": "uint256"
+                "type": "string"
             }
         ],
         "stateMutability": "view",
@@ -419,9 +559,9 @@
     {
         "inputs": [
             {
-                "internalType": "uint256",
+                "internalType": "string",
                 "name": "",
-                "type": "uint256"
+                "type": "string"
             }
         ],
         "name": "duels",
@@ -440,6 +580,16 @@
                 "internalType": "address",
                 "name": "tokenB",
                 "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "topicA",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "topicB",
+                "type": "string"
             },
             {
                 "internalType": "uint256",
@@ -467,14 +617,14 @@
                 "type": "uint256"
             },
             {
-                "internalType": "bool",
-                "name": "isLive",
-                "type": "bool"
+                "internalType": "enum FlashDuels.DuelStatus",
+                "name": "duelStatus",
+                "type": "uint8"
             },
             {
-                "internalType": "bool",
-                "name": "isSettled",
-                "type": "bool"
+                "internalType": "enum FlashDuels.DuelCategory",
+                "name": "category",
+                "type": "uint8"
             },
             {
                 "internalType": "uint256",
@@ -490,6 +640,35 @@
                 "internalType": "int256",
                 "name": "startPriceB",
                 "type": "int256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            }
+        ],
+        "name": "getDuelDetails",
+        "outputs": [
+            {
+                "internalType": "enum FlashDuels.DuelStatus",
+                "name": "_duelStatus",
+                "type": "uint8"
+            },
+            {
+                "internalType": "address[]",
+                "name": "_duelUsersA",
+                "type": "address[]"
+            },
+            {
+                "internalType": "address[]",
+                "name": "_duelUsersB",
+                "type": "address[]"
             }
         ],
         "stateMutability": "view",
@@ -517,9 +696,9 @@
     {
         "inputs": [
             {
-                "internalType": "uint256",
+                "internalType": "string",
                 "name": "_duelId",
-                "type": "uint256"
+                "type": "string"
             }
         ],
         "name": "getPriceDelta",
@@ -533,6 +712,35 @@
                 "internalType": "int256",
                 "name": "",
                 "type": "int256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            },
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getWagerAmountDeposited",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "wagerAmountA",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "wagerAmountB",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -559,14 +767,38 @@
     {
         "inputs": [
             {
-                "internalType": "uint256",
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "name": "isValidDuelId",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
                 "name": "_duelId",
-                "type": "uint256"
+                "type": "string"
             },
             {
                 "internalType": "address",
                 "name": "_token",
                 "type": "address"
+            },
+            {
+                "internalType": "bool",
+                "name": "isTopicA",
+                "type": "bool"
             },
             {
                 "internalType": "uint256",
@@ -646,6 +878,19 @@
     },
     {
         "inputs": [],
+        "name": "protocolAddress",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "protocolFeePercentage",
         "outputs": [
             {
@@ -681,6 +926,32 @@
         "inputs": [
             {
                 "internalType": "address",
+                "name": "_bot",
+                "type": "address"
+            }
+        ],
+        "name": "setBotAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_fee",
+                "type": "uint256"
+            }
+        ],
+        "name": "setCreateDuelFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
                 "name": "_token",
                 "type": "address"
             },
@@ -698,9 +969,35 @@
     {
         "inputs": [
             {
-                "internalType": "uint256",
+                "internalType": "address",
+                "name": "_protocolAddress",
+                "type": "address"
+            }
+        ],
+        "name": "setProtocolAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_token",
+                "type": "address"
+            }
+        ],
+        "name": "setSupportedToken",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
                 "name": "_duelId",
-                "type": "uint256"
+                "type": "string"
             }
         ],
         "name": "settleDuel",
@@ -711,9 +1008,9 @@
     {
         "inputs": [
             {
-                "internalType": "uint256",
+                "internalType": "string",
                 "name": "_duelId",
-                "type": "uint256"
+                "type": "string"
             }
         ],
         "name": "startDuel",
@@ -735,6 +1032,38 @@
                 "internalType": "bool",
                 "name": "",
                 "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "totalCreatorFeeEarned",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalProtocolFeesGenerated",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -793,14 +1122,27 @@
     },
     {
         "inputs": [],
-        "name": "withdrawFees",
+        "name": "withdrawCreatorFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "withdrawEarnings",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
     },
     {
         "inputs": [],
-        "name": "withdrawFunds",
+        "name": "withdrawProtocolFees",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

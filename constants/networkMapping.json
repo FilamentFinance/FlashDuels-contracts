@@ -1,0 +1,8 @@
+{
+    "hardhat": {
+        "Betting": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+    },
+    "seiTestnet": {
+        "Betting": "0x66cd0F41662EFfa90d62A0aa9f6Cb4a83F03Eaa9"
+    }
+}

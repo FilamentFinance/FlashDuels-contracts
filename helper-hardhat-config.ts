@@ -26,7 +26,7 @@ export const networkConfig: networkConfigInfo = {
     seiTestnet: {
         chainId: 1328,
         goldskySlug: "sei-testnet",
-        deployer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        deployer: "0x91C2352245065B9e5d2514a313b60c1f01BfF60F",
         usdcAdmin: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
     },
     seiMainnet: {
