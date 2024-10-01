@@ -126,6 +126,43 @@
             {
                 "indexed": false,
                 "internalType": "address",
+                "name": "tokenA",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "tokenB",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topicA",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topicB",
+                "type": "string"
+            }
+        ],
+        "name": "DuelCancelled",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
                 "name": "creator",
                 "type": "address"
             },
@@ -312,6 +349,37 @@
         "inputs": [
             {
                 "indexed": false,
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "recipient",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amountA",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amountB",
+                "type": "uint256"
+            }
+        ],
+        "name": "RefundIssued",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
                 "internalType": "address",
                 "name": "account",
                 "type": "address"
@@ -450,6 +518,19 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            }
+        ],
+        "name": "cancelDuelIfThresholdNotMet",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -913,6 +994,19 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            }
+        ],
+        "name": "refundDuel",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
