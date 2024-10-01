@@ -8,6 +8,8 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
+import "hardhat/console.sol";
+
 /// @title FlashDuels
 /// @notice This contract allows users to create and participate in duels by betting on one of two tokens.
 /// @dev Uses Chainlink price feeds and OpenZeppelin upgradeable contracts for functionality and security.
@@ -22,7 +24,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     error FlashDuels__DuelAlreadyStarted();
 
     /// @notice The minimum threshold for wagering, set to 50 USDC (or configurable)
-    uint256 public constant minThreshold = 50 * 1e6; // $50 or 50 SEI can be configured
+    uint256 public minThreshold;
 
     /// @notice Struct that stores details of each duel
     struct Duel {
@@ -233,6 +235,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         protocolFeePercentage = 200; // 2%
         creatorFeePercentage = 200; // 2%
         bootstrapPeriod = 30 minutes;
+        minThreshold = 50 * 1e6; // 50 USDC
     }
 
     /**
@@ -295,6 +298,16 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      */
     function setProtocolAddress(address _protocolAddress) external onlyOwner {
         protocolAddress = _protocolAddress;
+    }
+
+    /**
+     * @notice Sets the minimum threshold.
+     * @dev This function can only be called by the contract owner.
+     * It updates the minThreshold variable with the new threshold value.
+     * @param _minThreshold The minimum threshold for the duel to start for each topic.
+     */
+    function setMinimumWagerThreshold(uint256 _minThreshold) external onlyOwner {
+        minThreshold = _minThreshold;
     }
 
     /**
@@ -534,9 +547,10 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /// @param _duelId The unique ID of the duel to be cancelled
     function cancelDuelIfThresholdNotMet(string calldata _duelId) external onlyBot {
         Duel storage duel = duels[_duelId];
+        console.logString(_duelId);
 
         // Check if the duel exists
-        require(!isValidDuelId[_duelId], "Duel doesn't exist");
+        require(isValidDuelId[_duelId], "Duel doesn't exist");
 
         // Check if the duel has already been cancelled or settled
         require(
@@ -573,7 +587,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         require(duel.duelStatus == DuelStatus.Cancelled, "Duel is live or settled");
 
         // Check if the total wagers did not meet the minimum threshold
-        require(duel.totalWagerA >= minThreshold && duel.totalWagerB >= minThreshold, "Threshold met, cannot refund");
+        require(duel.totalWagerA < minThreshold && duel.totalWagerB < minThreshold, "Threshold met, cannot refund");
 
         // Refund users who wagered on token A
         uint256 wagerA = duel.wagersA[msg.sender];
