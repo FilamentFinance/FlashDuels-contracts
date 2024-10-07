@@ -5,661 +5,1237 @@ import { networkConfig, testNetworkChains } from "../helper-hardhat-config";
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("FlashDuels Contract", function () {
-  let flashDuels: any;
-  let owner: any;
-  let addr1: any;
-  let addr2: any;
-  let addr3: any;
-  let bot: any;
-  let usdcToken: any;
-  let tokenA: any;
-  let tokenB: any;
-  let randomToken: any;
-  let usdAddress: any;
-  let mockOracleA: any;
-  let mockOracleB: any;
+    let flashDuels: any;
+    let owner: any;
+    let addr1: any;
+    let addr2: any;
+    let addr3: any;
+    let addr4: any;
+    let bot: any;
+    let usdcToken: any;
+    let tokenA: any;
+    let tokenB: any;
+    let randomToken: any;
+    let usdAddress: any;
+    let mockOracleA: any;
+    let mockOracleB: any;
 
-  beforeEach(async function () {
-    [owner, addr1, addr2, addr3, bot] = await ethers.getSigners();
-    const networkName = network.name;
-    const usdcAdmin = networkConfig[networkName].usdcAdmin;
+    beforeEach(async function () {
+        [owner, addr1, addr2, addr3, addr4, bot] = await ethers.getSigners();
+        const networkName = network.name;
+        const usdcAdmin = networkConfig[networkName].usdcAdmin;
 
-    if (networkName === "seiMainnet") {
-      usdAddress = networkConfig[networkName].usdc;
-    } else {
-      const USDC = await ethers.getContractFactory("USDCF");
-      const usdcNew = await upgrades.deployProxy(USDC, [
-        "USDC Filament",
-        "USDFIL",
-        usdcAdmin,
-      ]);
-      usdcToken = await usdcNew.waitForDeployment();
-      usdAddress = await usdcToken.getAddress();
-    }
-
-    // Deploy mock tokens for the duel
-    const TokenAMock = await ethers.getContractFactory("MockERC20");
-    tokenA = await TokenAMock.deploy("Token A", "TKA", 18);
-    await tokenA.waitForDeployment();
-
-    const TokenBMock = await ethers.getContractFactory("MockERC20");
-    tokenB = await TokenBMock.deploy("Token B", "TKB", 18);
-    await tokenB.waitForDeployment();
-
-    const MockOracleFactoryA = await ethers.getContractFactory("MockOracle");
-    mockOracleA = await MockOracleFactoryA.deploy();
-    await mockOracleA.waitForDeployment();
-
-    await mockOracleA.setPrice(1500);
-
-    const MockOracleFactoryB = await ethers.getContractFactory("MockOracle");
-    mockOracleB = await MockOracleFactoryB.deploy();
-    await mockOracleB.waitForDeployment();
-
-    await mockOracleB.setPrice(2000);
-
-    // Deploy FlashDuels contract
-    const FlashDuelsFactory = await ethers.getContractFactory("FlashDuels");
-    const flashDuelsProxy = await upgrades.deployProxy(FlashDuelsFactory, [
-      usdAddress,
-      bot.address,
-    ]);
-    flashDuels = await flashDuelsProxy.waitForDeployment();
-
-    // Add supported tokens
-    await flashDuels.setSupportedToken(tokenA.target);
-    await flashDuels.setSupportedToken(tokenB.target);
-
-    await flashDuels.setPriceAggregator(tokenA.target, mockOracleA.target);
-    await flashDuels.setPriceAggregator(tokenB.target, mockOracleB.target);
-  });
-
-  describe("Duel Creation", function () {
-    it("should create a duel successfully", async function () {
-      const expiryTime = 1; // 6 hours
-      const minWager = ethers.parseUnits("10", 6); // 10 USDC
-      await usdcToken
-        .connect(owner)
-        .mint(addr1.address, ethers.parseUnits("10", 6));
-      await usdcToken
-        .connect(addr1)
-        .approve(flashDuels.target, ethers.parseUnits("10", 6));
-      let receipt = await flashDuels
-        .connect(addr1)
-        .createDuel(
-          tokenA.target,
-          tokenB.target,
-          "Topic A",
-          "Topic B",
-          expiryTime,
-          minWager,
-          1
-        ); // 1 for DuelCategory.Crypto
-      let txr = await receipt.wait();
-      // console.log(txr?.logs)
-      // console.log("Total logs length: ", txr?.logs.length)
-      let duelId;
-      for (let i = 0; i < txr?.logs.length; i++) {
-        if (txr?.logs[i]["args"]) {
-          // console.log("duelId: ", txr?.logs[i]["args"][0]);
-          duelId = txr?.logs[i]["args"][0];
+        if (networkName === "seiMainnet") {
+            usdAddress = networkConfig[networkName].usdc;
+        } else {
+            const USDC = await ethers.getContractFactory("USDCF");
+            const usdcNew = await upgrades.deployProxy(USDC, [
+                "USDC Filament",
+                "USDFIL",
+                usdcAdmin,
+            ]);
+            usdcToken = await usdcNew.waitForDeployment();
+            usdAddress = await usdcToken.getAddress();
         }
-      }
-      const duel = await flashDuels.duels(duelId.toString());
-      // console.log("duel", duel);
-      expect(duel.creator).to.equal(addr1.address);
-      expect(duel.tokenA).to.equal(tokenA.target);
-      expect(duel.tokenB).to.equal(tokenB.target);
-      expect(duel.minWager).to.equal(minWager);
-      expect(duel.category).to.equal(1); // DuelCategory.Crypto
+
+        // Deploy mock tokens for the duel
+        const TokenAMock = await ethers.getContractFactory("MockERC20");
+        tokenA = await TokenAMock.deploy("Token A", "TKA", 18);
+        await tokenA.waitForDeployment();
+
+        const TokenBMock = await ethers.getContractFactory("MockERC20");
+        tokenB = await TokenBMock.deploy("Token B", "TKB", 18);
+        await tokenB.waitForDeployment();
+
+        const MockOracleFactoryA = await ethers.getContractFactory("MockOracle");
+        mockOracleA = await MockOracleFactoryA.deploy();
+        await mockOracleA.waitForDeployment();
+
+        await mockOracleA.setPrice(1500);
+
+        const MockOracleFactoryB = await ethers.getContractFactory("MockOracle");
+        mockOracleB = await MockOracleFactoryB.deploy();
+        await mockOracleB.waitForDeployment();
+
+        await mockOracleB.setPrice(2000);
+
+        // Deploy FlashDuels contract
+        const FlashDuelsFactory = await ethers.getContractFactory("FlashDuels");
+        const flashDuelsProxy = await upgrades.deployProxy(FlashDuelsFactory, [
+            usdAddress,
+            bot.address,
+        ]);
+        flashDuels = await flashDuelsProxy.waitForDeployment();
+
+        // Add supported tokens
+        await flashDuels.setSupportedToken(tokenA.target);
+        await flashDuels.setSupportedToken(tokenB.target);
+
+        await flashDuels.setPriceAggregator(tokenA.target, mockOracleA.target);
+        await flashDuels.setPriceAggregator(tokenB.target, mockOracleB.target);
     });
 
-    it("should fail if unsupported tokens are provided", async function () {
-      const RandomToken = await ethers.getContractFactory("MockERC20");
-      randomToken = await RandomToken.deploy("Random Token", "RND", 18);
-      await randomToken.waitForDeployment();
-
-      await expect(
-        flashDuels
-          .connect(addr1)
-          .createDuel(
-            randomToken.target,
-            tokenB.target,
-            "Topic A",
-            "Topic B",
-            1,
-            ethers.parseUnits("10", 6),
-            1
-          )
-      ).to.be.revertedWith("Unsupported tokens");
-    });
-  });
-
-  describe("Duel Joining", function () {
-    let duelId: any;
-    let duel: any;
-    let topicA: any;
-    let topicB: any;
-    let expiryTime: any;
-    let minWager: any;
-    beforeEach(async function () {
-      expiryTime = 1;
-
-      minWager = ethers.parseUnits("10", 6); // 10 USDC
-      await usdcToken
-        .connect(owner)
-        .mint(addr1.address, ethers.parseUnits("10", 6));
-      await usdcToken
-        .connect(addr1)
-        .approve(flashDuels.target, ethers.parseUnits("10", 6));
-      topicA = "Topic A";
-      topicB = "Topic B";
-
-      await ethers.provider.send("evm_increaseTime", [30 * 60]);
-      await ethers.provider.send("evm_mine", []);
-
-      let receipt = await flashDuels
-        .connect(addr1)
-        .createDuel(
-          tokenA.target,
-          tokenB.target,
-          topicA,
-          topicB,
-          expiryTime,
-          minWager,
-          1
-        ); // 1 for DuelCategory.Crypto
-      let txr = await receipt.wait();
-      // console.log(txr?.logs)
-      // console.log("Total logs length: ", txr?.logs.length)
-      for (let i = 0; i < txr?.logs.length; i++) {
-        if (txr?.logs[i]["args"]) {
-          // console.log("duelId: ", txr?.logs[i]["args"][0]);
-          duelId = txr?.logs[i]["args"][0];
-        }
-      }
+    describe("Duel Creation", function () {
+        it("should create a duel successfully", async function () {
+            const expiryTime = 1;
+            const minWager = ethers.parseUnits("10", 6); // 10 USDC
+            await usdcToken
+                .connect(owner)
+                .mint(addr1.address, ethers.parseUnits("10", 6));
+            await usdcToken
+                .connect(addr1)
+                .approve(flashDuels.target, ethers.parseUnits("10", 6));
+            let receipt = await flashDuels
+                .connect(addr1)
+                .createDuel(
+                    2,
+                    "Donald Trump will win the US election ?",
+                    ["Yes", "No"],
+                    minWager,
+                    expiryTime,
+                );
+            let txr = await receipt.wait();
+            // console.log(txr?.logs)
+            // console.log("Total logs length: ", txr?.logs.length)
+            let duelId;
+            for (let i = 0; i < txr?.logs.length; i++) {
+                if (txr?.logs[i]["args"]) {
+                    // console.log("duelId: ", txr?.logs[i]["args"][1]);
+                    duelId = txr?.logs[i]["args"][1];
+                }
+            }
+            const duel = await flashDuels.duels(duelId.toString());
+            expect(duel.creator).to.equal(addr1.address);
+            expect(duel.minWager).to.equal(minWager);
+            expect(duel.category).to.equal(2); // DuelCategory.Politics
+        });
     });
 
-    it("should allow only bot to start a duel", async function () {
-      // Create a new duel
-      expiryTime = 1;
-      const wager = ethers.parseUnits("60", 6);
-      await usdcToken.connect(owner).mint(addr1.address, wager);
-      await usdcToken.connect(addr1).approve(flashDuels.target, wager);
+    describe("Duel Joining", function () {
+        let duelId: any;
+        let cryptoDuelId: any;
+        let duel: any;
+        let topic: any;
+        let expiryTime: any;
+        let minWager: any;
+        beforeEach(async function () {
+            const expiryTime = 1;
+            const minWager = ethers.parseUnits("10", 6); // 10 USDC
+            await usdcToken
+                .connect(owner)
+                .mint(addr1.address, ethers.parseUnits("10", 6));
+            await usdcToken
+                .connect(addr1)
+                .approve(flashDuels.target, ethers.parseUnits("10", 6));
+            let receipt = await flashDuels
+                .connect(addr1)
+                .createDuel(
+                    2,
+                    "Donald Trump will win the US election ?",
+                    ["Yes", "No"],
+                    minWager,
+                    expiryTime,
+                );
+            let txr = await receipt.wait();
+            // console.log(txr?.logs)
+            // console.log("Total logs length: ", txr?.logs.length)
+            let duelId;
+            for (let i = 0; i < txr?.logs.length; i++) {
+                if (txr?.logs[i]["args"]) {
+                    // console.log("duelId: ", txr?.logs[i]["args"][1]);
+                    duelId = txr?.logs[i]["args"][1];
+                }
+            }
+        });
 
-      const createDuelTx = await flashDuels
-        .connect(addr1)
-        .createDuel(
-          tokenA.target,
-          tokenB.target,
-          topicA,
-          topicB,
-          expiryTime,
-          wager,
-          1
-        );
+        it("should allow users to join duels", async function () {
+            const amount = ethers.parseUnits("60", 6);
 
-      const txReceipt = await createDuelTx.wait();
-      // const duelId = txReceipt.logs[0].args[0];
-      const duelId = await flashDuels.creatorTopicsToDuelId(
-        addr1.address,
-        topicA,
-        topicB
-      );
+            await usdcToken.connect(owner).mint(addr2.address, amount);
+            await usdcToken.connect(owner).mint(addr3.address, amount);
+            await usdcToken.connect(owner).mint(addr4.address, amount);
 
-      // Attempt to start the duel with a non-bot account (should fail)
-      await expect(
-        flashDuels.connect(addr1).startDuel(duelId)
-      ).to.be.revertedWithCustomError(flashDuels, "FlashDuels__InvalidBot");
+            // Approve token transfer
+            await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+            await usdcToken.connect(addr3).approve(flashDuels.target, amount);
+            await usdcToken.connect(addr4).approve(flashDuels.target, amount);
+
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+            let BTC = tokenA;
+
+            // Join Duel with tokenA
+            await flashDuels
+                .connect(addr2)
+                .joinDuel(duelIds[0], 0, amount);
+            await flashDuels
+                .connect(addr3)
+                .joinDuel(duelIds[0], 1, amount);
+
+            duel = await flashDuels.duels(duelIds[0]);
+            expect(duel.duelStatus).to.equal(1); // 1 represents the "BootStrapped" status
+
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
+
+            // Start the duel with the bot account
+            await expect(flashDuels.connect(bot).startDuel(duelIds[0])).to.emit(
+                flashDuels,
+                "DuelStarted"
+            );
+
+            // // Verify that the duel status has changed to "Live"
+            duel = await flashDuels.duels(duelIds[0]);
+            expect(duel.duelStatus).to.equal(2); // 2 represents the "Live" status
+
+            await flashDuels
+                .connect(addr4)
+                .joinDuel(duelIds[0], 1, amount);
+            const getDuelUsers = await flashDuels.getDuelUsersForOption(duelIds[0], "Yes");
+            // console.log(getDuelUsers);
+        });
+
+        it("should allow only bot to start a duel", async function () {
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
+
+            // Attempt to start the duel with a non-bot account (should fail)
+            await expect(
+                flashDuels.connect(addr1).startDuel(duelIds[0])
+            ).to.be.revertedWithCustomError(flashDuels, "FlashDuels__InvalidBot");
+        });
+
+        it("should fail if wager is below minimum", async function () {
+            const amount = ethers.parseUnits("5", 6); // 5 USDC
+
+            await usdcToken.connect(owner).mint(addr2.address, amount);
+            await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+            let BTC = tokenA;
+
+            await expect(
+                flashDuels
+                    .connect(addr2)
+                    .joinDuel(duelIds[0], 1, amount)
+            ).to.be.revertedWith("Wager below minimum");
+        });
     });
 
-    it("should allow users to join duels", async function () {
-      const amount = ethers.parseUnits("60", 6);
+    describe("Duel Settlement", function () {
+        let duelId: string;
+        let topicA: string;
+        let topicB: string;
+        const amount = ethers.parseUnits("60", 6); // 60 USDC
+        let expiryTime: any;
+        let minWager: any;
 
-      await usdcToken.connect(owner).mint(addr2.address, amount);
-      await usdcToken.connect(owner).mint(addr3.address, amount);
-      // console.log(await tokenA.balanceOf(addr2.address));
-      // console.log(await tokenB.balanceOf(addr3.address));
+        beforeEach(async function () {
+            const expiryTime = 1;
+            const minWager = ethers.parseUnits("10", 6); // 10 USDC
+            await usdcToken
+                .connect(owner)
+                .mint(addr1.address, ethers.parseUnits("10", 6));
+            await usdcToken
+                .connect(addr1)
+                .approve(flashDuels.target, ethers.parseUnits("10", 6));
+            let receipt = await flashDuels
+                .connect(addr1)
+                .createDuel(
+                    2,
+                    "Donald Trump will win the US election ?",
+                    ["Yes", "No"],
+                    minWager,
+                    expiryTime,
+                );
+            let txr = await receipt.wait();
+            // console.log(txr?.logs)
+            // console.log("Total logs length: ", txr?.logs.length)
+            let duelId;
+            for (let i = 0; i < txr?.logs.length; i++) {
+                if (txr?.logs[i]["args"]) {
+                    // console.log("duelId: ", txr?.logs[i]["args"][1]);
+                    duelId = txr?.logs[i]["args"][1];
+                }
+            }
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
 
-      // Approve token transfer
-      await usdcToken.connect(addr2).approve(flashDuels.target, amount);
-      await usdcToken.connect(addr3).approve(flashDuels.target, amount);
+            await usdcToken.connect(owner).mint(addr2.address, amount);
+            await usdcToken.connect(owner).mint(addr3.address, amount);
 
-      const duelId = await flashDuels.creatorTopicsToDuelId(
-        addr1.address,
-        topicA,
-        topicB
-      );
+            await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+            await usdcToken.connect(addr3).approve(flashDuels.target, amount);
 
-      // Join Duel with tokenA
-      await flashDuels
-        .connect(addr2)
-        .joinDuel(duelId, tokenA.target, true, amount);
-      await flashDuels
-        .connect(addr3)
-        .joinDuel(duelId, tokenB.target, false, amount);
+            await flashDuels
+                .connect(addr2)
+                .joinDuel(duelIds[0], 0, amount);
 
-      duel = await flashDuels.duels(duelId);
-      expect(duel.duelStatus).to.equal(1); // 1 represents the "BootStrapped" status
+            await flashDuels
+                .connect(addr3)
+                .joinDuel(duelIds[0], 1, amount);
+        });
 
-      await ethers.provider.send("evm_increaseTime", [30 * 60]);
-      await ethers.provider.send("evm_mine", []);
+        it("should settle duel and distribute rewards", async function () {
+            // Simulate time passage for the bootstrap period to end
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
 
-      // Start the duel with the bot account
-      await expect(flashDuels.connect(bot).startDuel(duelId)).to.emit(
-        flashDuels,
-        "DuelStarted"
-      );
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
 
-      // // Verify that the duel status has changed to "Live"
-      duel = await flashDuels.duels(duelId);
-      expect(duel.duelStatus).to.equal(2); // 2 represents the "Live" status
+            await flashDuels.connect(bot).startDuel(duelIds[0]);
+
+            // Simulate time passage for the duel to expire (6 hours)
+            let time = 3600 * 6;
+            await network.provider.request({
+                method: "evm_increaseTime",
+                params: [time],
+            });
+            await network.provider.send("evm_mine");
+
+            const duelIdToOptions = await flashDuels.getDuelIdToOptions(duelIds[0]);
+
+
+            await expect(flashDuels.connect(bot).settleDuel(duelIds[0], 0))
+                .to.emit(flashDuels, "DuelSettled")
+                .withArgs(duelIds[0], duelIdToOptions[0], 0); // Assume tokenB wins based on mock prices
+
+            // Verify duel status
+            const duel = await flashDuels.duels(duelIds[0]);
+            expect(duel.duelStatus).to.equal(3); // 3 represents the "Settled" status
+        });
     });
 
-    it("should fail if token is not part of the duel", async function () {
-      const amount = ethers.parseUnits("60", 6);
+    describe("Duel Settlement with Reward Distribution", function () {
+        let duelId: string;
+        let topicA: string;
+        let topicB: string;
+        const amount = ethers.parseUnits("60", 6); // 60 USDC
+        let expiryTime: any;
+        let minWager: any;
 
-      const RandomToken = await ethers.getContractFactory("MockERC20");
-      const randomToken = await RandomToken.deploy("Random Token", "RND", 6);
-      await randomToken.waitForDeployment();
+        beforeEach(async function () {
+            expiryTime = 1;
+            minWager = ethers.parseUnits("10", 6); // 10 USDC
+            await usdcToken
+                .connect(owner)
+                .mint(addr1.address, ethers.parseUnits("10", 6));
+            await usdcToken
+                .connect(addr1)
+                .approve(flashDuels.target, ethers.parseUnits("10", 6));
+            let receipt = await flashDuels
+                .connect(addr1)
+                .createDuel(
+                    2,
+                    "Donald Trump will win the US election ?",
+                    ["Yes", "No"],
+                    minWager,
+                    expiryTime,
+                );
+            let txr = await receipt.wait();
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
 
-      await randomToken.connect(owner).mint(addr2.address, amount);
-      await randomToken.connect(addr2).approve(flashDuels.target, amount);
+            await usdcToken.connect(owner).mint(addr2.address, amount);
+            await usdcToken.connect(owner).mint(addr3.address, amount);
 
-      const duelId = await flashDuels.creatorTopicsToDuelId(
-        addr1.address,
-        topicA,
-        topicB
-      );
+            await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+            await usdcToken.connect(addr3).approve(flashDuels.target, amount);
 
-      await expect(
-        flashDuels
-          .connect(addr2)
-          .joinDuel(duelId, randomToken.target, true, amount)
-      ).to.be.revertedWith("Invalid token for this duel");
+            await flashDuels
+                .connect(addr2)
+                .joinDuel(duelIds[0], 0, amount);
+
+            await flashDuels
+                .connect(addr3)
+                .joinDuel(duelIds[0], 1, amount);
+        });
+
+        it("should settle duel and distribute rewards correctly to winner", async function () {
+            // Simulate time passage for the bootstrap period to end
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
+
+            // Check balances before settlement
+            const initialBalanceAddr2 = await usdcToken.balanceOf(addr2.address); // 0
+            const initialBalanceAddr3 = await usdcToken.balanceOf(addr3.address); // 0
+            await network.provider.send("evm_mine");
+
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+
+            await flashDuels.connect(bot).startDuel(duelIds[0]);
+
+            let time = 3600 * 6;
+            await network.provider.request({
+                method: "evm_increaseTime",
+                params: [time],
+            });
+            // await helpers.time.increase(time)
+
+            // Settle the duel
+            await flashDuels.connect(bot).settleDuel(duelIds[0], "0");
+
+            // Check balances after settlement
+            let finalBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
+            let finalBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
+            expect(finalBalanceAddr2).to.be.equal("0");
+            expect(finalBalanceAddr3).to.be.equal("0");
+
+            let allTImeEarningsAddr2 = await flashDuels.allTimeEarnings(
+                addr2.address
+            );
+            let allTImeEarningsAddr3 = await flashDuels.allTimeEarnings(
+                addr3.address
+            );
+
+            await flashDuels.connect(addr2).withdrawEarnings(allTImeEarningsAddr2);
+
+            // Check if addr2 (winner) received the rewards
+            finalBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
+            expect(finalBalanceAddr2).to.be.gt(initialBalanceAddr2); // addr2's balance should increase
+            // Check if addr3 (loser) lost their wager amount
+            expect(finalBalanceAddr3).to.be.lte(initialBalanceAddr3); // addr3's balance should decrease or remain the same
+        });
+
+        it("should not change wallet balance if duel is not settled", async function () {
+            const initialBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
+            const initialBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
+
+            // No settlement is triggered, balances should remain the same
+            expect(await usdcToken.balanceOf(addr2.address)).to.equal(
+                initialBalanceAddr2
+            );
+            expect(await usdcToken.balanceOf(addr3.address)).to.equal(
+                initialBalanceAddr3
+            );
+        });
     });
 
-    it("should fail if wager is below minimum", async function () {
-      const amount = ethers.parseUnits("5", 6); // 5 USDC
+    describe("Duel Cancel and Refund Logic", function () {
+        const bootstrapPeriod = 3600; // Example bootstrap period of 1 hour
+        const minThreshold = ethers.parseUnits("100", 6); // Example threshold of 100 USDC
+        let duelId: string;
+        let topic: string;
+        let amount = ethers.parseUnits("60", 6); // 60 USDC
+        let expiryTime: any;
+        let minWager: any;
 
-      await usdcToken.connect(owner).mint(addr2.address, amount);
-      await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+        beforeEach(async function () {
+            // Setup duels and join for settlement testing
+            expiryTime = 1;
+            minWager = ethers.parseUnits("10", 6); // 10 USDC
+            await usdcToken
+                .connect(owner)
+                .mint(addr1.address, ethers.parseUnits("10", 6));
 
-      const duelId = await flashDuels.creatorTopicsToDuelId(
-        addr1.address,
-        topicA,
-        topicB
-      );
+            await usdcToken
+                .connect(addr1)
+                .approve(flashDuels.target, ethers.parseUnits("10", 6));
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
+            let receipt = await flashDuels
+            .connect(addr1)
+            .createDuel(
+                2,
+                "Donald Trump will win the US election ?",
+                ["Yes", "No"],
+                minWager,
+                expiryTime,
+            );
+        let txr = await receipt.wait();
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+            expect(await flashDuels.isValidDuelId(duelIds[0])).to.be.equal(true);
+        });
 
-      await expect(
-        flashDuels.connect(addr2).joinDuel(duelId, tokenA.target, true, amount)
-      ).to.be.revertedWith("Wager below minimum");
-    });
-  });
+        describe("Cancel Duel if Threshold Not Met", function () {
+            it("should cancel the duel if the threshold is not met after the bootstrap period", async function () {
+                // Increase time to after the bootstrap period
+                await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
+                await ethers.provider.send("evm_mine", []);
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
 
-  describe("Duel Settlement", function () {
-    let duelId: string;
-    let topicA: string;
-    let topicB: string;
-    const amount = ethers.parseUnits("60", 6); // 60 USDC
 
-    beforeEach(async function () {
-      // Setup duels and join for settlement testing
-      topicA = "Topic A";
-      topicB = "Topic B";
+                // Check that the duel exists and hasn't started yet
+                const duel = await flashDuels.duels(duelIds[0]);
+                expect(duel.duelStatus).to.equal(1); // BootStrapped status
 
-      await usdcToken
-        .connect(owner)
-        .mint(addr1.address, ethers.parseUnits("10", 6));
+                // Call cancelDuelIfThresholdNotMet by the bot
+                await flashDuels.connect(bot).cancelDuelIfThresholdNotMet(duelIds[0]);
 
-      await usdcToken
-        .connect(addr1)
-        .approve(flashDuels.target, ethers.parseUnits("10", 6));
-      await flashDuels
-        .connect(addr1)
-        .createDuel(tokenA.target, tokenB.target, topicA, topicB, 0, amount, 1);
+                // Validate the duel status is updated to Cancelled
+                const cancelledDuel = await flashDuels.duels(duelIds[0]);
+                expect(cancelledDuel.duelStatus).to.equal(4); // Cancelled status
+            });
 
-      duelId = await flashDuels.creatorTopicsToDuelId(
-        addr1.address,
-        topicA,
-        topicB
-      );
+            it("should not cancel duel if the threshold is met", async function () {
+                // Simulate meeting the threshold
+                await usdcToken.connect(owner).mint(addr2.address, minThreshold);
+                await usdcToken.connect(owner).mint(addr3.address, minThreshold);
 
-      await usdcToken.connect(owner).mint(addr2.address, amount);
-      await usdcToken.connect(owner).mint(addr3.address, amount);
+                await usdcToken.connect(addr2).approve(flashDuels.target, minThreshold);
+                await usdcToken.connect(addr3).approve(flashDuels.target, minThreshold);
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+                await flashDuels
+                    .connect(addr2)
+                    .joinDuel(duelIds[0], 0, amount);
 
-      await usdcToken.connect(addr2).approve(flashDuels.target, amount);
-      await usdcToken.connect(addr3).approve(flashDuels.target, amount);
+                await flashDuels
+                    .connect(addr3)
+                    .joinDuel(duelIds[0], 1, amount);
 
-      await flashDuels
-        .connect(addr2)
-        .joinDuel(duelId, tokenA.target, true, amount);
-      await flashDuels
-        .connect(addr3)
-        .joinDuel(duelId, tokenB.target, false, amount);
-    });
 
-    it("should settle duel and distribute rewards", async function () {
-      // Simulate time passage for the bootstrap period to end
-      await ethers.provider.send("evm_increaseTime", [30 * 60]);
-      await ethers.provider.send("evm_mine", []);
+                // Increase time to after the bootstrap period
+                await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
+                await ethers.provider.send("evm_mine", []);
 
-      await flashDuels.connect(bot).startDuel(duelId);
+                // Attempt to cancel the duel
+                await expect(
+                    flashDuels.connect(bot).cancelDuelIfThresholdNotMet(duelIds[0])
+                ).to.be.revertedWith("Threshold met, cannot cancel");
+            });
 
-      // Simulate time passage for the duel to expire (6 hours)
-      let time = 3600 * 6;
-      await network.provider.request({
-        method: "evm_increaseTime",
-        params: [time],
-      });
-      await network.provider.send("evm_mine");
+            it("should revert if non-bot tries to cancel the duel", async function () {
+                await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
+                await ethers.provider.send("evm_mine", []);
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
 
-      // Set mock prices so tokenB wins
-      await mockOracleB.setPrice(2000); // Price for tokenB
-      await mockOracleA.setPrice(1500); // Price for tokenA
+                await expect(
+                    flashDuels.connect(addr1).cancelDuelIfThresholdNotMet(duelIds[0])
+                ).to.be.revertedWithCustomError(flashDuels, "FlashDuels__InvalidBot");
+            });
+        });
 
-      await expect(flashDuels.connect(bot).settleDuel(duelId))
-        .to.emit(flashDuels, "DuelSettled")
-        .withArgs(duelId, topicB); // Assume tokenB wins based on mock prices
+        describe("Refund Duel", function () {
+            const bootstrapPeriod = 3600; // Example bootstrap period of 1 hour
+            let amount = ethers.parseUnits("70", 6);
+            beforeEach(async function () {
+                await flashDuels
+                    .connect(owner)
+                    .setMinimumWagerThreshold(ethers.parseUnits("80", 6));
+                await usdcToken.connect(owner).mint(addr2.address, amount);
 
-      // Verify duel status
-      const duel = await flashDuels.duels(duelId);
-      expect(duel.duelStatus).to.equal(3); // 3 represents the "Settled" status
-    });
-  });
+                await usdcToken.connect(addr2).approve(flashDuels.target, amount);
 
-  describe("Duel Settlement with Reward Distribution", function () {
-    let duelId: string;
-    let topicA: string;
-    let topicB: string;
-    const amount = ethers.parseUnits("60", 6); // 60 USDC
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+                let BTC = tokenA;
+                await flashDuels
+                    .connect(addr2)
+                    .joinCryptoDuel(duelIds[0], BTC, 0, amount);
+                await usdcToken.connect(owner).mint(addr3.address, amount);
 
-    beforeEach(async function () {
-      // Setup duels and join for settlement testing
-      topicA = "Topic A";
-      topicB = "Topic B";
+                await usdcToken.connect(addr3).approve(flashDuels.target, amount);
 
-      await usdcToken
-        .connect(owner)
-        .mint(addr1.address, ethers.parseUnits("10", 6));
+                await flashDuels
+                    .connect(addr3)
+                    .joinCryptoDuel(duelIds[0], BTC, 1, amount);
 
-      await usdcToken
-        .connect(addr1)
-        .approve(flashDuels.target, ethers.parseUnits("10", 6));
-      await flashDuels
-        .connect(addr1)
-        .createDuel(tokenA.target, tokenB.target, topicA, topicB, 0, amount, 1);
+                await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
+                await ethers.provider.send("evm_mine", []);
 
-      duelId = await flashDuels.creatorTopicsToDuelId(
-        addr1.address,
-        topicA,
-        topicB
-      );
+                await flashDuels.connect(bot).cancelDuelIfThresholdNotMet(duelIds[0]);
+            });
 
-      await usdcToken.connect(owner).mint(addr2.address, amount);
-      await usdcToken.connect(owner).mint(addr3.address, amount);
+            it("should refund users who wagered on option 1", async function () {
+                const initialBalanceAddr2 = await usdcToken.balanceOf(addr1.address);
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
 
-      await usdcToken.connect(addr2).approve(flashDuels.target, amount);
-      await usdcToken.connect(addr3).approve(flashDuels.target, amount);
+                let wagerAddr2 = await flashDuels.getWagerAmountDeposited(
+                    duelIds[0],
+                    addr2.address
+                );
+                // Refund addr1
+                await flashDuels.connect(addr2).refundDuel(duelIds[0]);
 
-      await flashDuels
-        .connect(addr2)
-        .joinDuel(duelId, tokenA.target, true, amount);
-      await flashDuels
-        .connect(addr3)
-        .joinDuel(duelId, tokenB.target, false, amount);
-    });
+                // Check that the wager was refunded
+                const finalBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
+                expect(finalBalanceAddr2).to.equal(initialBalanceAddr2 + amount);
 
-    it("should settle duel and distribute rewards correctly to winner", async function () {
-      // Simulate time passage for the bootstrap period to end
-      await ethers.provider.send("evm_increaseTime", [30 * 60]);
-      await ethers.provider.send("evm_mine", []);
+                // Ensure wager data is cleared
+                const wager = await flashDuels.getWagerAmountDeposited(
+                    duelIds[0],
+                    addr2.address
+                );
+                expect(wager[2][0]).to.equal(0);
+                expect(wager[2][1]).to.equal(0);
+            });
 
-      // Set mock prices so tokenB wins
-      await mockOracleB.setPrice(2000); // Price for tokenB
-      await mockOracleA.setPrice(1500); // Price for tokenA
+            it("should refund users who wagered on option 2", async function () {
+                const initialBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
 
-      // Check balances before settlement
-      const initialBalanceAddr2 = await usdcToken.balanceOf(addr2.address); // 0
-      const initialBalanceAddr3 = await usdcToken.balanceOf(addr3.address); // 0
+                let wagerAddr3 = await flashDuels.getWagerAmountDeposited(
+                    duelIds[0],
+                    addr3.address
+                );
+                // Refund addr3
+                await flashDuels.connect(addr3).refundDuel(duelIds[0]);
 
-      await flashDuels.connect(bot).startDuel(duelId);
+                // Check that the wager was refunded
+                const finalBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
+                expect(finalBalanceAddr3).to.equal(initialBalanceAddr3 + amount);
 
-      let time = 3600 * 6;
-      await network.provider.request({
-        method: "evm_increaseTime",
-        params: [time],
-      });
-      // await helpers.time.increase(time)
-      await network.provider.send("evm_mine");
+                // Ensure wager data is cleared
+                const wager = await flashDuels.getWagerAmountDeposited(
+                    duelIds[0],
+                    addr3.address
+                );
+                expect(wager[2][0]).to.equal(0);
+                expect(wager[2][1]).to.equal(0);
+            });
 
-      // Settle the duel
-      await flashDuels.connect(bot).settleDuel(duelId);
+            it("should revert if the duel is not cancelled", async function () {
+                // Create a new duel that is not cancelled
 
-      // Check balances after settlement
-      let finalBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
-      let finalBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
-      expect(finalBalanceAddr2).to.be.equal("0");
-      expect(finalBalanceAddr3).to.be.equal("0");
+                await usdcToken
+                    .connect(owner)
+                    .mint(addr1.address, ethers.parseUnits("10", 6));
 
-      let allTImeEarningsAddr2 = await flashDuels.allTimeEarnings(
-        addr2.address
-      );
-      let allTImeEarningsAddr3 = await flashDuels.allTimeEarnings(
-        addr3.address
-      );
+                await usdcToken
+                    .connect(addr1)
+                    .approve(flashDuels.target, ethers.parseUnits("10", 6));
+                let BTC = tokenA;
+                topic = "BTC price will go beyond $65000.00";
+                let receipt = await flashDuels
+                    .connect(addr1)
+                    .createCryptoDuel(
+                        [BTC],
+                        topic,
+                        ["Yes", "No"],
+                        minWager,
+                        expiryTime,
+                    );
+                let txr = await receipt.wait();
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+                expect(duelIds.length).to.equal(2);
+                expect(await flashDuels.isValidDuelId(duelIds[1])).to.be.equal(true);
 
-      await flashDuels.connect(addr3).withdrawEarnings(allTImeEarningsAddr3);
+                await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
+                await ethers.provider.send("evm_mine", []);
 
-      // Check if addr3 (winner) received the rewards
-      finalBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
-      expect(finalBalanceAddr3).to.be.gt(initialBalanceAddr3); // addr3's balance should increase
-      // Check if addr2 (loser) lost their wager amount
-      expect(finalBalanceAddr2).to.be.lte(initialBalanceAddr2); // addr2's balance should decrease or remain the same
-    });
-
-    it("should not change wallet balance if duel is not settled", async function () {
-      const initialBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
-      const initialBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
-
-      // No settlement is triggered, balances should remain the same
-      expect(await usdcToken.balanceOf(addr2.address)).to.equal(
-        initialBalanceAddr2
-      );
-      expect(await usdcToken.balanceOf(addr3.address)).to.equal(
-        initialBalanceAddr3
-      );
-    });
-  });
-
-  describe("Duel Cancel and Refund Logic", function () {
-    const bootstrapPeriod = 3600; // Example bootstrap period of 1 hour
-    const minThreshold = ethers.parseUnits("100", 6); // Example threshold of 100 USDC
-    let duelId: string;
-    let topicA: string;
-    let topicB: string;
-    let amount = ethers.parseUnits("60", 6); // 60 USDC
-
-    beforeEach(async function () {
-      // Setup duels and join for settlement testing
-      topicA = "Topic A";
-      topicB = "Topic B";
-
-      await usdcToken
-        .connect(owner)
-        .mint(addr1.address, ethers.parseUnits("10", 6));
-
-      await usdcToken
-        .connect(addr1)
-        .approve(flashDuels.target, ethers.parseUnits("10", 6));
-      await flashDuels
-        .connect(addr1)
-        .createDuel(tokenA.target, tokenB.target, topicA, topicB, 0, amount, 1);
-      duelId = await flashDuels.creatorTopicsToDuelId(
-        addr1.address,
-        topicA,
-        topicB
-      );
-      expect(await flashDuels.isValidDuelId(duelId)).to.be.equal(true);
+                await expect(
+                    flashDuels.connect(addr1).refundDuel(duelIds[1])
+                ).to.be.revertedWith("Duel is live or settled");
+            });
+        });
     });
 
-    describe("Cancel Duel if Threshold Not Met", function () {
-      it("should cancel the duel if the threshold is not met after the bootstrap period", async function () {
-        // Increase time to after the bootstrap period
-        await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
-        await ethers.provider.send("evm_mine", []);
+    console.log("================Crypto Duels================");
 
-        // Check that the duel exists and hasn't started yet
-        const duel = await flashDuels.duels(duelId);
-        expect(duel.duelStatus).to.equal(1); // BootStrapped status
+    describe("Crypto Duel Creation", function () {
+        it("should create a crypto duel successfully", async function () {
+            const expiryTime = 1;
+            const minWager = ethers.parseUnits("10", 6); // 10 USDC
+            await usdcToken
+                .connect(owner)
+                .mint(addr1.address, ethers.parseUnits("10", 6));
+            await usdcToken
+                .connect(addr1)
+                .approve(flashDuels.target, ethers.parseUnits("10", 6));
+            let receipt = await flashDuels
+                .connect(addr1)
+                .createCryptoDuel(
+                    [tokenA, tokenB],
+                    "BTC price will go beyond $65000.00",
+                    ["Yes", "No"],
+                    minWager,
+                    expiryTime,
+                );
+            let txr = await receipt.wait();
+            // console.log(txr?.logs)
+            // console.log("Total logs length: ", txr?.logs.length)
+            let duelId;
+            for (let i = 0; i < txr?.logs.length; i++) {
+                if (txr?.logs[i]["args"]) {
+                    // console.log("duelId: ", txr?.logs[i]["args"][0]);
+                    duelId = txr?.logs[i]["args"][2];
+                }
+            }
+            const duel = await flashDuels.duels(duelId.toString());
+            expect(duel.creator).to.equal(addr1.address);
+            expect(duel.minWager).to.equal(minWager);
+            expect(duel.category).to.equal(1); // DuelCategory.Crypto
+        });
 
-        // Call cancelDuelIfThresholdNotMet by the bot
-        await flashDuels.connect(bot).cancelDuelIfThresholdNotMet(duelId);
+        it("should fail if unsupported tokens are provided", async function () {
+            const expiryTime = 1;
+            const minWager = ethers.parseUnits("10", 6); // 10 USDC
+            const RandomToken = await ethers.getContractFactory("MockERC20");
+            randomToken = await RandomToken.deploy("Random Token", "RND", 18);
+            await randomToken.waitForDeployment();
 
-        // Validate the duel status is updated to Cancelled
-        const cancelledDuel = await flashDuels.duels(duelId);
-        expect(cancelledDuel.duelStatus).to.equal(4); // Cancelled status
-      });
-
-      it("should not cancel duel if the threshold is met", async function () {
-        // Simulate meeting the threshold
-        await usdcToken.connect(owner).mint(addr2.address, minThreshold);
-        await usdcToken.connect(owner).mint(addr3.address, minThreshold);
-
-        await usdcToken.connect(addr2).approve(flashDuels.target, minThreshold);
-        await usdcToken.connect(addr3).approve(flashDuels.target, minThreshold);
-
-        await flashDuels
-          .connect(addr2)
-          .joinDuel(duelId, tokenA.target, true, minThreshold);
-        await flashDuels
-          .connect(addr3)
-          .joinDuel(duelId, tokenA.target, true, minThreshold);
-
-        // Increase time to after the bootstrap period
-        await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
-        await ethers.provider.send("evm_mine", []);
-
-        // Attempt to cancel the duel
-        await expect(
-          flashDuels.connect(bot).cancelDuelIfThresholdNotMet(duelId)
-        ).to.be.revertedWith("Threshold met, cannot cancel");
-      });
-
-      it("should revert if non-bot tries to cancel the duel", async function () {
-        await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
-        await ethers.provider.send("evm_mine", []);
-
-        await expect(
-          flashDuels.connect(addr1).cancelDuelIfThresholdNotMet(duelId)
-        ).to.be.revertedWithCustomError(flashDuels, "FlashDuels__InvalidBot");
-      });
+            await expect(
+                flashDuels
+                    .connect(addr1).createCryptoDuel(
+                        [randomToken.target, tokenB],
+                        "BTC price will go beyond $65000.00",
+                        ["Yes", "No"],
+                        minWager,
+                        expiryTime,
+                    )
+            ).to.be.revertedWith("Unsupported tokens");
+        });
     });
 
-    describe("Refund Duel", function () {
-      const bootstrapPeriod = 3600; // Example bootstrap period of 1 hour
-      let amount = ethers.parseUnits("70", 6);
-      beforeEach(async function () {
-        await flashDuels
-          .connect(owner)
-          .setMinimumWagerThreshold(ethers.parseUnits("80", 6));
-        await usdcToken.connect(owner).mint(addr2.address, amount);
+    describe("Crypto Duel Joining", function () {
+        let duelId: any;
+        let cryptoDuelId: any;
+        let duel: any;
+        let topic: any;
+        let expiryTime: any;
+        let minWager: any;
+        beforeEach(async function () {
+            expiryTime = 1;
+            minWager = ethers.parseUnits("10", 6); // 10 USDC
+            await usdcToken
+                .connect(owner)
+                .mint(addr1.address, ethers.parseUnits("10", 6));
+            await usdcToken
+                .connect(addr1)
+                .approve(flashDuels.target, ethers.parseUnits("10", 6));
+            topic = "BTC price will go beyond $65000.00",
 
-        await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+                await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
+            let BTC = tokenA;
+            let receipt = await flashDuels
+                .connect(addr1)
+                .createCryptoDuel(
+                    [BTC],
+                    topic,
+                    ["Yes", "No"],
+                    minWager,
+                    expiryTime,
+                );
+            let txr = await receipt.wait();
+            // console.log(txr?.logs)
+            // console.log("Total logs length: ", txr?.logs.length)
+            for (let i = 0; i < txr?.logs.length; i++) {
+                if (txr?.logs[i]["args"]) {
+                    // console.log("duelId: ", txr?.logs[i]["args"][0]);
+                    cryptoDuelId = txr?.logs[i]["args"][2];
+                }
+            }
+        });
 
-        await flashDuels
-          .connect(addr2)
-          .joinDuel(duelId, tokenA.target, true, amount);
-        await usdcToken.connect(owner).mint(addr3.address, amount);
+        it("should allow users to join duels", async function () {
+            const amount = ethers.parseUnits("60", 6);
 
-        await usdcToken.connect(addr3).approve(flashDuels.target, amount);
+            await usdcToken.connect(owner).mint(addr2.address, amount);
+            await usdcToken.connect(owner).mint(addr3.address, amount);
+            await usdcToken.connect(owner).mint(addr4.address, amount);
 
-        await flashDuels
-          .connect(addr3)
-          .joinDuel(duelId, tokenB.target, false, amount);
-        await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
-        await ethers.provider.send("evm_mine", []);
+            // Approve token transfer
+            await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+            await usdcToken.connect(addr3).approve(flashDuels.target, amount);
+            await usdcToken.connect(addr4).approve(flashDuels.target, amount);
 
-        await flashDuels.connect(bot).cancelDuelIfThresholdNotMet(duelId);
-      });
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+            let BTC = tokenA;
 
-      it("should refund users who wagered on token A", async function () {
-        const initialBalanceAddr2 = await usdcToken.balanceOf(addr1.address);
-        let wagerAddr2 = await flashDuels.getWagerAmountDeposited(
-          duelId,
-          addr2.address
-        );
-        console.log("wagerAddr2", wagerAddr2);
+            // Join Duel with tokenA
+            await flashDuels
+                .connect(addr2)
+                .joinCryptoDuel(duelIds[0], BTC, 0, amount);
+            await flashDuels
+                .connect(addr3)
+                .joinCryptoDuel(duelIds[0], BTC, 1, amount);
 
-        // Refund addr1
-        await flashDuels.connect(addr2).refundDuel(duelId);
+            duel = await flashDuels.duels(duelIds[0]);
+            expect(duel.duelStatus).to.equal(1); // 1 represents the "BootStrapped" status
 
-        // Check that the wager was refunded
-        const finalBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
-        expect(finalBalanceAddr2).to.equal(initialBalanceAddr2 + amount);
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
 
-        // Ensure wager data is cleared
-        const wager = await flashDuels.getWagerAmountDeposited(
-          duelId,
-          addr2.address
-        );
-        expect(wager[0]).to.equal(0);
-        expect(wager[1]).to.equal(0);
-      });
+            // Start the duel with the bot account
+            await expect(flashDuels.connect(bot).startDuel(duelIds[0])).to.emit(
+                flashDuels,
+                "DuelStarted"
+            );
 
-      it("should refund users who wagered on token B", async function () {
-        const initialBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
+            // // Verify that the duel status has changed to "Live"
+            duel = await flashDuels.duels(duelIds[0]);
+            expect(duel.duelStatus).to.equal(2); // 2 represents the "Live" status
 
-        // Refund addr2
-        await flashDuels.connect(addr3).refundDuel(duelId);
+            await flashDuels
+                .connect(addr4)
+                .joinCryptoDuel(duelIds[0], BTC, 1, amount);
+            const getDuelUsers = await flashDuels.getDuelUsersForOption(duelIds[0], "Yes");
+            // console.log(getDuelUsers);
+        });
 
-        // Check that the wager was refunded
-        const finalBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
-        expect(finalBalanceAddr3).to.equal(initialBalanceAddr3 + amount);
+        it("should allow only bot to start a duel", async function () {
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
 
-        // Ensure wager data is cleared
-        const wager = await flashDuels.getWagerAmountDeposited(
-          duelId,
-          addr3.address
-        );
-        expect(wager[0]).to.equal(0);
-        expect(wager[1]).to.equal(0);
-      });
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
 
-      it("should revert if the duel is not cancelled", async function () {
-        // Create a new duel that is not cancelled
+            // Attempt to start the duel with a non-bot account (should fail)
+            await expect(
+                flashDuels.connect(addr1).startDuel(duelIds[0])
+            ).to.be.revertedWithCustomError(flashDuels, "FlashDuels__InvalidBot");
+        });
 
-        await usdcToken
-          .connect(owner)
-          .mint(addr1.address, ethers.parseUnits("10", 6));
 
-        await usdcToken
-          .connect(addr1)
-          .approve(flashDuels.target, ethers.parseUnits("10", 6));
-        await flashDuels
-          .connect(addr1)
-          .createDuel(
-            tokenA.target,
-            tokenB.target,
-            topicA,
-            topicB,
-            0,
-            amount,
-            1
-          );
-        duelId = await flashDuels.creatorTopicsToDuelId(
-          addr1.address,
-          topicA,
-          topicB
-        );
-        expect(await flashDuels.isValidDuelId(duelId)).to.be.equal(true);
-        await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
-        await ethers.provider.send("evm_mine", []);
+        it("should fail if token is not part of the duel", async function () {
+            const amount = ethers.parseUnits("60", 6);
 
-        await expect(
-          flashDuels.connect(addr1).refundDuel(duelId)
-        ).to.be.revertedWith("Duel is live or settled");
-      });
+            const RandomToken = await ethers.getContractFactory("MockERC20");
+            const randomToken = await RandomToken.deploy("Random Token", "RND", 6);
+            await randomToken.waitForDeployment();
+
+            await randomToken.connect(owner).mint(addr2.address, amount);
+            await randomToken.connect(addr2).approve(flashDuels.target, amount);
+
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+
+            await expect(
+                flashDuels
+                    .connect(addr2)
+                    .joinCryptoDuel(duelIds[0], randomToken.target, 1, amount)
+            ).to.be.revertedWith("Invalid token for this duel");
+        });
+
+        it("should fail if wager is below minimum", async function () {
+            const amount = ethers.parseUnits("5", 6); // 5 USDC
+
+            await usdcToken.connect(owner).mint(addr2.address, amount);
+            await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+            let BTC = tokenA;
+
+            await expect(
+                flashDuels
+                    .connect(addr2)
+                    .joinCryptoDuel(duelIds[0], BTC, 1, amount)
+            ).to.be.revertedWith("Wager below minimum");
+        });
     });
-  });
+
+    describe("Crypto Duel Settlement", function () {
+        let duelId: string;
+        let topicA: string;
+        let topicB: string;
+        const amount = ethers.parseUnits("60", 6); // 60 USDC
+        let expiryTime: any;
+        let minWager: any;
+
+        beforeEach(async function () {
+            expiryTime = 1;
+            minWager = ethers.parseUnits("10", 6); // 10 USDC
+            // Setup duels and join for settlement testing
+            await usdcToken
+                .connect(owner)
+                .mint(addr1.address, ethers.parseUnits("10", 6));
+
+            await usdcToken
+                .connect(addr1)
+                .approve(flashDuels.target, ethers.parseUnits("10", 6));
+            let topic = "BTC price will go beyond $65000.00";
+
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
+            let BTC = tokenA;
+            let receipt = await flashDuels
+                .connect(addr1)
+                .createCryptoDuel(
+                    [BTC],
+                    topic,
+                    ["Yes", "No"],
+                    minWager,
+                    expiryTime,
+                );
+            let txr = await receipt.wait();
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+
+            await usdcToken.connect(owner).mint(addr2.address, amount);
+            await usdcToken.connect(owner).mint(addr3.address, amount);
+
+            await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+            await usdcToken.connect(addr3).approve(flashDuels.target, amount);
+
+            await flashDuels
+                .connect(addr2)
+                .joinCryptoDuel(duelIds[0], BTC, 0, amount);
+
+            await flashDuels
+                .connect(addr3)
+                .joinCryptoDuel(duelIds[0], BTC, 1, amount);
+        });
+
+        it("should settle duel and distribute rewards", async function () {
+            // Simulate time passage for the bootstrap period to end
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
+
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+
+            await flashDuels.connect(bot).startDuel(duelIds[0]);
+
+            // Simulate time passage for the duel to expire (6 hours)
+            let time = 3600 * 6;
+            await network.provider.request({
+                method: "evm_increaseTime",
+                params: [time],
+            });
+            await network.provider.send("evm_mine");
+
+            // Set mock prices so tokenB wins
+            await mockOracleB.setPrice(2000); // Price for tokenB
+            await mockOracleA.setPrice(66000); // Price for tokenA
+
+            const duelIdToOptions = await flashDuels.getDuelIdToOptions(duelIds[0]);
+
+
+            await expect(flashDuels.connect(bot).settleDuel(duelIds[0], 0))
+                .to.emit(flashDuels, "DuelSettled")
+                .withArgs(duelIds[0], duelIdToOptions[0], 0); // Assume tokenB wins based on mock prices
+
+            // Verify duel status
+            const duel = await flashDuels.duels(duelIds[0]);
+            expect(duel.duelStatus).to.equal(3); // 3 represents the "Settled" status
+        });
+    });
+
+    describe("Crypto Duel Settlement with Reward Distribution", function () {
+        let duelId: string;
+        let topicA: string;
+        let topicB: string;
+        const amount = ethers.parseUnits("60", 6); // 60 USDC
+        let expiryTime: any;
+        let minWager: any;
+
+        beforeEach(async function () {
+            expiryTime = 1;
+            minWager = ethers.parseUnits("10", 6); // 10 USDC
+            // Setup duels and join for settlement testing
+            await usdcToken
+                .connect(owner)
+                .mint(addr1.address, ethers.parseUnits("10", 6));
+
+            await usdcToken
+                .connect(addr1)
+                .approve(flashDuels.target, ethers.parseUnits("10", 6));
+            let topic = "BTC price will go beyond $65000.00";
+
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
+            let BTC = tokenA;
+            let receipt = await flashDuels
+                .connect(addr1)
+                .createCryptoDuel(
+                    [BTC],
+                    topic,
+                    ["Yes", "No"],
+                    minWager,
+                    expiryTime,
+                );
+            let txr = await receipt.wait();
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+
+            await usdcToken.connect(owner).mint(addr2.address, amount);
+            await usdcToken.connect(owner).mint(addr3.address, amount);
+
+            await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+            await usdcToken.connect(addr3).approve(flashDuels.target, amount);
+
+            await flashDuels
+                .connect(addr2)
+                .joinCryptoDuel(duelIds[0], BTC, 0, amount);
+
+            await flashDuels
+                .connect(addr3)
+                .joinCryptoDuel(duelIds[0], BTC, 1, amount);
+        });
+
+        it("should settle duel and distribute rewards correctly to winner", async function () {
+            // Simulate time passage for the bootstrap period to end
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
+
+            // Set mock prices so tokenB wins
+            await mockOracleB.setPrice(2000); // Price for tokenB
+            await mockOracleA.setPrice(66000); // Price for tokenA
+
+            // Check balances before settlement
+            const initialBalanceAddr2 = await usdcToken.balanceOf(addr2.address); // 0
+            const initialBalanceAddr3 = await usdcToken.balanceOf(addr3.address); // 0
+            await network.provider.send("evm_mine");
+
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+
+            await flashDuels.connect(bot).startDuel(duelIds[0]);
+
+            let time = 3600 * 6;
+            await network.provider.request({
+                method: "evm_increaseTime",
+                params: [time],
+            });
+            // await helpers.time.increase(time)
+
+            // Settle the duel
+            await flashDuels.connect(bot).settleDuel(duelIds[0], "0");
+
+            // Check balances after settlement
+            let finalBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
+            let finalBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
+            expect(finalBalanceAddr2).to.be.equal("0");
+            expect(finalBalanceAddr3).to.be.equal("0");
+
+            let allTImeEarningsAddr2 = await flashDuels.allTimeEarnings(
+                addr2.address
+            );
+            let allTImeEarningsAddr3 = await flashDuels.allTimeEarnings(
+                addr3.address
+            );
+
+            await flashDuels.connect(addr2).withdrawEarnings(allTImeEarningsAddr2);
+
+            // Check if addr2 (winner) received the rewards
+            finalBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
+            expect(finalBalanceAddr2).to.be.gt(initialBalanceAddr2); // addr2's balance should increase
+            // Check if addr3 (loser) lost their wager amount
+            expect(finalBalanceAddr3).to.be.lte(initialBalanceAddr3); // addr3's balance should decrease or remain the same
+        });
+
+        it("should not change wallet balance if duel is not settled", async function () {
+            const initialBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
+            const initialBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
+
+            // No settlement is triggered, balances should remain the same
+            expect(await usdcToken.balanceOf(addr2.address)).to.equal(
+                initialBalanceAddr2
+            );
+            expect(await usdcToken.balanceOf(addr3.address)).to.equal(
+                initialBalanceAddr3
+            );
+        });
+    });
+
+    describe("Crypto Duel Cancel and Refund Logic", function () {
+        const bootstrapPeriod = 3600; // Example bootstrap period of 1 hour
+        const minThreshold = ethers.parseUnits("100", 6); // Example threshold of 100 USDC
+        let duelId: string;
+        let topic: string;
+        let amount = ethers.parseUnits("60", 6); // 60 USDC
+        let expiryTime: any;
+        let minWager: any;
+
+        beforeEach(async function () {
+            // Setup duels and join for settlement testing
+            expiryTime = 1;
+            minWager = ethers.parseUnits("10", 6); // 10 USDC
+            await usdcToken
+                .connect(owner)
+                .mint(addr1.address, ethers.parseUnits("10", 6));
+
+            await usdcToken
+                .connect(addr1)
+                .approve(flashDuels.target, ethers.parseUnits("10", 6));
+            await ethers.provider.send("evm_increaseTime", [30 * 60]);
+            await ethers.provider.send("evm_mine", []);
+            let BTC = tokenA;
+            topic = "BTC price will go beyond $65000.00";
+            let receipt = await flashDuels
+                .connect(addr1)
+                .createCryptoDuel(
+                    [BTC],
+                    topic,
+                    ["Yes", "No"],
+                    minWager,
+                    expiryTime,
+                );
+            let txr = await receipt.wait();
+            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+            expect(duelIds.length).to.equal(1);
+            expect(await flashDuels.isValidDuelId(duelIds[0])).to.be.equal(true);
+        });
+
+        describe("Cancel Duel if Threshold Not Met", function () {
+            it("should cancel the duel if the threshold is not met after the bootstrap period", async function () {
+                // Increase time to after the bootstrap period
+                await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
+                await ethers.provider.send("evm_mine", []);
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+
+
+                // Check that the duel exists and hasn't started yet
+                const duel = await flashDuels.duels(duelIds[0]);
+                expect(duel.duelStatus).to.equal(1); // BootStrapped status
+
+                // Call cancelDuelIfThresholdNotMet by the bot
+                await flashDuels.connect(bot).cancelDuelIfThresholdNotMet(duelIds[0]);
+
+                // Validate the duel status is updated to Cancelled
+                const cancelledDuel = await flashDuels.duels(duelIds[0]);
+                expect(cancelledDuel.duelStatus).to.equal(4); // Cancelled status
+            });
+
+            it("should not cancel duel if the threshold is met", async function () {
+                // Simulate meeting the threshold
+                await usdcToken.connect(owner).mint(addr2.address, minThreshold);
+                await usdcToken.connect(owner).mint(addr3.address, minThreshold);
+
+                await usdcToken.connect(addr2).approve(flashDuels.target, minThreshold);
+                await usdcToken.connect(addr3).approve(flashDuels.target, minThreshold);
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+                let BTC = tokenA;
+                await flashDuels
+                    .connect(addr2)
+                    .joinCryptoDuel(duelIds[0], BTC, 0, amount);
+
+                await flashDuels
+                    .connect(addr3)
+                    .joinCryptoDuel(duelIds[0], BTC, 1, amount);
+
+
+                // Increase time to after the bootstrap period
+                await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
+                await ethers.provider.send("evm_mine", []);
+
+                // Attempt to cancel the duel
+                await expect(
+                    flashDuels.connect(bot).cancelDuelIfThresholdNotMet(duelIds[0])
+                ).to.be.revertedWith("Threshold met, cannot cancel");
+            });
+
+            it("should revert if non-bot tries to cancel the duel", async function () {
+                await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
+                await ethers.provider.send("evm_mine", []);
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+
+                await expect(
+                    flashDuels.connect(addr1).cancelDuelIfThresholdNotMet(duelIds[0])
+                ).to.be.revertedWithCustomError(flashDuels, "FlashDuels__InvalidBot");
+            });
+        });
+
+        describe("Refund Duel", function () {
+            const bootstrapPeriod = 3600; // Example bootstrap period of 1 hour
+            let amount = ethers.parseUnits("70", 6);
+            beforeEach(async function () {
+                await flashDuels
+                    .connect(owner)
+                    .setMinimumWagerThreshold(ethers.parseUnits("80", 6));
+                await usdcToken.connect(owner).mint(addr2.address, amount);
+
+                await usdcToken.connect(addr2).approve(flashDuels.target, amount);
+
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+                let BTC = tokenA;
+                await flashDuels
+                    .connect(addr2)
+                    .joinCryptoDuel(duelIds[0], BTC, 0, amount);
+                await usdcToken.connect(owner).mint(addr3.address, amount);
+
+                await usdcToken.connect(addr3).approve(flashDuels.target, amount);
+
+                await flashDuels
+                    .connect(addr3)
+                    .joinCryptoDuel(duelIds[0], BTC, 1, amount);
+
+                await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
+                await ethers.provider.send("evm_mine", []);
+
+                await flashDuels.connect(bot).cancelDuelIfThresholdNotMet(duelIds[0]);
+            });
+
+            it("should refund users who wagered on option 1", async function () {
+                const initialBalanceAddr2 = await usdcToken.balanceOf(addr1.address);
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+
+                let wagerAddr2 = await flashDuels.getWagerAmountDeposited(
+                    duelIds[0],
+                    addr2.address
+                );
+                // Refund addr1
+                await flashDuels.connect(addr2).refundDuel(duelIds[0]);
+
+                // Check that the wager was refunded
+                const finalBalanceAddr2 = await usdcToken.balanceOf(addr2.address);
+                expect(finalBalanceAddr2).to.equal(initialBalanceAddr2 + amount);
+
+                // Ensure wager data is cleared
+                const wager = await flashDuels.getWagerAmountDeposited(
+                    duelIds[0],
+                    addr2.address
+                );
+                expect(wager[2][0]).to.equal(0);
+                expect(wager[2][1]).to.equal(0);
+            });
+
+            it("should refund users who wagered on option 2", async function () {
+                const initialBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+
+                let wagerAddr3 = await flashDuels.getWagerAmountDeposited(
+                    duelIds[0],
+                    addr3.address
+                );
+                // Refund addr3
+                await flashDuels.connect(addr3).refundDuel(duelIds[0]);
+
+                // Check that the wager was refunded
+                const finalBalanceAddr3 = await usdcToken.balanceOf(addr3.address);
+                expect(finalBalanceAddr3).to.equal(initialBalanceAddr3 + amount);
+
+                // Ensure wager data is cleared
+                const wager = await flashDuels.getWagerAmountDeposited(
+                    duelIds[0],
+                    addr3.address
+                );
+                expect(wager[2][0]).to.equal(0);
+                expect(wager[2][1]).to.equal(0);
+            });
+
+            it("should revert if the duel is not cancelled", async function () {
+                // Create a new duel that is not cancelled
+
+                await usdcToken
+                    .connect(owner)
+                    .mint(addr1.address, ethers.parseUnits("10", 6));
+
+                await usdcToken
+                    .connect(addr1)
+                    .approve(flashDuels.target, ethers.parseUnits("10", 6));
+                let BTC = tokenA;
+                topic = "BTC price will go beyond $65000.00";
+                let receipt = await flashDuels
+                    .connect(addr1)
+                    .createCryptoDuel(
+                        [BTC],
+                        topic,
+                        ["Yes", "No"],
+                        minWager,
+                        expiryTime,
+                    );
+                let txr = await receipt.wait();
+                const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
+                expect(duelIds.length).to.equal(2);
+                expect(await flashDuels.isValidDuelId(duelIds[1])).to.be.equal(true);
+
+                await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
+                await ethers.provider.send("evm_mine", []);
+
+                await expect(
+                    flashDuels.connect(addr1).refundDuel(duelIds[1])
+                ).to.be.revertedWith("Duel is live or settled");
+            });
+        });
+    });
 });
