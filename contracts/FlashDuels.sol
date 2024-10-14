@@ -7,6 +7,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+import "./OptionToken.sol";
 
 /// @title FlashDuels
 /// @notice This contract allows users to create and participate in duels by betting on the options.
@@ -30,6 +31,8 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     uint256 private nonce;
     // address => duelId => option => userWager
     mapping(address => mapping(string => mapping(string => uint256))) public userWager;
+    // optionIndex => Option token address
+    mapping(string => mapping(uint256 => address)) public optionIndexToOptionToken;
     // duelId => option => totalWagerForOption
     mapping(string => mapping(string => uint256)) public totalWagerForOption;
     // duelId => option => duelUsersForOption
@@ -42,8 +45,8 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     mapping(address => string[]) public creatorToDuelIds;
     // duelId => options
     mapping(string => string[]) public duelIdToOptions;
-    // duelId => tokens
-    mapping(string => address[]) public duelIdToTokens;
+    // optionIndex => option
+    mapping(uint256 => string) public optionIndexToOption;
     /// @notice Mapping of token addresses to their price aggregators
     mapping(address => address) public priceAggregator;
     /// @notice Tracks total earnings for participants
@@ -87,6 +90,8 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     struct CryptoDuel {
         /// @notice Address of the duel creator
         address creator;
+        /// @notice Address of the token
+        address token;
         /// @notice UNIX timestamp when the duel creates
         uint256 createTime;
         /// @notice UNIX timestamp when the duel starts
@@ -96,7 +101,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         /// @notice Minimum wager amount in the duel option
         uint256 minWager;
         /// @notice Trigger value
-        uint256 triggerValue;
+        int256 triggerValue;
         /// @notice Trigger type
         TriggerType triggerType;
         /// @notice Trigger condition
@@ -166,7 +171,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
 
     /// @notice Emitted when a new duel is created
     /// @param creator The address of the duel creator
-    /// @param tokens The addresses of tokens
+    /// @param token The address of token
     /// @param duelId The unique ID of the duel
     /// @param options The options of the duel
     /// @param createTime The time the duel was created
@@ -175,13 +180,13 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /// @param category The category of the duel
     event CryptoDuelCreated(
         address creator,
-        address[] tokens,
+        address token,
         string duelId,
         string[] options,
         uint256 createTime,
         uint256 expiryTime,
         uint256 createDuelFee,
-        uint256 triggerValue,
+        int256 triggerValue,
         TriggerType triggerType,
         TriggerCondition triggerCondition,
         DuelCategory category
@@ -192,16 +197,36 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /// @param topic The topic related to the token
     /// @param participant The address of the participant
     /// @param amount The amount wagered
+    /// @param optionToken The option token
+    /// @param amountOptionToken The amount of option token to mint
     /// @param joinTime The time the participant joined the duel
-    event DuelJoined(string duelId, string topic, address participant, uint256 amount, uint256 joinTime);
+    event DuelJoined(
+        string duelId,
+        string topic,
+        address participant,
+        uint256 amount,
+        address optionToken,
+        uint256 amountOptionToken,
+        uint256 joinTime
+    );
 
     /// @notice Emitted when a participant joins a duel
     /// @param duelId The ID of the duel being joined
     /// @param participant The address of the participant
     /// @param token The token being wagered on
     /// @param amount The amount wagered
+    /// @param optionToken The option token
+    /// @param amountOptionToken The amount of option token to mint
     /// @param joinTime The time the participant joined the duel
-    event CryptoDuelJoined(string duelId, address participant, address token, uint256 amount, uint256 joinTime);
+    event CryptoDuelJoined(
+        string duelId,
+        address participant,
+        address token,
+        uint256 amount,
+        address optionToken,
+        uint256 amountOptionToken,
+        uint256 joinTime
+    );
 
     /// @notice Emitted when a duel starts
     /// @param duelId The ID of the duel that started
@@ -407,7 +432,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     }
     /**
      * @notice Creates a new crypto duel.
-     * @param _tokens Allowed tokens for wagering.
+     * @param _token Allowed token for wagering.
      * @param _options Betting options for the duel.
      * @param _minWager Minimum wager amount.
      * @param _triggerValue Value that triggers the outcome.
@@ -418,17 +443,15 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      */
 
     function createCryptoDuel(
-        address[] memory _tokens,
+        address _token,
         string[] memory _options,
         uint256 _minWager,
-        uint256 _triggerValue,
+        int256 _triggerValue,
         TriggerType _triggerType,
         TriggerCondition _triggerCondition,
         DuelDuration _duelDuration
     ) external nonReentrant whenNotPaused returns (string memory) {
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            require(supportedTokens[_tokens[i]], "Unsupported tokens");
-        }
+        require(supportedTokens[_token], "Unsupported token");
         // Transfer USDC fee for duel creation
         require(IERC20(usdc).transferFrom(msg.sender, address(this), createDuelFee), "USDC transfer failed");
         totalProtocolFeesGenerated = totalProtocolFeesGenerated + createDuelFee;
@@ -448,6 +471,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         string memory _duelId = generateDuelId(msg.sender);
         CryptoDuel storage duel = cryptoDuels[_duelId];
         duel.creator = msg.sender;
+        duel.token = _token;
         duel.createTime = block.timestamp;
         // duel.startTime, startPriceToken will be updated in startDuel function
         duel.expiryTime = block.timestamp + bootstrapPeriod + duelDuration;
@@ -458,12 +482,12 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         duel.duelStatus = DuelStatus.BootStrapped;
         // totalWagerForOption, duelUsersForOption,  userWager will be updated in joinDuel
         duelIdToOptions[_duelId] = _options;
-        duelIdToTokens[_duelId] = _tokens;
+        // duelIdToTokens[_duelId] = _tokens;
         creatorToDuelIds[msg.sender].push(_duelId);
 
         emit CryptoDuelCreated(
             msg.sender,
-            _tokens,
+            _token,
             _duelId,
             _options,
             block.timestamp,
@@ -479,18 +503,18 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     }
 
     /// @notice Allows a user to join an existing duel by placing a wager on one of the two sides.
-    /// @dev This function checks if the duel exists and is live, ensures that the selected token
-    ///      is valid for the duel, and validates the wager amount against the minimum required.
-    ///      Users must choose one of the tokens used in the duel and place a wager.
-    ///      If the wager is on Topic A, the wager is recorded in `wagersA`; otherwise, it's recorded in `wagersB`.
     /// @param _duelId The ID of the duel to join.
-    /// @param _optionsIndex The option index).
+    /// @param _option The option of the duel.
+    /// @param _optionsIndex The option index.
+    /// @param _optionPrice The option price.
     /// @param _amount The amount of the token to wager in the duel.
-    function joinDuel(string memory _duelId, uint256 _optionsIndex, uint256 _amount)
-        external
-        nonReentrant
-        whenNotPaused
-    {
+    function joinDuel(
+        string memory _duelId,
+        string memory _option,
+        uint256 _optionsIndex,
+        uint256 _optionPrice,
+        uint256 _amount
+    ) external nonReentrant whenNotPaused {
         Duel storage duel = duels[_duelId];
         require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.category != DuelCategory.Crypto, "Should not a crypto duel");
@@ -505,23 +529,33 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         duelUsersForOption[_duelId][duelIdToOptions[_duelId][_optionsIndex]].push(msg.sender);
         userWager[msg.sender][_duelId][duelIdToOptions[_duelId][_optionsIndex]] += _amount;
 
-        emit DuelJoined(_duelId, duel.topic, msg.sender, _amount, block.timestamp);
+        uint256 amountTokenToMint = (_amount * 1e18) / _optionPrice;
+        // Deploy a new ERC-20 token contract
+        OptionToken newOptionToken = new OptionToken(_option, _option);
+        // Mint the specified amount of option tokens to the recipient address
+        newOptionToken.mint(msg.sender, amountTokenToMint);
+        optionIndexToOptionToken[_duelId][_optionsIndex] = address(newOptionToken);
+
+        emit DuelJoined(
+            _duelId, duel.topic, msg.sender, _amount, address(newOptionToken), amountTokenToMint, block.timestamp
+        );
     }
 
     /// @notice Allows a user to join an existing duel by placing a wager on one of the two sides.
-    /// @dev This function checks if the duel exists and is live, ensures that the selected token
-    ///      is valid for the duel, and validates the wager amount against the minimum required.
-    ///      Users must choose one of the tokens used in the duel and place a wager.
-    ///      If the wager is on Topic A, the wager is recorded in `wagersA`; otherwise, it's recorded in `wagersB`.
     /// @param _duelId The ID of the duel to join.
+    /// @param _option The option of the duel.
     /// @param _token The address of the token to wager (must be either token A or token B of the duel).
     /// @param _optionsIndex The option index of the duel.
+    /// @param _optionPrice The option price of the duel.
     /// @param _amount The amount of the token to wager in the duel.
-    function joinCryptoDuel(string memory _duelId, address _token, uint256 _optionsIndex, uint256 _amount)
-        external
-        nonReentrant
-        whenNotPaused
-    {
+    function joinCryptoDuel(
+        string memory _duelId,
+        string memory _option,
+        address _token,
+        uint256 _optionsIndex,
+        uint256 _optionPrice,
+        uint256 _amount
+    ) external nonReentrant whenNotPaused {
         CryptoDuel storage duel = cryptoDuels[_duelId];
         require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
@@ -536,90 +570,99 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         duelUsersForOption[_duelId][duelIdToOptions[_duelId][_optionsIndex]].push(msg.sender);
         userWager[msg.sender][_duelId][duelIdToOptions[_duelId][_optionsIndex]] += _amount;
 
-        emit CryptoDuelJoined(_duelId, msg.sender, _token, _amount, block.timestamp);
+        uint256 amountTokenToMint = (_amount * 1e18) / _optionPrice;
+        // Deploy a new ERC-20 token contract
+        OptionToken newOptionToken = new OptionToken(_option, _option);
+        // Mint the specified amount of option tokens to the recipient address
+        newOptionToken.mint(msg.sender, amountTokenToMint);
+        optionIndexToOptionToken[_duelId][_optionsIndex] = address(newOptionToken);
+
+        emit CryptoDuelJoined(
+            _duelId, msg.sender, _token, _amount, address(newOptionToken), amountTokenToMint, block.timestamp
+        );
     }
 
     /**
      * @notice Starts the duel once the bootstrap period has ended and both sides have met the minimum wager requirements.
-     * @dev This function performs several checks before starting the duel:
-     *      - Verifies that the duel exists.
-     *      - Ensures that the bootstrap period has ended.
-     *      - Confirms that both sides of the duel have met the minimum wager thresholds.
-     *      - Fetches the initial prices for both tokens involved in the duel from an oracle (if it's a crypto duel).
-     *      - Marks the duel as live and records the start time.
-     *      Only callable by the bot when the contract is not paused, and non-reentrant.
-     * @param _duelCategory The duel category.
      * @param _duelId The ID of the duel to be started.
      * Emits a {DuelStarted} event upon successful execution.
      */
-    function startDuel(DuelCategory _duelCategory, string memory _duelId) external nonReentrant whenNotPaused onlyBot {
-        if (_duelCategory != DuelCategory.Crypto) {
-            Duel storage duel = duels[_duelId];
-            require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
-            // Ensure the bootstrap period has ended
-            require(block.timestamp >= duel.createTime + bootstrapPeriod, "Bootstrap period not ended");
-            // Ensure the duel is not already live
-            require(duel.duelStatus == DuelStatus.BootStrapped, "Duel has already started or settled");
-            // Ensure both tokens have met the minimum wager requirements
-            uint256 optionsLength = duelIdToOptions[_duelId].length;
-            for (uint256 i = 0; i < optionsLength; i++) {
-                require(
-                    totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] >= minThreshold,
-                    "Threshold not reached for each options to start the duel"
-                );
-            }
-            // Record the start time and mark the duel as live
-            duel.startTime = block.timestamp;
-            uint256 duelDuration = duel.expiryTime - (duel.createTime + bootstrapPeriod);
-            duel.expiryTime = block.timestamp + duelDuration;
-            duel.duelStatus = DuelStatus.Live;
-        } else {
-            CryptoDuel storage cryptoDuel = cryptoDuels[_duelId];
-            uint256 duelTokensLength = duelIdToTokens[_duelId].length;
-            for (uint256 i = 0; i < duelTokensLength; i++) {
-                startPriceToken[_duelId][duelIdToTokens[_duelId][i]] = getOraclePrice(duelIdToTokens[_duelId][i]);
-            }
-            // Record the start time and mark the duel as live
-            cryptoDuel.startTime = block.timestamp;
-            uint256 duelDuration = cryptoDuel.expiryTime - (cryptoDuel.createTime + bootstrapPeriod);
-            cryptoDuel.expiryTime = block.timestamp + duelDuration;
-            cryptoDuel.duelStatus = DuelStatus.Live;
+    function startDuel(string memory _duelId) external nonReentrant whenNotPaused onlyBot {
+        Duel storage duel = duels[_duelId];
+        require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
+        // Ensure the bootstrap period has ended
+        require(block.timestamp >= duel.createTime + bootstrapPeriod, "Bootstrap period not ended");
+        // Ensure the duel is not already live
+        require(duel.duelStatus == DuelStatus.BootStrapped, "Duel has already started or settled");
+        // Ensure both tokens have met the minimum wager requirements
+        uint256 optionsLength = duelIdToOptions[_duelId].length;
+        for (uint256 i = 0; i < optionsLength; i++) {
+            require(
+                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] >= minThreshold,
+                "Threshold not reached for each options to start the duel"
+            );
         }
+        // Record the start time and mark the duel as live
+        duel.startTime = block.timestamp;
+        uint256 duelDuration = duel.expiryTime - (duel.createTime + bootstrapPeriod);
+        duel.expiryTime = block.timestamp + duelDuration;
+        duel.duelStatus = DuelStatus.Live;
+
+        emit DuelStarted(_duelId, block.timestamp);
+    }
+    /**
+     * @notice Starts the crypto duel with the specified ID.
+     * @dev Can only be called by the bot when the contract is not paused. Uses nonReentrant for security.
+     * @param _duelId The ID of the duel to start.
+     */
+
+    function startCryptoDuel(string memory _duelId) external nonReentrant whenNotPaused onlyBot {
+        CryptoDuel storage cryptoDuel = cryptoDuels[_duelId];
+
+        require(isValidDuelId[_duelId] && cryptoDuel.createTime != 0, "Duel doesn't exist");
+        // Ensure the bootstrap period has ended
+        require(block.timestamp >= cryptoDuel.createTime + bootstrapPeriod, "Bootstrap period not ended");
+        // Ensure the duel is not already live
+        require(cryptoDuel.duelStatus == DuelStatus.BootStrapped, "Duel has already started or settled");
+        // Ensure both tokens have met the minimum wager requirements
+        uint256 optionsLength = duelIdToOptions[_duelId].length;
+        for (uint256 i = 0; i < optionsLength; i++) {
+            require(
+                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] >= minThreshold,
+                "Threshold not reached for each options to start the duel"
+            );
+        }
+
+        // uint256 duelTokensLength = duelIdToTokens[_duelId].length;
+        // for (uint256 i = 0; i < duelTokensLength; i++) {
+        // startPriceToken[_duelId][
+        //     duelIdToTokens[_duelId][i]
+        // ] = getOraclePrice(duelIdToTokens[_duelId][i]);
+        // }
+        startPriceToken[_duelId][cryptoDuel.token] = getOraclePrice(cryptoDuel.token);
+        // Record the start time and mark the duel as live
+        cryptoDuel.startTime = block.timestamp;
+        uint256 duelDuration = cryptoDuel.expiryTime - (cryptoDuel.createTime + bootstrapPeriod);
+        cryptoDuel.expiryTime = block.timestamp + duelDuration;
+        cryptoDuel.duelStatus = DuelStatus.Live;
 
         emit DuelStarted(_duelId, block.timestamp);
     }
 
     /**
      * @notice Settles the duel after it has expired, distributing the winnings to the correct side.
-     * @dev This function checks if the duel is live and has expired before proceeding.
-     *      It calculates the winning side based on price deltas (for Crypto duels) and distributes
-     *      the winnings after deducting the protocol and creator fees.
-     *      Only callable by the bot.
-     * @param _duelCategory The duel category.
      * @param _duelId The ID of the duel to settle.
      * @param _optionIndex The option index of the duel.
      * Emits a {DuelSettled} event with the duel ID and the winning topic.
      */
-    function settleDuel(DuelCategory _duelCategory, string memory _duelId, uint256 _optionIndex)
-        external
-        nonReentrant
-        onlyBot
-    {
-        if (_duelCategory != DuelCategory.Crypto) {
-            Duel storage duel = duels[_duelId];
-            // Ensure the duel is live and not yet settled
-            require(duel.duelStatus == DuelStatus.Live, "Duel not live or already settled");
-            // Ensure the duel has expired
-            require(block.timestamp >= duel.expiryTime, "Duel not expired");
-            require(block.timestamp <= duel.expiryTime + (48 * 3600), "Resolving time expired"); // 48 hours to settle duel
-        } else {
-            CryptoDuel storage cryptoDuel = cryptoDuels[_duelId];
-            // Ensure the duel is live and not yet settled
-            require(cryptoDuel.duelStatus == DuelStatus.Live, "Duel not live or already settled");
-            // Ensure the duel has expired
-            require(block.timestamp >= cryptoDuel.expiryTime, "Duel not expired");
-            require(block.timestamp <= cryptoDuel.expiryTime + (48 * 3600), "Resolving time expired"); // 48 hours to settle duel
-        }
+    function settleDuel(string memory _duelId, uint256 _optionIndex) external nonReentrant onlyBot {
+        Duel storage duel = duels[_duelId];
+        // Ensure the duel is live and not yet settled
+        require(duel.duelStatus == DuelStatus.Live, "Duel not live or already settled");
+        // Ensure the duel has expired
+        require(block.timestamp >= duel.expiryTime, "Duel not expired");
+        require(block.timestamp <= duel.expiryTime + (48 * 3600), "Resolving time expired"); // 48 hours to settle duel
+
         string[] memory _options = duelIdToOptions[_duelId];
         string memory winningOption = _options[_optionIndex];
         uint256 totalWagerLooser;
@@ -635,18 +678,70 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
 
         totalProtocolFeesGenerated += protocolFee;
 
-        _distributeWinnings(_duelId, winningOption, payout);
+        _distributeWinnings(_duelId, _optionIndex, winningOption, payout);
 
-        if (_duelCategory != DuelCategory.Crypto) {
-            totalCreatorFeeEarned[duels[_duelId].creator] += creatorFee;
-            duels[_duelId].duelStatus = DuelStatus.Settled;
-        } else {
-            totalCreatorFeeEarned[cryptoDuels[_duelId].creator] += creatorFee;
-            cryptoDuels[_duelId].duelStatus = DuelStatus.Settled;
-        }
+        totalCreatorFeeEarned[duels[_duelId].creator] += creatorFee;
+        duels[_duelId].duelStatus = DuelStatus.Settled;
 
         // Emit event indicating that the duel has been settled
         emit DuelSettled(_duelId, winningOption, _optionIndex);
+    }
+    /**
+     * @notice Settles the crypto duel with the given ID.
+     * @dev Can only be called by the bot. Uses nonReentrant for security.
+     * @param _duelId The ID of the duel to settle.
+     */
+
+    function settleCryptoDuel(string memory _duelId) external nonReentrant onlyBot {
+        string memory winningOption;
+        uint256 totalWagerLooser;
+        uint256 optionIndex;
+        CryptoDuel storage cryptoDuel = cryptoDuels[_duelId];
+        // Ensure the duel is live and not yet settled
+        require(cryptoDuel.duelStatus == DuelStatus.Live, "Duel not live or already settled");
+        // Ensure the duel has expired
+        require(block.timestamp >= cryptoDuel.expiryTime, "Duel not expired");
+        require(block.timestamp <= cryptoDuel.expiryTime + (48 * 3600), "Resolving time expired"); // 48 hours to settle duel
+
+        string[] memory _options = duelIdToOptions[_duelId];
+
+        int256 currentOraclePrice = getOraclePrice(cryptoDuel.token);
+        if (cryptoDuel.triggerType == TriggerType.Absolute) {
+            int256 _triggerValue = cryptoDuel.triggerValue;
+            if (cryptoDuel.triggerCondition == TriggerCondition.Above) {
+                winningOption = currentOraclePrice > _triggerValue ? _options[0] : _options[1];
+                optionIndex = 0;
+                totalWagerLooser += totalWagerForOption[_duelId][_options[1]];
+            } else if (cryptoDuel.triggerCondition == TriggerCondition.Below) {
+                winningOption = currentOraclePrice > _triggerValue ? _options[1] : _options[0];
+                optionIndex = 1;
+                totalWagerLooser += totalWagerForOption[_duelId][_options[0]];
+            }
+        }
+        // for (uint256 i = 0; i < _options.length; i++) {
+        //     if (i != _optionIndex) {
+        //         totalWagerLooser += totalWagerForOption[_duelId][_options[i]];
+        //     }
+        // }
+
+        uint256 protocolFee = (totalWagerLooser * protocolFeePercentage) / 10000;
+        uint256 creatorFee = (totalWagerLooser * creatorFeePercentage) / 10000;
+        uint256 payout = totalWagerLooser - protocolFee - creatorFee;
+
+        totalProtocolFeesGenerated += protocolFee;
+
+        _distributeWinnings(_duelId, optionIndex, winningOption, payout);
+
+        // if (_duelCategory != DuelCategory.Crypto) {
+        //     totalCreatorFeeEarned[duels[_duelId].creator] += creatorFee;
+        //     duels[_duelId].duelStatus = DuelStatus.Settled;
+        // } else {
+        totalCreatorFeeEarned[cryptoDuels[_duelId].creator] += creatorFee;
+        cryptoDuels[_duelId].duelStatus = DuelStatus.Settled;
+        // }
+
+        // Emit event indicating that the duel has been settled
+        emit DuelSettled(_duelId, winningOption, optionIndex);
     }
 
     /// @notice Cancels the duel if the threshold amount is not met after the bootstrap period
@@ -732,6 +827,22 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             }
         }
     }
+    /**
+     * @notice Retrieves the user's share for a specific option in an external duel.
+     * @dev This function allows external contracts or users to query the share of a user for a given option in a duel.
+     * @param _duelId The unique ID of the duel.
+     * @param _optionIndex The index of the option in the duel for which the share is being queried.
+     * @param _user The address of the user whose option share is being queried.
+     * @return optionShare The share of the user for the specified option in the duel.
+     */
+
+    function getUserDuelOptionShare(string memory _duelId, uint256 _optionIndex, address _user)
+        external
+        view
+        returns (uint256 optionShare)
+    {
+        return _getUserDuelOptionShare(_duelId, _optionIndex, _user);
+    }
 
     /**
      * @notice Withdraws earnings for the caller.
@@ -741,6 +852,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         uint256 _allTimeEarnings = allTimeEarnings[msg.sender];
         require(_amount <= _allTimeEarnings, "Amount should be less than equal earnings");
         IERC20(usdc).transfer(msg.sender, _amount);
+        allTimeEarnings[msg.sender] -= _amount;
         emit WithdrawEarning(msg.sender, _amount);
     }
 
@@ -751,6 +863,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         uint256 creatorFee = totalCreatorFeeEarned[msg.sender];
         require(creatorFee > 0, "No funds available");
         IERC20(usdc).transfer(msg.sender, creatorFee);
+        totalCreatorFeeEarned[msg.sender] = 0;
         emit WithdrawCreatorEarning(msg.sender, creatorFee);
     }
     /**
@@ -761,6 +874,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         uint256 protocolBalance = totalProtocolFeesGenerated;
         require(protocolBalance > 0, "No funds available");
         IERC20(usdc).transfer(msg.sender, protocolBalance);
+        totalProtocolFeesGenerated = 0;
         emit WithdrawProtocolFee(msg.sender, protocolBalance);
     }
 
@@ -827,11 +941,12 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /**
      * @notice Retrieves the allowed tokens for a specific duel.
      * @param _duelId The ID of the duel.
-     * @return An array of token addresses for the specified duel.
+     * @return A token address for the specified duel.
      */
 
-    function getDuelIdToTokens(string memory _duelId) public view returns (address[] memory) {
-        return duelIdToTokens[_duelId];
+    function getDuelIdToToken(string memory _duelId) public view returns (address) {
+        CryptoDuel memory cryptoDuel = cryptoDuels[_duelId];
+        return cryptoDuel.token;
     }
     /**
      * @notice Retrieves the users who have chosen a specific option in a duel.
@@ -913,30 +1028,53 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
 
     /**
      * @notice Distributes winnings to the users who bet on the winning side.
-     * @dev This function calculates and distributes both the winning token and a portion of the losing token to the winners.
-     * It transfers the respective amounts based on each user's wager proportionally.
      * @param _duelId The duel for which the winnings are being distributed.
      * @param _winningOption The winning option.
      * @param _payout The total amount of the winning token to be distributed among the winners.
      */
-    function _distributeWinnings(string memory _duelId, string memory _winningOption, uint256 _payout) internal {
-        address[] storage winners = duelUsersForOption[_duelId][_winningOption];
+    function _distributeWinnings(
+        string memory _duelId,
+        uint256 _optionIndex,
+        string memory _winningOption,
+        uint256 _payout
+    ) internal {
+        address[] storage winners = duelUsersForOption[_duelId][_winningOption]; // @note -  while transferring tokens, need to update the duelUsers as well
         uint256 totalWinningWagers = totalWagerForOption[_duelId][_winningOption];
+        uint256 winningOptionPoolBalance = totalWinningWagers + _payout;
 
         for (uint256 i = 0; i < winners.length; i++) {
             address winner = winners[i];
-            uint256 winnerWager = userWager[winner][_duelId][_winningOption];
+            uint256 winnerShare = _getUserDuelOptionShare(_duelId, _optionIndex, winner);
+            // uint256 winnerWager = userWager[winner][_duelId][_winningOption];
+            // uint256 winnerShare = (winnerWager * 1e18) / totalWinningWagers;
+            uint256 winnerWinningTokenAmount = (winnerShare * winningOptionPoolBalance) / 1e18;
 
-            uint256 winnerShare = (winnerWager * 1e18) / totalWinningWagers;
-            uint256 winnerWinningTokenAmount = (winnerShare * _payout) / 1e18;
-
-            allTimeEarnings[winner] += (winnerWager + winnerWinningTokenAmount);
+            allTimeEarnings[winner] += winnerWinningTokenAmount;
             // Transfer the winning token amount to the winner
             // require(
             //     IERC20(usdc).transfer(winner, (winnerWager + winnerWinningTokenAmount)),
             //     "Winning token transfer failed"
             // );
         }
+    }
+    /**
+     * @notice Retrieves the user's share for a specific option in a duel.
+     * @dev This function calculates and returns the share of a user in a given option of a duel.
+     * @param _duelId The unique ID of the duel.
+     * @param _optionIndex The index of the option in the duel for which the share is being calculated.
+     * @param _user The address of the user whose share is to be retrieved.
+     * @return optionShare The share of the user for the specified option in the duel.
+     */
+
+    function _getUserDuelOptionShare(string memory _duelId, uint256 _optionIndex, address _user)
+        internal
+        view
+        returns (uint256 optionShare)
+    {
+        address optionToken = optionIndexToOptionToken[_duelId][_optionIndex];
+        uint256 optionTokenBalance = IERC20(optionToken).balanceOf(_user);
+        uint256 totalOptionTokenSupply = IERC20(optionToken).totalSupply();
+        optionShare = optionTokenBalance * 1e18 / totalOptionTokenSupply;
     }
 
     /**

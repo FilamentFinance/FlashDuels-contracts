@@ -115,9 +115,9 @@
             },
             {
                 "indexed": false,
-                "internalType": "address[]",
-                "name": "tokens",
-                "type": "address[]"
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
             },
             {
                 "indexed": false,
@@ -151,9 +151,9 @@
             },
             {
                 "indexed": false,
-                "internalType": "uint256",
+                "internalType": "int256",
                 "name": "triggerValue",
-                "type": "uint256"
+                "type": "int256"
             },
             {
                 "indexed": false,
@@ -202,6 +202,18 @@
                 "indexed": false,
                 "internalType": "uint256",
                 "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "optionToken",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amountOptionToken",
                 "type": "uint256"
             },
             {
@@ -319,6 +331,18 @@
                 "indexed": false,
                 "internalType": "uint256",
                 "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "optionToken",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amountOptionToken",
                 "type": "uint256"
             },
             {
@@ -617,9 +641,9 @@
     {
         "inputs": [
             {
-                "internalType": "address[]",
-                "name": "_tokens",
-                "type": "address[]"
+                "internalType": "address",
+                "name": "_token",
+                "type": "address"
             },
             {
                 "internalType": "string[]",
@@ -632,9 +656,9 @@
                 "type": "uint256"
             },
             {
-                "internalType": "uint256",
+                "internalType": "int256",
                 "name": "_triggerValue",
-                "type": "uint256"
+                "type": "int256"
             },
             {
                 "internalType": "enum FlashDuels.TriggerType",
@@ -768,6 +792,11 @@
                 "type": "address"
             },
             {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+            },
+            {
                 "internalType": "uint256",
                 "name": "createTime",
                 "type": "uint256"
@@ -788,9 +817,9 @@
                 "type": "uint256"
             },
             {
-                "internalType": "uint256",
+                "internalType": "int256",
                 "name": "triggerValue",
-                "type": "uint256"
+                "type": "int256"
             },
             {
                 "internalType": "enum FlashDuels.TriggerType",
@@ -830,30 +859,6 @@
                 "internalType": "string",
                 "name": "",
                 "type": "string"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
-            },
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "name": "duelIdToTokens",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
             }
         ],
         "stateMutability": "view",
@@ -988,12 +993,12 @@
                 "type": "string"
             }
         ],
-        "name": "getDuelIdToTokens",
+        "name": "getDuelIdToToken",
         "outputs": [
             {
-                "internalType": "address[]",
+                "internalType": "address",
                 "name": "",
-                "type": "address[]"
+                "type": "address"
             }
         ],
         "stateMutability": "view",
@@ -1089,6 +1094,35 @@
                 "type": "string"
             },
             {
+                "internalType": "uint256",
+                "name": "_optionIndex",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getUserDuelOptionShare",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "optionShare",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            },
+            {
                 "internalType": "address",
                 "name": "_user",
                 "type": "address"
@@ -1160,6 +1194,11 @@
                 "type": "string"
             },
             {
+                "internalType": "string",
+                "name": "_option",
+                "type": "string"
+            },
+            {
                 "internalType": "address",
                 "name": "_token",
                 "type": "address"
@@ -1167,6 +1206,11 @@
             {
                 "internalType": "uint256",
                 "name": "_optionsIndex",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_optionPrice",
                 "type": "uint256"
             },
             {
@@ -1188,8 +1232,18 @@
                 "type": "string"
             },
             {
+                "internalType": "string",
+                "name": "_option",
+                "type": "string"
+            },
+            {
                 "internalType": "uint256",
                 "name": "_optionsIndex",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_optionPrice",
                 "type": "uint256"
             },
             {
@@ -1211,6 +1265,49 @@
                 "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "optionIndexToOption",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "optionIndexToOptionToken",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
             }
         ],
         "stateMutability": "view",
@@ -1418,10 +1515,18 @@
     {
         "inputs": [
             {
-                "internalType": "enum FlashDuels.DuelCategory",
-                "name": "_duelCategory",
-                "type": "uint8"
-            },
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            }
+        ],
+        "name": "settleCryptoDuel",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
             {
                 "internalType": "string",
                 "name": "_duelId",
@@ -1441,10 +1546,18 @@
     {
         "inputs": [
             {
-                "internalType": "enum FlashDuels.DuelCategory",
-                "name": "_duelCategory",
-                "type": "uint8"
-            },
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            }
+        ],
+        "name": "startCryptoDuel",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
             {
                 "internalType": "string",
                 "name": "_duelId",
