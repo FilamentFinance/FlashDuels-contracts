@@ -127,12 +127,6 @@
             },
             {
                 "indexed": false,
-                "internalType": "string",
-                "name": "topic",
-                "type": "string"
-            },
-            {
-                "indexed": false,
                 "internalType": "string[]",
                 "name": "options",
                 "type": "string[]"
@@ -157,6 +151,24 @@
             },
             {
                 "indexed": false,
+                "internalType": "uint256",
+                "name": "triggerValue",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum FlashDuels.TriggerType",
+                "name": "triggerType",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum FlashDuels.TriggerCondition",
+                "name": "triggerCondition",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
                 "internalType": "enum FlashDuels.DuelCategory",
                 "name": "category",
                 "type": "uint8"
@@ -172,12 +184,6 @@
                 "indexed": false,
                 "internalType": "string",
                 "name": "duelId",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "topic",
                 "type": "string"
             },
             {
@@ -593,6 +599,11 @@
     {
         "inputs": [
             {
+                "internalType": "enum FlashDuels.DuelCategory",
+                "name": "_duelCategory",
+                "type": "uint8"
+            },
+            {
                 "internalType": "string",
                 "name": "_duelId",
                 "type": "string"
@@ -611,11 +622,6 @@
                 "type": "address[]"
             },
             {
-                "internalType": "string",
-                "name": "_topic",
-                "type": "string"
-            },
-            {
                 "internalType": "string[]",
                 "name": "_options",
                 "type": "string[]"
@@ -624,6 +630,21 @@
                 "internalType": "uint256",
                 "name": "_minWager",
                 "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_triggerValue",
+                "type": "uint256"
+            },
+            {
+                "internalType": "enum FlashDuels.TriggerType",
+                "name": "_triggerType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "enum FlashDuels.TriggerCondition",
+                "name": "_triggerCondition",
+                "type": "uint8"
             },
             {
                 "internalType": "enum FlashDuels.DuelDuration",
@@ -726,6 +747,65 @@
                 "internalType": "string",
                 "name": "",
                 "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "name": "cryptoDuels",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "creator",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "createTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "startTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expiryTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "minWager",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "triggerValue",
+                "type": "uint256"
+            },
+            {
+                "internalType": "enum FlashDuels.TriggerType",
+                "name": "triggerType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "enum FlashDuels.TriggerCondition",
+                "name": "triggerCondition",
+                "type": "uint8"
+            },
+            {
+                "internalType": "enum FlashDuels.DuelStatus",
+                "name": "duelStatus",
+                "type": "uint8"
             }
         ],
         "stateMutability": "view",
@@ -1230,6 +1310,11 @@
     {
         "inputs": [
             {
+                "internalType": "enum FlashDuels.DuelCategory",
+                "name": "_duelCategory",
+                "type": "uint8"
+            },
+            {
                 "internalType": "string",
                 "name": "_duelId",
                 "type": "string"
@@ -1333,6 +1418,11 @@
     {
         "inputs": [
             {
+                "internalType": "enum FlashDuels.DuelCategory",
+                "name": "_duelCategory",
+                "type": "uint8"
+            },
+            {
                 "internalType": "string",
                 "name": "_duelId",
                 "type": "string"
@@ -1350,6 +1440,11 @@
     },
     {
         "inputs": [
+            {
+                "internalType": "enum FlashDuels.DuelCategory",
+                "name": "_duelCategory",
+                "type": "uint8"
+            },
             {
                 "internalType": "string",
                 "name": "_duelId",
