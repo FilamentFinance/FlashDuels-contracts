@@ -39,6 +39,10 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     mapping(string => mapping(string => address[])) public duelUsersForOption;
     // duelId => token => price
     mapping(string => mapping(address => int256)) public startPriceToken;
+    /// @notice Tracks total bets on duel
+    mapping(string => uint256) public totalBetsOnDuel;
+    /// @notice Tracks total bets on duel option for a particular duel
+    mapping(string => mapping(uint256 => mapping(string => uint256))) public totalBetsOnOption;
     /// @notice Tracks total fees earned by duel creators
     mapping(address => uint256) public totalCreatorFeeEarned;
     /// @notice To store multiple duel IDs for the same combination
@@ -536,6 +540,9 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         newOptionToken.mint(msg.sender, amountTokenToMint);
         optionIndexToOptionToken[_duelId][_optionsIndex] = address(newOptionToken);
 
+        totalBetsOnDuel[_duelId] += amountTokenToMint;
+        totalBetsOnOption[_duelId][_optionsIndex][_option] += amountTokenToMint;
+
         emit DuelJoined(
             _duelId, duel.topic, msg.sender, _amount, address(newOptionToken), amountTokenToMint, block.timestamp
         );
@@ -576,6 +583,9 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         // Mint the specified amount of option tokens to the recipient address
         newOptionToken.mint(msg.sender, amountTokenToMint);
         optionIndexToOptionToken[_duelId][_optionsIndex] = address(newOptionToken);
+
+        totalBetsOnDuel[_duelId] += amountTokenToMint;
+        totalBetsOnOption[_duelId][_optionsIndex][_option] += amountTokenToMint;
 
         emit CryptoDuelJoined(
             _duelId, msg.sender, _token, _amount, address(newOptionToken), amountTokenToMint, block.timestamp
@@ -826,6 +836,18 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
                 emit RefundIssued(_duelId, duelIdToOptions[_duelId][i], msg.sender, wager);
             }
         }
+    }
+
+    /// @notice Checks whether threshold has been met or not for a duel
+    /// @param _duelId The unique ID of the duel to be cancelled
+    function checkIfThresholdMet(string calldata _duelId) external view returns (bool) {
+        uint256 optionsLength = duelIdToOptions[_duelId].length;
+        for (uint256 i = 0; i < optionsLength; i++) {
+            if (totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold) {
+                return false; // As soon as any value is below the threshold, return false
+            }
+        }
+        return true; // If no values are below the threshold, return true
     }
     /**
      * @notice Retrieves the user's share for a specific option in an external duel.
