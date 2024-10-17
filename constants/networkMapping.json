@@ -1,8 +1,10 @@
 {
   "hardhat": {
-    "Betting": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+    "FLASHUSDC": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "FlashDuels": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
   },
   "seiTestnet": {
-    "Betting": "0x66cd0F41662EFfa90d62A0aa9f6Cb4a83F03Eaa9"
+    "FLASHUSDC": "0x454C0C96fE5ADEf1c16665381Ed674BE4706d4cc",
+    "FlashDuels": "0x91A91Aba60f85aB15656F2aFd27B8Ffb80a824Ed"
   }
 }

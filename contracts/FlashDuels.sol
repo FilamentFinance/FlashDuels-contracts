@@ -1,13 +1,33 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
-import "./OptionToken.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {OptionToken} from "./OptionToken.sol";
+import {
+    Duel,
+    CryptoDuel,
+    DuelCategory,
+    DuelDuration,
+    TriggerType,
+    TriggerCondition,
+    DuelStatus,
+    DuelCreated,
+    CryptoDuelCreated,
+    DuelJoined,
+    CryptoDuelJoined,
+    DuelStarted,
+    DuelSettled,
+    DuelCancelled,
+    RefundIssued,
+    WithdrawEarning,
+    WithdrawCreatorEarning,
+    WithdrawProtocolFee
+} from "./interfaces/IFlashDuels.sol";
 
 /// @title FlashDuels
 /// @notice This contract allows users to create and participate in duels by betting on the options.
@@ -70,207 +90,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /// @notice Protocol address to receive fees
     address public protocolAddress;
 
-    /// @notice Struct that stores details of each duel
-    struct Duel {
-        /// @notice Address of the duel creator
-        address creator;
-        /// @notice Topic of the duel
-        string topic;
-        /// @notice UNIX timestamp when the duel creates
-        uint256 createTime;
-        /// @notice UNIX timestamp when the duel starts
-        uint256 startTime;
-        /// @notice UNIX timestamp when the duel expires
-        uint256 expiryTime;
-        /// @notice Minimum wager amount in the duel option
-        uint256 minWager;
-        /// @notice Status of the duel
-        DuelStatus duelStatus;
-        /// @notice Category of the duel
-        DuelCategory category;
-    }
-
-    /// @notice Struct that stores details of each crypto duel
-    struct CryptoDuel {
-        /// @notice Address of the duel creator
-        address creator;
-        /// @notice Address of the token
-        address token;
-        /// @notice UNIX timestamp when the duel creates
-        uint256 createTime;
-        /// @notice UNIX timestamp when the duel starts
-        uint256 startTime;
-        /// @notice UNIX timestamp when the duel expires
-        uint256 expiryTime;
-        /// @notice Minimum wager amount in the duel option
-        uint256 minWager;
-        /// @notice Trigger value
-        int256 triggerValue;
-        /// @notice Trigger type
-        TriggerType triggerType;
-        /// @notice Trigger condition
-        TriggerCondition triggerCondition;
-        /// @notice Status of the duel
-        DuelStatus duelStatus;
-    }
-
-    /// @notice Enum representing different possible duel durations
-    enum DuelDuration {
-        ThreeHours,
-        SixHours,
-        TwelveHours
-    }
-
-    /// @notice Enum representing the current status of a duel
-    enum DuelStatus {
-        NotStarted,
-        BootStrapped,
-        Live,
-        Settled,
-        Cancelled
-    }
-
-    /// @notice Enum representing categories a duel can belong to
-    enum DuelCategory {
-        Any,
-        Crypto,
-        Politics,
-        Sports,
-        Twitter,
-        NFTs,
-        News
-    }
-
-    /// @notice Enum representing trigger type
-    enum TriggerType {
-        Absolute,
-        Percentage
-    }
-
-    /// @notice Enum representing trigger condition
-    enum TriggerCondition {
-        Above,
-        Below
-    }
-
-    /// @notice Emitted when a new duel is created
-    /// @param creator The address of the duel creator
-    /// @param duelId The unique ID of the duel
-    /// @param topic The description of duel
-    /// @param options The options of the duel
-    /// @param createTime The time the duel was created
-    /// @param expiryTime The time the duel will expire
-    /// @param createDuelFee The fee paid for creating the duel
-    /// @param category The category of the duel
-    event DuelCreated(
-        address creator,
-        string duelId,
-        string topic,
-        string[] options,
-        uint256 createTime,
-        uint256 expiryTime,
-        uint256 createDuelFee,
-        DuelCategory category
-    );
-
-    /// @notice Emitted when a new duel is created
-    /// @param creator The address of the duel creator
-    /// @param token The address of token
-    /// @param duelId The unique ID of the duel
-    /// @param options The options of the duel
-    /// @param createTime The time the duel was created
-    /// @param expiryTime The time the duel will expire
-    /// @param createDuelFee The fee paid for creating the duel
-    /// @param category The category of the duel
-    event CryptoDuelCreated(
-        address creator,
-        address token,
-        string duelId,
-        string[] options,
-        uint256 createTime,
-        uint256 expiryTime,
-        uint256 createDuelFee,
-        int256 triggerValue,
-        TriggerType triggerType,
-        TriggerCondition triggerCondition,
-        DuelCategory category
-    );
-
-    /// @notice Emitted when a participant joins a duel
-    /// @param duelId The ID of the duel being joined
-    /// @param topic The topic related to the token
-    /// @param participant The address of the participant
-    /// @param amount The amount wagered
-    /// @param optionToken The option token
-    /// @param amountOptionToken The amount of option token to mint
-    /// @param joinTime The time the participant joined the duel
-    event DuelJoined(
-        string duelId,
-        string topic,
-        address participant,
-        uint256 amount,
-        address optionToken,
-        uint256 amountOptionToken,
-        uint256 joinTime
-    );
-
-    /// @notice Emitted when a participant joins a duel
-    /// @param duelId The ID of the duel being joined
-    /// @param participant The address of the participant
-    /// @param token The token being wagered on
-    /// @param amount The amount wagered
-    /// @param optionToken The option token
-    /// @param amountOptionToken The amount of option token to mint
-    /// @param joinTime The time the participant joined the duel
-    event CryptoDuelJoined(
-        string duelId,
-        address participant,
-        address token,
-        uint256 amount,
-        address optionToken,
-        uint256 amountOptionToken,
-        uint256 joinTime
-    );
-
-    /// @notice Emitted when a duel starts
-    /// @param duelId The ID of the duel that started
-    /// @param startTime The time the duel started
-    event DuelStarted(string duelId, uint256 startTime);
-
-    /// @notice Emitted when a duel is settled and the winner is determined
-    /// @param duelId The ID of the duel that was settled
-    /// @param winningTopic The topic associated with the winning token
-    /// @param optionIndex The option index
-    event DuelSettled(string duelId, string winningTopic, uint256 optionIndex);
-
-    /// @notice Emitted when a user withdraws their earnings
-    /// @param user The address of the user withdrawing earnings
-    /// @param amount The amount withdrawn
-    event WithdrawEarning(address user, uint256 amount);
-
-    /// @notice Emitted when a duel creator withdraws their creator fees
-    /// @param user The address of the duel creator
-    /// @param creatorFee The fee withdrawn by the creator
-    event WithdrawCreatorEarning(address user, uint256 creatorFee);
-
-    /// @notice Emitted when protocol fees are withdrawn
-    /// @param user The address of the protocol
-    /// @param protocolBalance The amount withdrawn as protocol fees
-    event WithdrawProtocolFee(address user, uint256 protocolBalance);
-
-    /// @notice Emitted when a refund is issued for a cancelled duel
-    /// @param duelId The ID of the cancelled duel
-    /// @param option The option for which refund issued
-    /// @param recipient The address receiving the refund
-    /// @param amount The amount refunded for option
-    event RefundIssued(string duelId, string option, address recipient, uint256 amount);
-
-    /// @notice Emitted when a duel is cancelled
-    /// @param duelId The ID of the cancelled duel
-    /// @param duelStartTime The duel start time
-    /// @param duelCancelTime The duel cancel time
-    event DuelCancelled(string duelId, uint256 duelStartTime, uint256 duelCancelTime);
-
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -319,10 +138,23 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /**
      * @notice Marks a token as supported in the contract
      * @dev Can only be called by the owner to add tokens that can be used in duels
-     * @param _token The address of the token to be supported
+     * @param _tokens The addresses of the tokens to be supported
      */
-    function setSupportedToken(address _token) external onlyOwner {
-        supportedTokens[_token] = true;
+    function setSupportedTokens(address[] memory _tokens) external onlyOwner {
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            supportedTokens[_tokens[i]] = true;
+        }
+    }
+
+    /**
+     * @notice Removes from the supported tokens in the contract
+     * @dev Can only be called by the owner to add tokens that can be used in duels
+     * @param _tokens The addresses of the tokens to be removed
+     */
+    function removeSupportedTokens(address[] memory _tokens) external onlyOwner {
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            supportedTokens[_tokens[i]] = false;
+        }
     }
 
     /**
@@ -342,6 +174,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @param _bot The address of the bot to set.
      */
     function setBotAddress(address _bot) external onlyOwner {
+        require(_bot != address(0), "Invalid bot address");
         bot = _bot;
     }
 
@@ -352,6 +185,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @param _protocolAddress The address of the protocol to set.
      */
     function setProtocolAddress(address _protocolAddress) external onlyOwner {
+        require(_protocolAddress != address(0), "Invalid protocol address");
         protocolAddress = _protocolAddress;
     }
 
@@ -368,14 +202,16 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /**
      * @notice Sets the Chainlink price aggregator for a specific token
      * @dev Can only be called by the owner to set up a price feed for supported tokens
-     * @param _token The address of the token for which the aggregator is being set
-     * @param _aggregator The address of the Chainlink price feed aggregator for the token
+     * @param _tokens The addresses of the token for which the aggregator is being set
+     * @param _aggregators The addresses of the Chainlink price feed aggregator for the token
      */
-    function setPriceAggregator(address _token, address _aggregator) external onlyOwner {
-        require(_token != address(0), "Invalid token address");
-        require(_aggregator != address(0), "Invalid aggregator address");
-
-        priceAggregator[_token] = _aggregator;
+    function setPriceAggregators(address[] memory _tokens, address[] memory _aggregators) external onlyOwner {
+        // require(_tokens.length == _aggregators.length, "Inequal array length");
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            // require(_tokens[i] != address(0), "Invalid token address");
+            // require(_aggregators[i] != address(0), "Invalid aggregator address");
+            priceAggregator[_tokens[i]] = _aggregators[i];
+        }
     }
 
     /**
@@ -728,6 +564,11 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
                 totalWagerLooser += totalWagerForOption[_duelId][_options[0]];
             }
         }
+
+        // @note - currently support only TriggerType.Percentage
+        // if (cryptoDuel.triggerType == TriggerType.Percentage) {
+        // }
+
         // for (uint256 i = 0; i < _options.length; i++) {
         //     if (i != _optionIndex) {
         //         totalWagerLooser += totalWagerForOption[_duelId][_options[i]];

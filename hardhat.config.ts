@@ -20,7 +20,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 100,
+        runs: 200,
       },
       viaIR: true,
     },
@@ -53,7 +53,7 @@ const config: HardhatUserConfig = {
     clear: true,
     flat: true,
     spacing: 4,
-    only: ["FlashDuels"],
+    only: ["FlashDuels", "FLASHUSDC", "FlashDuelsMarketplace"],
   },
   sourcify: {
     enabled: false,

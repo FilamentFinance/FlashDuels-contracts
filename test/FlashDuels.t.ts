@@ -28,7 +28,7 @@ describe("FlashDuels Contract", function () {
     if (networkName === "seiMainnet") {
       usdAddress = networkConfig[networkName].usdc;
     } else {
-      const USDC = await ethers.getContractFactory("USDCF");
+      const USDC = await ethers.getContractFactory("FLASHUSDC");
       const usdcNew = await upgrades.deployProxy(USDC, [
         "USDC Filament",
         "USDFIL",
@@ -68,11 +68,14 @@ describe("FlashDuels Contract", function () {
     flashDuels = await flashDuelsProxy.waitForDeployment();
 
     // Add supported tokens
-    await flashDuels.setSupportedToken(tokenA.target);
-    await flashDuels.setSupportedToken(tokenB.target);
+    await flashDuels.setSupportedTokens([tokenA.target, tokenB.target]);
+    // await flashDuels.setSupportedToken(tokenB.target);
 
-    await flashDuels.setPriceAggregator(tokenA.target, mockOracleA.target);
-    await flashDuels.setPriceAggregator(tokenB.target, mockOracleB.target);
+    await flashDuels.setPriceAggregators(
+      [tokenA.target, tokenB.target],
+      [mockOracleA.target, mockOracleB.target]
+    );
+    // await flashDuels.setPriceAggregator(tokenB.target, mockOracleB.target);
   });
 
   describe("Duel Creation", function () {
@@ -161,8 +164,12 @@ describe("FlashDuels Contract", function () {
       let BTC = tokenA;
 
       // Join Duel with tokenA
-      await flashDuels.connect(addr2).joinDuel(duelIds[0], "Yes", 0, optionPrice, amount);
-      await flashDuels.connect(addr3).joinDuel(duelIds[0], "No", 1, optionPrice, amount);
+      await flashDuels
+        .connect(addr2)
+        .joinDuel(duelIds[0], "Yes", 0, optionPrice, amount);
+      await flashDuels
+        .connect(addr3)
+        .joinDuel(duelIds[0], "No", 1, optionPrice, amount);
 
       duel = await flashDuels.duels(duelIds[0]);
       expect(duel.duelStatus).to.equal(1); // 1 represents the "BootStrapped" status
@@ -180,8 +187,10 @@ describe("FlashDuels Contract", function () {
       duel = await flashDuels.duels(duelIds[0]);
       expect(duel.duelStatus).to.equal(2); // 2 represents the "Live" status
 
-    //   await flashDuels.connect(addr4).joinDuel(duelIds[0], 1, amount);
-      await flashDuels.connect(addr4).joinDuel(duelIds[0], "No", 1, optionPrice, amount);
+      //   await flashDuels.connect(addr4).joinDuel(duelIds[0], 1, amount);
+      await flashDuels
+        .connect(addr4)
+        .joinDuel(duelIds[0], "No", 1, optionPrice, amount);
       const getDuelUsers = await flashDuels.getDuelUsersForOption(
         duelIds[0],
         "Yes"
@@ -214,7 +223,9 @@ describe("FlashDuels Contract", function () {
       let BTC = tokenA;
 
       await expect(
-        flashDuels.connect(addr2).joinDuel(duelIds[0], "No", 1, optionPrice, amount)
+        flashDuels
+          .connect(addr2)
+          .joinDuel(duelIds[0], "No", 1, optionPrice, amount)
       ).to.be.revertedWith("Wager below minimum");
     });
   });
@@ -260,10 +271,12 @@ describe("FlashDuels Contract", function () {
       await usdcToken.connect(addr2).approve(flashDuels.target, amount);
       await usdcToken.connect(addr3).approve(flashDuels.target, amount);
 
-      await flashDuels.connect(addr2).joinDuel(duelIds[0], "Yes", 0, optionPrice, amount);
-      await flashDuels.connect(addr3).joinDuel(duelIds[0], "No", 1, optionPrice, amount);
-
-
+      await flashDuels
+        .connect(addr2)
+        .joinDuel(duelIds[0], "Yes", 0, optionPrice, amount);
+      await flashDuels
+        .connect(addr3)
+        .joinDuel(duelIds[0], "No", 1, optionPrice, amount);
     });
 
     it("should settle duel and distribute rewards", async function () {
@@ -330,10 +343,13 @@ describe("FlashDuels Contract", function () {
       await usdcToken.connect(addr2).approve(flashDuels.target, amount);
       await usdcToken.connect(addr3).approve(flashDuels.target, amount);
 
-      await flashDuels.connect(addr2).joinDuel(duelIds[0], "Yes", 0, optionPrice, amount);
+      await flashDuels
+        .connect(addr2)
+        .joinDuel(duelIds[0], "Yes", 0, optionPrice, amount);
 
-      await flashDuels.connect(addr3).joinDuel(duelIds[0], "No", 1, optionPrice, amount);
-
+      await flashDuels
+        .connect(addr3)
+        .joinDuel(duelIds[0], "No", 1, optionPrice, amount);
     });
 
     it("should settle duel and distribute rewards correctly to winner", async function () {
@@ -464,9 +480,13 @@ describe("FlashDuels Contract", function () {
         await usdcToken.connect(addr3).approve(flashDuels.target, minThreshold);
         const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
 
-        await flashDuels.connect(addr2).joinDuel(duelIds[0], "Yes", 0, optionPrice, amount);
+        await flashDuels
+          .connect(addr2)
+          .joinDuel(duelIds[0], "Yes", 0, optionPrice, amount);
 
-        await flashDuels.connect(addr3).joinDuel(duelIds[0], "No", 1, optionPrice, amount);
+        await flashDuels
+          .connect(addr3)
+          .joinDuel(duelIds[0], "No", 1, optionPrice, amount);
 
         // Increase time to after the bootstrap period
         await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
@@ -503,14 +523,18 @@ describe("FlashDuels Contract", function () {
         const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address);
         let BTC = tokenA;
         // await flashDuels.connect(addr2).joinDuel(duelIds[0], 0, amount);
-        await flashDuels.connect(addr2).joinDuel(duelIds[0], "Yes", 0, optionPrice, amount);
+        await flashDuels
+          .connect(addr2)
+          .joinDuel(duelIds[0], "Yes", 0, optionPrice, amount);
 
         await usdcToken.connect(owner).mint(addr3.address, amount);
-        
+
         await usdcToken.connect(addr3).approve(flashDuels.target, amount);
-        
+
         // await flashDuels.connect(addr3).joinDuel(duelIds[0], 1, amount);
-        await flashDuels.connect(addr3).joinDuel(duelIds[0], "No", 1, optionPrice, amount);
+        await flashDuels
+          .connect(addr3)
+          .joinDuel(duelIds[0], "No", 1, optionPrice, amount);
 
         await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1]);
         await ethers.provider.send("evm_mine", []);
@@ -778,7 +802,14 @@ describe("FlashDuels Contract", function () {
       await expect(
         flashDuels
           .connect(addr2)
-          .joinCryptoDuel(duelIds[0], "No", randomToken.target, 1, optionPrice, amount)
+          .joinCryptoDuel(
+            duelIds[0],
+            "No",
+            randomToken.target,
+            1,
+            optionPrice,
+            amount
+          )
       ).to.be.revertedWith("Invalid token for this duel");
     });
 
@@ -794,8 +825,9 @@ describe("FlashDuels Contract", function () {
       let BTC = tokenA;
 
       await expect(
-        flashDuels.connect(addr2).joinCryptoDuel(duelIds[0], "No", BTC, 1, optionPrice, amount)
-
+        flashDuels
+          .connect(addr2)
+          .joinCryptoDuel(duelIds[0], "No", BTC, 1, optionPrice, amount)
       ).to.be.revertedWith("Wager below minimum");
     });
   });
@@ -844,11 +876,11 @@ describe("FlashDuels Contract", function () {
       await usdcToken.connect(addr3).approve(flashDuels.target, amount);
 
       await flashDuels
-      .connect(addr2)
-      .joinCryptoDuel(duelIds[0], "Yes", BTC, 0, optionPrice, amount);
+        .connect(addr2)
+        .joinCryptoDuel(duelIds[0], "Yes", BTC, 0, optionPrice, amount);
       await flashDuels
-      .connect(addr3)
-      .joinCryptoDuel(duelIds[0], "No", BTC, 1, optionPrice, amount);
+        .connect(addr3)
+        .joinCryptoDuel(duelIds[0], "No", BTC, 1, optionPrice, amount);
     });
 
     it("should settle duel and distribute rewards", async function () {

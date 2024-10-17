@@ -22,7 +22,7 @@ abstract contract USDC_Storage {
 }
 
 /// @custom:oz-upgrades-from test/Mocks/mockToken.sol:USDC
-contract USDCF is USDC_Storage, ERC20Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
+contract FLASHUSDC is USDC_Storage, ERC20Upgradeable, UUPSUpgradeable, OwnableUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() payable {
         _disableInitializers();
