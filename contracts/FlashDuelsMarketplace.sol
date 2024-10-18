@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-// import {ITokenMarketplace} from "./interfaces/ITokenMarketplace.sol";
+import {IFlashDuels, Duel, DuelStatus} from "./interfaces/IFlashDuels.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+error FlashDuelsMarketplace__DuelEnded(string duelId);
 
 contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20 for IERC20;
@@ -20,11 +22,13 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
     }
 
     mapping(address => mapping(uint256 => Sale)) public sales;
+    mapping(address => string) public tokenToDuelId;
     uint256 public saleCounter;
     IERC20 public usdc;
     uint256 public maxStrikes; // @review - What is maxStrike and why 5 ? Explained Below
     uint256 constant BPS = 1000000;
     uint256 public fees; // 0.1%
+    IFlashDuels public flashDuels;
 
     event SaleCreated(uint256 saleId, address seller, address token, uint256 qnty, uint256 totalPrice);
     event SaleCancelled(uint256 saleId, address seller, address token);
@@ -37,13 +41,14 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
     /// @notice Initializes the contract with the USDC token address and bot address
     /// @dev This function can only be called once as it uses the initializer modifier
     /// @param _usdc The address of the USDC token contract
-    function initialize(address _usdc) public initializer {
+    function initialize(address _usdc, address _flashDuels) public initializer {
         __Ownable_init(msg.sender);
         __Pausable_init();
         __UUPSUpgradeable_init();
         usdc = IERC20(_usdc);
         maxStrikes = 5;
         fees = 10;
+        flashDuels = IFlashDuels(_flashDuels);
     }
 
     function updateMaxStrikes(uint256 _newMaxStrikes) external onlyOwner {
@@ -66,7 +71,10 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
         _unpause();
     }
 
-    function sell(address token, uint256 qnty, uint256 totalPrice) external {
+    function sell(address token, string memory duelId, uint256 qnty, uint256 totalPrice) external {
+       
+            tokenToDuelId[token] = duelId;
+     
         require(qnty > 0, "Amount must be greater than zero");
         require(totalPrice > 0, "Price per token must be greater than zero");
         IERC20 erc20 = IERC20(token);
@@ -91,6 +99,10 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
     }
 
     function buy(address token, uint256 saleId) external {
+        Duel memory duel = flashDuels.duels(tokenToDuelId[token]);
+        if(duel.duelStatus == DuelStatus.Settled || duel.duelStatus == DuelStatus.Cancelled){
+            revert FlashDuelsMarketplace__DuelEnded(tokenToDuelId[token]);
+        }
         Sale memory sale = sales[token][saleId];
         IERC20 erc20 = IERC20(token);
         // @review - What is this check for ??
