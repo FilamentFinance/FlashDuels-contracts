@@ -1,10 +1,12 @@
 {
-  "hardhat": {
-    "FLASHUSDC": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-    "FlashDuels": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
-  },
-  "seiTestnet": {
-    "FLASHUSDC": "0x454C0C96fE5ADEf1c16665381Ed674BE4706d4cc",
-    "FlashDuels": "0x91A91Aba60f85aB15656F2aFd27B8Ffb80a824Ed"
-  }
+    "hardhat": {
+        "FLASHUSDC": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        "FlashDuels": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+        "FlashDuelsMarketplace": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
+    },
+    "seiTestnet": {
+        "FLASHUSDC": "0xc0027D9E61a32544546E4a5e390C239f05ac8b82",
+        "FlashDuels": "0x35D490B5D9CC6af75CE2FFE0a3e6fC03f06f9Fe0",
+        "FlashDuelsMarketplace": "0xd93c026ba9Ff18724D63944eFdE0Bb10548cC806"
+    }
 }

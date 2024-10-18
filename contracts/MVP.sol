@@ -43,7 +43,11 @@ contract Betting {
     }
 
     event BattleCreated(
-        uint256 indexed battleId, address indexed creator, uint256 hero1, uint256 hero2, uint256 startTime
+        uint256 indexed battleId,
+        address indexed creator,
+        uint256 hero1,
+        uint256 hero2,
+        uint256 startTime
     );
     event BetPlaced(uint256 indexed battleId, address indexed bettor, uint256 hero, uint256 amount);
     event BattleFinalized(uint256 indexed battleId, uint256 winner);
@@ -74,7 +78,7 @@ contract Betting {
 
         uint256[2] memory pricepershare = getcurrentPrice(battleCount);
 
-        uint256 betshareAsPerCurrentPrice = (msg.value - CREATION_FEE) * 10000 / pricepershare[betonhero1];
+        uint256 betshareAsPerCurrentPrice = ((msg.value - CREATION_FEE) * 10000) / pricepershare[betonhero1];
         battle.heropool[betonhero1] += msg.value - CREATION_FEE;
         battle.heroSharepool[betonhero1] += betshareAsPerCurrentPrice;
         battle.totalPool += msg.value - CREATION_FEE;
@@ -113,12 +117,12 @@ contract Betting {
         }
 
         uint256[2] memory currentPrice = getcurrentPrice(battleId);
-        uint256 betValue = msg.value * (100 - PROTOCOL_FEE_PERCENTAGE) / 100;
+        uint256 betValue = (msg.value * (100 - PROTOCOL_FEE_PERCENTAGE)) / 100;
 
         require(betValue * 10000 > currentPrice[inBattleHeroIndex], "need to bet atleast 0.01% of current price");
 
-        payable(PROTOCOL_ADDRESS).transfer(msg.value * PROTOCOL_FEE_PERCENTAGE / 100);
-        uint256 shareAsPerCurrentPrice = betValue * 10000 / currentPrice[inBattleHeroIndex];
+        payable(PROTOCOL_ADDRESS).transfer((msg.value * PROTOCOL_FEE_PERCENTAGE) / 100);
+        uint256 shareAsPerCurrentPrice = (betValue * 10000) / currentPrice[inBattleHeroIndex];
 
         battle.totalPool += betValue;
         battle.heropool[inBattleHeroIndex] += betValue;
@@ -136,11 +140,11 @@ contract Betting {
         emit BetPlaced(battleId, msg.sender, heroIndex, msg.value);
     }
 
-    function finalizeBattle(uint256 battleId, uint256 winnerIndex, address cardHolder)
-        external
-        onlyBattleFinalizer
-        canbeFinalized(battleId)
-    {
+    function finalizeBattle(
+        uint256 battleId,
+        uint256 winnerIndex,
+        address cardHolder
+    ) external onlyBattleFinalizer canbeFinalized(battleId) {
         require(battles[battleId].creator != address(0), "Battle is not prepered yet");
         require(!battles[battleId].finalized, "Battle has Ended");
 
@@ -151,15 +155,13 @@ contract Betting {
             for (uint256 i = 0; i < battleIdtoBettor[battleId].length; i++) {
                 address bettor = battleIdtoBettor[battleId][i];
                 if (bets[battleId][bettor].heroIndexinBattle == winnerIndex) {
-                    uint256 amountWon = bets[battleId][bettor].amount
-                        + (
-                            bets[battleId][bettor].share * WINNER_PERCENTAGE * battle.heropool[1 - winnerIndex]
-                                / (battle.heroSharepool[winnerIndex] * 100)
-                        );
+                    uint256 amountWon = bets[battleId][bettor].amount +
+                        ((bets[battleId][bettor].share * WINNER_PERCENTAGE * battle.heropool[1 - winnerIndex]) /
+                            (battle.heroSharepool[winnerIndex] * 100));
                     payable(bettor).transfer(amountWon);
                 }
             }
-            payable(cardHolder).transfer((100 - WINNER_PERCENTAGE) * battle.heropool[1 - winnerIndex] / 100); // transfer remaining balance to dummy address
+            payable(cardHolder).transfer(((100 - WINNER_PERCENTAGE) * battle.heropool[1 - winnerIndex]) / 100); // transfer remaining balance to dummy address
         } else {
             for (uint256 i = 0; i < battleIdtoBettor[battleId].length; i++) {
                 address bettor = battleIdtoBettor[battleId][i];
@@ -176,8 +178,8 @@ contract Betting {
 
         uint256 TOTAL = exp(qA) + exp(qB);
 
-        uint256 PriceA = exp(qA) * 0.001 ether / TOTAL;
-        uint256 PriceB = exp(qB) * 0.001 ether / TOTAL;
+        uint256 PriceA = (exp(qA) * 0.001 ether) / TOTAL;
+        uint256 PriceB = (exp(qB) * 0.001 ether) / TOTAL;
 
         return [PriceA, PriceB];
     }
@@ -196,13 +198,15 @@ contract Betting {
 
     modifier isWindowOpen(uint256 battleId) {
         require(
-            block.timestamp - battles[battleId].startTime < BATTLE_DURATION + BATTLE_WAITING_TIME, "Battle has ended"
+            block.timestamp - battles[battleId].startTime < BATTLE_DURATION + BATTLE_WAITING_TIME,
+            "Battle has ended"
         );
         if (block.timestamp - battles[battleId].startTime > BATTLE_WAITING_TIME) {
             uint256 windowtime = block.timestamp - battles[battleId].startTime - BATTLE_WAITING_TIME;
             require(
-                0 <= windowtime && windowtime <= 10 minutes || 35 minutes <= windowtime && windowtime <= 40 minutes
-                    || 55 minutes <= windowtime && windowtime <= 60 minutes,
+                (0 <= windowtime && windowtime <= 10 minutes) ||
+                    (35 minutes <= windowtime && windowtime <= 40 minutes) ||
+                    (55 minutes <= windowtime && windowtime <= 60 minutes),
                 "Wait till betting window opens"
             );
         }
@@ -211,7 +215,8 @@ contract Betting {
 
     modifier isBattleLive(uint256 battleId) {
         require(
-            block.timestamp - battles[battleId].startTime < BATTLE_DURATION + BATTLE_WAITING_TIME, "Battle has ended"
+            block.timestamp - battles[battleId].startTime < BATTLE_DURATION + BATTLE_WAITING_TIME,
+            "Battle has ended"
         );
         require(30 minutes < block.timestamp - battles[battleId].startTime, "Battle has ended");
         _;

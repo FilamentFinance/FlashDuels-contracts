@@ -1,0 +1,24 @@
+node_modules
+.env
+coverage
+coverage.json
+typechain
+typechain-types
+
+#Hardhat files
+cache
+artifacts
+deployments
+README.md
+.solhintignore
+.env.example
+tsconfig.json
+cache_hardhat
+
+#Foundry Files
+lib
+cache_forge
+out
+docs
+
+.openzeppelin
