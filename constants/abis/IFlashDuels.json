@@ -17,9 +17,9 @@
                         "type": "address"
                     },
                     {
-                        "internalType": "address",
-                        "name": "token",
-                        "type": "address"
+                        "internalType": "string",
+                        "name": "tokenSymbol",
+                        "type": "string"
                     },
                     {
                         "internalType": "uint256",
@@ -126,6 +126,30 @@
                 "internalType": "struct Duel",
                 "name": "",
                 "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "cryptoDuelId",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "optionIndex",
+                "type": "uint256"
+            }
+        ],
+        "name": "getOptionIndexToOptionToken",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
             }
         ],
         "stateMutability": "view",

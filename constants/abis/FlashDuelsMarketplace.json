@@ -58,6 +58,17 @@
         "type": "error"
     },
     {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            }
+        ],
+        "name": "FlashDuelsMarketplace__DuelEnded",
+        "type": "error"
+    },
+    {
         "inputs": [],
         "name": "InvalidInitialization",
         "type": "error"
@@ -215,7 +226,7 @@
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "qnty",
+                "name": "quantity",
                 "type": "uint256"
             },
             {
@@ -252,7 +263,7 @@
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "qnty",
+                "name": "quantity",
                 "type": "uint256"
             },
             {
@@ -312,6 +323,11 @@
                 "type": "address"
             },
             {
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
                 "internalType": "uint256",
                 "name": "saleId",
                 "type": "uint256"
@@ -354,10 +370,79 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "flashDuels",
+        "outputs": [
+            {
+                "internalType": "contract IFlashDuels",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "seller",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "saleId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getSale",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "seller",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "quantity",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "strike",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalPrice",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct FlashDuelsMarketplace.Sale",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "address",
                 "name": "_usdc",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_flashDuels",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_protocolTreasury",
                 "type": "address"
             }
         ],
@@ -407,6 +492,19 @@
                 "internalType": "bool",
                 "name": "",
                 "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "protocolTreasury",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
             }
         ],
         "stateMutability": "view",
@@ -467,7 +565,7 @@
             },
             {
                 "internalType": "uint256",
-                "name": "qnty",
+                "name": "quantity",
                 "type": "uint256"
             },
             {
@@ -492,8 +590,18 @@
                 "type": "address"
             },
             {
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
                 "internalType": "uint256",
-                "name": "qnty",
+                "name": "optionIndex",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "quantity",
                 "type": "uint256"
             },
             {

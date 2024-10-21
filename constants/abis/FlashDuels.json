@@ -115,9 +115,9 @@
             },
             {
                 "indexed": false,
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
+                "internalType": "string",
+                "name": "tokenSymbol",
+                "type": "string"
             },
             {
                 "indexed": false,
@@ -194,9 +194,9 @@
             },
             {
                 "indexed": false,
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
+                "internalType": "string",
+                "name": "tokenSymbol",
+                "type": "string"
             },
             {
                 "indexed": false,
@@ -660,9 +660,9 @@
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "_token",
-                "type": "address"
+                "internalType": "string",
+                "name": "_tokenSymbol",
+                "type": "string"
             },
             {
                 "internalType": "string[]",
@@ -811,9 +811,9 @@
                 "type": "address"
             },
             {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
+                "internalType": "string",
+                "name": "tokenSymbol",
+                "type": "string"
             },
             {
                 "internalType": "uint256",
@@ -1012,12 +1012,12 @@
                 "type": "string"
             }
         ],
-        "name": "getDuelIdToToken",
+        "name": "getDuelIdToTokenSymbol",
         "outputs": [
             {
-                "internalType": "address",
+                "internalType": "string",
                 "name": "",
-                "type": "address"
+                "type": "string"
             }
         ],
         "stateMutability": "view",
@@ -1050,17 +1050,22 @@
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "_token",
-                "type": "address"
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_optionIndex",
+                "type": "uint256"
             }
         ],
-        "name": "getOraclePrice",
+        "name": "getOptionIndexToOptionToken",
         "outputs": [
             {
-                "internalType": "int256",
+                "internalType": "address",
                 "name": "",
-                "type": "int256"
+                "type": "address"
             }
         ],
         "stateMutability": "view",
@@ -1074,9 +1079,14 @@
                 "type": "string"
             },
             {
-                "internalType": "address",
-                "name": "_token",
-                "type": "address"
+                "internalType": "string",
+                "name": "_tokenSymbol",
+                "type": "string"
+            },
+            {
+                "internalType": "int256",
+                "name": "_currentOraclePrice",
+                "type": "int256"
             }
         ],
         "name": "getPriceDelta",
@@ -1218,9 +1228,9 @@
                 "type": "string"
             },
             {
-                "internalType": "address",
-                "name": "_token",
-                "type": "address"
+                "internalType": "string",
+                "name": "_tokenSymbol",
+                "type": "string"
             },
             {
                 "internalType": "uint256",
@@ -1366,25 +1376,6 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "name": "priceAggregator",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
         "inputs": [],
         "name": "protocolAddress",
         "outputs": [
@@ -1444,12 +1435,12 @@
     {
         "inputs": [
             {
-                "internalType": "address[]",
-                "name": "_tokens",
-                "type": "address[]"
+                "internalType": "string[]",
+                "name": "_tokenSymbols",
+                "type": "string[]"
             }
         ],
-        "name": "removeSupportedTokens",
+        "name": "removeSupportedTokenSymbols",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1503,24 +1494,6 @@
     {
         "inputs": [
             {
-                "internalType": "address[]",
-                "name": "_tokens",
-                "type": "address[]"
-            },
-            {
-                "internalType": "address[]",
-                "name": "_aggregators",
-                "type": "address[]"
-            }
-        ],
-        "name": "setPriceAggregators",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "address",
                 "name": "_protocolAddress",
                 "type": "address"
@@ -1534,12 +1507,12 @@
     {
         "inputs": [
             {
-                "internalType": "address[]",
-                "name": "_tokens",
-                "type": "address[]"
+                "internalType": "string[]",
+                "name": "_tokenSymbols",
+                "type": "string[]"
             }
         ],
-        "name": "setSupportedTokens",
+        "name": "setSupportedTokenSymbols",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1550,6 +1523,11 @@
                 "internalType": "string",
                 "name": "_duelId",
                 "type": "string"
+            },
+            {
+                "internalType": "int256",
+                "name": "_endTokenPrice",
+                "type": "int256"
             }
         ],
         "name": "settleCryptoDuel",
@@ -1581,6 +1559,11 @@
                 "internalType": "string",
                 "name": "_duelId",
                 "type": "string"
+            },
+            {
+                "internalType": "int256",
+                "name": "_startTokenPrice",
+                "type": "int256"
             }
         ],
         "name": "startCryptoDuel",
@@ -1609,9 +1592,9 @@
                 "type": "string"
             },
             {
-                "internalType": "address",
+                "internalType": "string",
                 "name": "",
-                "type": "address"
+                "type": "string"
             }
         ],
         "name": "startPriceToken",
@@ -1628,12 +1611,12 @@
     {
         "inputs": [
             {
-                "internalType": "address",
+                "internalType": "string",
                 "name": "",
-                "type": "address"
+                "type": "string"
             }
         ],
-        "name": "supportedTokens",
+        "name": "supportedTokenSymbols",
         "outputs": [
             {
                 "internalType": "bool",

@@ -11,106 +11,146 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 
 error FlashDuelsMarketplace__DuelEnded(string duelId);
 
-contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
+/// @title Flash Duels Marketplace Contract
+/// @notice This contract allows users to create, cancel, and purchase sales of tokens tied to Flash Duels.
+/// @dev Implements ERC20 token functionality with pausable and upgradeable features.
+contract FlashDuelsMarketplace is
+    UUPSUpgradeable,
+    OwnableUpgradeable,
+    PausableUpgradeable,
+    ReentrancyGuardUpgradeable
+{
     using SafeERC20 for IERC20;
 
     struct Sale {
         address seller;
-        uint256 qnty;
-        uint256 strike; // @review - What is the use of strike here ? Explained Below
+        uint256 quantity;
+        uint256 strike;
         uint256 totalPrice;
     }
 
-    mapping(address => mapping(uint256 => Sale)) public sales;
-    mapping(address => string) public tokenToDuelId;
+    address public protocolTreasury;
     uint256 public saleCounter;
-    IERC20 public usdc;
-    uint256 public maxStrikes; // @review - What is maxStrike and why 5 ? Explained Below
-    uint256 constant BPS = 1000000;
+    uint256 public maxStrikes;
+    uint256 constant BPS = 10000;
     uint256 public fees; // 0.1%
     IFlashDuels public flashDuels;
+    IERC20 public usdc;
 
-    event SaleCreated(uint256 saleId, address seller, address token, uint256 qnty, uint256 totalPrice);
+    /// @notice Mapping to track sales for each token by sale ID
+    mapping(address => mapping(uint256 => Sale)) public sales;
+
+    /// @notice Emitted when a sale is created
+    /// @param saleId The ID of the sale
+    /// @param seller The address of the seller
+    /// @param token The address of the token being sold
+    /// @param quantity The quantity of tokens being sold
+    /// @param totalPrice The total price for the sale
+    event SaleCreated(uint256 saleId, address seller, address token, uint256 quantity, uint256 totalPrice);
+
+    /// @notice Emitted when a sale is cancelled
+    /// @param saleId The ID of the sale
+    /// @param seller The address of the seller
+    /// @param token The address of the token for the cancelled sale
     event SaleCancelled(uint256 saleId, address seller, address token);
-    event TokensPurchased(address buyer, address seller, address token, uint256 qnty, uint256 totalPrice);
+
+    /// @notice Emitted when tokens are purchased
+    /// @param buyer The address of the buyer
+    /// @param seller The address of the seller
+    /// @param token The address of the token being purchased
+    /// @param quantity The quantity of tokens purchased
+    /// @param totalPrice The total price paid by the buyer
+    event TokensPurchased(address buyer, address seller, address token, uint256 quantity, uint256 totalPrice);
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    /// @notice Initializes the contract with the USDC token address and bot address
-    /// @dev This function can only be called once as it uses the initializer modifier
+    /// @notice Initializes the contract with the USDC token and Flash Duels addresses
+    /// @dev Can only be called once due to the initializer modifier
     /// @param _usdc The address of the USDC token contract
-    function initialize(address _usdc, address _flashDuels) public initializer {
+    /// @param _flashDuels The address of the Flash Duels contract
+    /// @param _protocolTreasury The address of the protocol treasury contract
+    function initialize(address _usdc, address _flashDuels, address _protocolTreasury) public initializer {
         __Ownable_init(msg.sender);
         __Pausable_init();
         __UUPSUpgradeable_init();
+        flashDuels = IFlashDuels(_flashDuels);
         usdc = IERC20(_usdc);
+        protocolTreasury = _protocolTreasury;
         maxStrikes = 5;
         fees = 10;
-        flashDuels = IFlashDuels(_flashDuels);
     }
 
+    /// @notice Updates the maximum allowed strikes for failed buy attempts
+    /// @param _newMaxStrikes The new maximum number of strikes
     function updateMaxStrikes(uint256 _newMaxStrikes) external onlyOwner {
         maxStrikes = _newMaxStrikes;
     }
 
+    /// @notice Updates the platform fee for transactions
+    /// @param _newFee The new fee in basis points
     function updateFee(uint256 _newFee) external onlyOwner {
         fees = _newFee;
     }
 
-    /// @notice Pauses the contract, disabling certain critical functions
-    /// @dev Can only be called by the owner to prevent further operations during an emergency
+    /// @notice Pauses the contract to prevent certain critical functions
+    /// @dev Can only be called by the owner
     function pause() external onlyOwner {
         _pause();
     }
 
-    /// @notice Unpauses the contract, enabling previously disabled functions
-    /// @dev Can only be called by the owner to resume normal contract operations
+    /// @notice Unpauses the contract, re-enabling paused functions
+    /// @dev Can only be called by the owner
     function unpause() external onlyOwner {
         _unpause();
     }
 
-    function sell(address token, string memory duelId, uint256 qnty, uint256 totalPrice) external {
-       
-            tokenToDuelId[token] = duelId;
-     
-        require(qnty > 0, "Amount must be greater than zero");
+    /// @notice Creates a new sale for the given token
+    /// @param token The address of the token to be sold
+    /// @param duelId The ID of the associated duel
+    /// @param optionIndex The index of the option
+    /// @param quantity The quantity of tokens to be sold
+    /// @param totalPrice The total price for the sale
+    function sell(address token, string memory duelId, uint256 optionIndex, uint256 quantity, uint256 totalPrice)
+        external
+    {
+        // tokenToDuelId[token] = duelId;
+        require(token == flashDuels.getOptionIndexToOptionToken(duelId, optionIndex), "Invalid option");
+        require(quantity > 0, "Amount must be greater than zero");
         require(totalPrice > 0, "Price per token must be greater than zero");
         IERC20 erc20 = IERC20(token);
-        require(erc20.allowance(msg.sender, address(this)) >= qnty, "Insufficient allowance for the contract");
-        // @review - Instead safeTransferFrom here, it should be called during buying function call, when user is ready to buy the option tokens
-        // @note - fixed
-        // @review - Sale struct has 4 params, but 3 used, so not compiling
-        // @note - fixed
-        sales[token][saleCounter] = Sale({seller: msg.sender, qnty: qnty, totalPrice: totalPrice, strike: 0});
-        emit SaleCreated(saleCounter, msg.sender, token, qnty, totalPrice);
+        require(erc20.allowance(msg.sender, address(this)) >= quantity, "Insufficient allowance for the contract");
+        sales[token][saleCounter] = Sale({seller: msg.sender, quantity: quantity, totalPrice: totalPrice, strike: 0});
+        emit SaleCreated(saleCounter, msg.sender, token, quantity, totalPrice);
         ++saleCounter;
     }
 
+    /// @notice Cancels an existing sale
+    /// @param token The address of the token for the sale
+    /// @param saleId The ID of the sale to cancel
     function cancelSell(address token, uint256 saleId) external {
         Sale memory sale = sales[token][saleId];
         require(sale.seller == msg.sender, "You are not the seller");
-        require(sale.qnty > 0, "No active sale");
-        // @review - If assets are not transferred while selling (just getting approval), it's not required for tranfer function, just cancel it without transfer
-        // @note - fixed.
+        require(sale.quantity > 0, "No active sale");
         delete sales[token][saleId];
         emit SaleCancelled(saleId, msg.sender, token);
     }
 
-    function buy(address token, uint256 saleId) external {
-        Duel memory duel = flashDuels.duels(tokenToDuelId[token]);
-        if(duel.duelStatus == DuelStatus.Settled || duel.duelStatus == DuelStatus.Cancelled){
-            revert FlashDuelsMarketplace__DuelEnded(tokenToDuelId[token]);
+    /// @notice Allows a user to buy tokens from a sale
+    /// @param token The address of the token being sold
+    /// @param duelId The duel id of the duel.
+    /// @param saleId The ID of the sale to buy from
+    function buy(address token, string memory duelId, uint256 saleId) external {
+        Duel memory duel = flashDuels.duels(duelId);
+        if (duel.duelStatus == DuelStatus.Settled || duel.duelStatus == DuelStatus.Cancelled) {
+            revert FlashDuelsMarketplace__DuelEnded(duelId);
         }
         Sale memory sale = sales[token][saleId];
         IERC20 erc20 = IERC20(token);
-        // @review - What is this check for ??
-        // @note - If User Approves to create the sell order and later revokes the approval, then buy option will fail.
-        // buy function might also fail if buyer enters quantity greater than approved. Have removed the option for user
-        // to buy a specific quantity now. Now, buyer has to buy the complete qnty and cannot buy part qnty.
-        // Buy Function will fail, if the user revoked approval, thus if buy trx fails move than maxStrikes, we remove the listing.
-        if (erc20.allowance(sale.seller, address(this)) < sale.qnty && sale.strike <= maxStrikes) {
+
+        if (erc20.allowance(sale.seller, address(this)) < sale.quantity && sale.strike <= maxStrikes) {
             sale.strike += 1;
             return;
         }
@@ -118,19 +158,24 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
             delete sales[token][saleId];
             emit SaleCancelled(saleId, msg.sender, token);
         } else {
-            // @review - Check the decimals of tokens qnty (as 18 decimals are used for option tokens)
-            // @note - fixed
             uint256 platformFee = (sale.totalPrice * fees) / BPS;
             uint256 receivables = sale.totalPrice - platformFee;
             usdc.safeTransferFrom(msg.sender, sale.seller, receivables);
-            usdc.safeTransferFrom(msg.sender, owner(), platformFee);
-            erc20.safeTransferFrom(sale.seller, msg.sender, sale.qnty);
-            emit TokensPurchased(msg.sender, sale.seller, token, sale.qnty, sale.totalPrice);
+            usdc.safeTransferFrom(msg.sender, protocolTreasury, platformFee);
+            erc20.safeTransferFrom(sale.seller, msg.sender, sale.quantity);
+            emit TokensPurchased(msg.sender, sale.seller, token, sale.quantity, sale.totalPrice);
             delete sales[token][saleId];
         }
     }
 
-    /// @notice Authorize an upgrade to a new implementation
+    /// @notice Get Sale information from seller and saleId
+    /// @param seller The address of the seller
+    /// @param saleId The sale ID
+    function getSale(address seller, uint256 saleId) public view returns (Sale memory) {
+        return sales[seller][saleId];
+    }
+
+    /// @notice Authorizes an upgrade to a new implementation contract
     /// @param newImplementation The address of the new implementation contract
     /// @dev Can only be called by the owner
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}

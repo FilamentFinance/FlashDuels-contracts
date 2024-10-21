@@ -25,8 +25,8 @@ struct Duel {
 struct CryptoDuel {
     /// @notice Address of the duel creator
     address creator;
-    /// @notice Address of the token
-    address token;
+    /// @notice Sybol of the token
+    string tokenSymbol;
     /// @notice UNIX timestamp when the duel creates
     uint256 createTime;
     /// @notice UNIX timestamp when the duel starts
@@ -106,7 +106,7 @@ event DuelCreated(
 
 /// @notice Emitted when a new duel is created
 /// @param creator The address of the duel creator
-/// @param token The address of token
+/// @param tokenSymbol The symbol of token
 /// @param duelId The unique ID of the duel
 /// @param options The options of the duel
 /// @param createTime The time the duel was created
@@ -115,7 +115,7 @@ event DuelCreated(
 /// @param category The category of the duel
 event CryptoDuelCreated(
     address creator,
-    address token,
+    string tokenSymbol,
     string duelId,
     string[] options,
     uint256 createTime,
@@ -148,7 +148,7 @@ event DuelJoined(
 /// @notice Emitted when a participant joins a duel
 /// @param duelId The ID of the duel being joined
 /// @param participant The address of the participant
-/// @param token The token being wagered on
+/// @param tokenSymbol The token symbol being wagered on
 /// @param amount The amount wagered
 /// @param optionToken The option token
 /// @param amountOptionToken The amount of option token to mint
@@ -156,7 +156,7 @@ event DuelJoined(
 event CryptoDuelJoined(
     string duelId,
     address participant,
-    address token,
+    string tokenSymbol,
     uint256 amount,
     address optionToken,
     uint256 amountOptionToken,
@@ -205,4 +205,8 @@ event DuelCancelled(string duelId, uint256 duelStartTime, uint256 duelCancelTime
 interface IFlashDuels {
     function duels(string memory duelId) external view returns (Duel memory);
     function cryptoDuels(string memory cryptoDuelId) external view returns (CryptoDuel memory);
+    function getOptionIndexToOptionToken(string memory cryptoDuelId, uint256 optionIndex)
+        external
+        view
+        returns (address);
 }

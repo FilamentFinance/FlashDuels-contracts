@@ -5,10 +5,28 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {OptionToken} from "./OptionToken.sol";
-import {Duel, CryptoDuel, DuelCategory, DuelDuration, TriggerType, TriggerCondition, DuelStatus, DuelCreated, CryptoDuelCreated, DuelJoined, CryptoDuelJoined, DuelStarted, DuelSettled, DuelCancelled, RefundIssued, WithdrawEarning, WithdrawCreatorEarning, WithdrawProtocolFee} from "./interfaces/IFlashDuels.sol";
+import {
+    Duel,
+    CryptoDuel,
+    DuelCategory,
+    DuelDuration,
+    TriggerType,
+    TriggerCondition,
+    DuelStatus,
+    DuelCreated,
+    CryptoDuelCreated,
+    DuelJoined,
+    CryptoDuelJoined,
+    DuelStarted,
+    DuelSettled,
+    DuelCancelled,
+    RefundIssued,
+    WithdrawEarning,
+    WithdrawCreatorEarning,
+    WithdrawProtocolFee
+} from "./interfaces/IFlashDuels.sol";
 
 /// @title FlashDuels
 /// @notice This contract allows users to create and participate in duels by betting on the options.
@@ -30,35 +48,33 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     uint256 public minThreshold;
     /// @notice Nonce used to generate unique duel IDs
     uint256 private nonce;
-    // address => duelId => option => userWager
+    /// @notice Mapping of user to the duelId to the option to the user wager amount
     mapping(address => mapping(string => mapping(string => uint256))) public userWager;
-    // optionIndex => Option token address
+    /// @notice Mapping of optionIndex to the option token address
     mapping(string => mapping(uint256 => address)) public optionIndexToOptionToken;
-    // duelId => option => totalWagerForOption
+    /// @notice Mapping of duelId to the option to the total wager for option
     mapping(string => mapping(string => uint256)) public totalWagerForOption;
-    // duelId => option => duelUsersForOption
+    /// @notice Mapping of duelId to the option to the duel users for option
     mapping(string => mapping(string => address[])) public duelUsersForOption;
-    // duelId => token => price
-    mapping(string => mapping(address => int256)) public startPriceToken;
-    /// @notice Tracks total bets on duel
+    /// @notice Mapping of duelId to the token to the start price
+    mapping(string => mapping(string => int256)) public startPriceToken;
+    /// @notice Mapping to track total bets on duel
     mapping(string => uint256) public totalBetsOnDuel;
-    /// @notice Tracks total bets on duel option for a particular duel
+    /// @notice Mapping to track total bets on duel option for a particular duel
     mapping(string => mapping(uint256 => mapping(string => uint256))) public totalBetsOnOption;
-    /// @notice Tracks total fees earned by duel creators
+    /// @notice Mapping to track total fees earned by duel creators
     mapping(address => uint256) public totalCreatorFeeEarned;
-    /// @notice To store multiple duel IDs for the same combination
+    /// @notice Mapping to store multiple duel IDs for the same combination
     mapping(address => string[]) public creatorToDuelIds;
-    // duelId => options
+    /// @notice Mapping of duelId to their options
     mapping(string => string[]) public duelIdToOptions;
-    // optionIndex => option
+    /// @notice Mapping of optionIndex to the option
     mapping(uint256 => string) public optionIndexToOption;
-    /// @notice Mapping of token addresses to their price aggregators
-    mapping(address => address) public priceAggregator;
-    /// @notice Tracks total earnings for participants
+    /// @notice Mapping to track total earnings for participants
     mapping(address => uint256) public allTimeEarnings;
-    /// @notice Mapping of supported token addresses
-    mapping(address => bool) public supportedTokens;
-    /// @notice Tracks valid duel IDs to prevent duplicates
+    /// @notice Mapping of supported token symbol (specifically for pyth)
+    mapping(string => bool) public supportedTokenSymbols;
+    /// @notice Mapping to track valid duel IDs to prevent duplicates
     mapping(string => bool) public isValidDuelId;
     /// @notice Mapping of duel IDs to duel information
     mapping(string => Duel) public duels;
@@ -117,24 +133,26 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     }
 
     /**
-     * @notice Marks a token as supported in the contract
+     * @notice Marks a token symbol as supported in the contract, (specifically for Pyth Oracle)
      * @dev Can only be called by the owner to add tokens that can be used in duels
-     * @param _tokens The addresses of the tokens to be supported
+     * @param _tokenSymbols The addresses of the tokens to be supported
      */
-    function setSupportedTokens(address[] memory _tokens) external onlyOwner {
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            supportedTokens[_tokens[i]] = true;
+    function setSupportedTokenSymbols(string[] memory _tokenSymbols) external onlyOwner {
+        uint256 length = _tokenSymbols.length;
+        for (uint256 i = 0; i < length; i++) {
+            supportedTokenSymbols[_tokenSymbols[i]] = true;
         }
     }
 
     /**
-     * @notice Removes from the supported tokens in the contract
+     * @notice Removes from the supported token symbol in the contract (specifically for Pyth oracle)
      * @dev Can only be called by the owner to add tokens that can be used in duels
-     * @param _tokens The addresses of the tokens to be removed
+     * @param _tokenSymbols The addresses of the tokens to be removed
      */
-    function removeSupportedTokens(address[] memory _tokens) external onlyOwner {
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            supportedTokens[_tokens[i]] = false;
+    function removeSupportedTokenSymbols(string[] memory _tokenSymbols) external onlyOwner {
+        uint256 length = _tokenSymbols.length;
+        for (uint256 i = 0; i < length; i++) {
+            supportedTokenSymbols[_tokenSymbols[i]] = false;
         }
     }
 
@@ -181,21 +199,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     }
 
     /**
-     * @notice Sets the Chainlink price aggregator for a specific token
-     * @dev Can only be called by the owner to set up a price feed for supported tokens
-     * @param _tokens The addresses of the token for which the aggregator is being set
-     * @param _aggregators The addresses of the Chainlink price feed aggregator for the token
-     */
-    function setPriceAggregators(address[] memory _tokens, address[] memory _aggregators) external onlyOwner {
-        // require(_tokens.length == _aggregators.length, "Inequal array length");
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            // require(_tokens[i] != address(0), "Invalid token address");
-            // require(_aggregators[i] != address(0), "Invalid aggregator address");
-            priceAggregator[_tokens[i]] = _aggregators[i];
-        }
-    }
-
-    /**
      * @notice Creates a new duel with the specified parameters
      * @dev Allows any user to create a duel with a predefined duel duration.
      *      A USDC fee is required for duel creation, and the duel starts after the bootstrap period.
@@ -236,31 +239,22 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         duel.creator = msg.sender;
         duel.topic = _topic;
         duel.createTime = block.timestamp;
-        // duel.startTime will be updated in startDuel function
         duel.expiryTime = block.timestamp + bootstrapPeriod + duelDuration;
-        duel.minWager = _minWager; // let's say 10 USDC, will be stored in 10 * 1e6
+        duel.minWager = _minWager; // let's say 10 USDC, will be stored as 10 * 1e6
         duel.duelStatus = DuelStatus.BootStrapped;
         duel.category = _category;
-        // totalWagerForOption, startPriceToken, duelUsersForOption,  userWager will be updated in joinDuel
         duelIdToOptions[_duelId] = _options;
         creatorToDuelIds[msg.sender].push(_duelId);
 
         emit DuelCreated(
-            msg.sender,
-            _duelId,
-            _topic,
-            _options,
-            block.timestamp,
-            duel.expiryTime,
-            createDuelFee,
-            _category
+            msg.sender, _duelId, _topic, _options, block.timestamp, duel.expiryTime, createDuelFee, _category
         );
 
         return _duelId;
     }
     /**
      * @notice Creates a new crypto duel.
-     * @param _token Allowed token for wagering.
+     * @param _tokenSymbol Allowed token symbol for wagering.
      * @param _options Betting options for the duel.
      * @param _minWager Minimum wager amount.
      * @param _triggerValue Value that triggers the outcome.
@@ -271,7 +265,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      */
 
     function createCryptoDuel(
-        address _token,
+        string memory _tokenSymbol,
         string[] memory _options,
         uint256 _minWager,
         int256 _triggerValue,
@@ -279,7 +273,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         TriggerCondition _triggerCondition,
         DuelDuration _duelDuration
     ) external nonReentrant whenNotPaused returns (string memory) {
-        require(supportedTokens[_token], "Unsupported token");
+        require(supportedTokenSymbols[_tokenSymbol], "Unsupported token");
         // Transfer USDC fee for duel creation
         require(IERC20(usdc).transferFrom(msg.sender, address(this), createDuelFee), "USDC transfer failed");
         totalProtocolFeesGenerated = totalProtocolFeesGenerated + createDuelFee;
@@ -299,23 +293,20 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         string memory _duelId = generateDuelId(msg.sender);
         CryptoDuel storage duel = cryptoDuels[_duelId];
         duel.creator = msg.sender;
-        duel.token = _token;
+        duel.tokenSymbol = _tokenSymbol;
         duel.createTime = block.timestamp;
-        // duel.startTime, startPriceToken will be updated in startDuel function
         duel.expiryTime = block.timestamp + bootstrapPeriod + duelDuration;
-        duel.minWager = _minWager; // let's say 10 USDC, will be stored in 10 * 1e6
+        duel.minWager = _minWager; // let's say 10 USDC, will be stored as 10 * 1e6
         duel.triggerValue = _triggerValue;
         duel.triggerType = _triggerType;
         duel.triggerCondition = _triggerCondition;
         duel.duelStatus = DuelStatus.BootStrapped;
-        // totalWagerForOption, duelUsersForOption,  userWager will be updated in joinDuel
         duelIdToOptions[_duelId] = _options;
-        // duelIdToTokens[_duelId] = _tokens;
         creatorToDuelIds[msg.sender].push(_duelId);
 
         emit CryptoDuelCreated(
             msg.sender,
-            _token,
+            _tokenSymbol,
             _duelId,
             _options,
             block.timestamp,
@@ -368,27 +359,21 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         totalBetsOnOption[_duelId][_optionsIndex][_option] += amountTokenToMint;
 
         emit DuelJoined(
-            _duelId,
-            duel.topic,
-            msg.sender,
-            _amount,
-            address(newOptionToken),
-            amountTokenToMint,
-            block.timestamp
+            _duelId, duel.topic, msg.sender, _amount, address(newOptionToken), amountTokenToMint, block.timestamp
         );
     }
 
     /// @notice Allows a user to join an existing duel by placing a wager on one of the two sides.
     /// @param _duelId The ID of the duel to join.
     /// @param _option The option of the duel.
-    /// @param _token The address of the token to wager (must be either token A or token B of the duel).
+    /// @param _tokenSymbol Allowed token symbol for wagering.
     /// @param _optionsIndex The option index of the duel.
     /// @param _optionPrice The option price of the duel.
     /// @param _amount The amount of the token to wager in the duel.
     function joinCryptoDuel(
         string memory _duelId,
         string memory _option,
-        address _token,
+        string memory _tokenSymbol,
         uint256 _optionsIndex,
         uint256 _optionPrice,
         uint256 _amount
@@ -397,7 +382,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
         require(block.timestamp < duel.expiryTime, "Duel expired");
-        require(supportedTokens[_token], "Invalid token for this duel");
+        require(supportedTokenSymbols[_tokenSymbol], "Invalid token for this duel");
         require(_amount >= duel.minWager, "Wager below minimum");
         // Transfer the wager amount in USDC to the contract
         require(IERC20(usdc).transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
@@ -418,13 +403,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         totalBetsOnOption[_duelId][_optionsIndex][_option] += amountTokenToMint;
 
         emit CryptoDuelJoined(
-            _duelId,
-            msg.sender,
-            _token,
-            _amount,
-            address(newOptionToken),
-            amountTokenToMint,
-            block.timestamp
+            _duelId, msg.sender, _tokenSymbol, _amount, address(newOptionToken), amountTokenToMint, block.timestamp
         );
     }
 
@@ -460,9 +439,15 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @notice Starts the crypto duel with the specified ID.
      * @dev Can only be called by the bot when the contract is not paused. Uses nonReentrant for security.
      * @param _duelId The ID of the duel to start.
+     * @param _startTokenPrice The start price of the token.
      */
 
-    function startCryptoDuel(string memory _duelId) external nonReentrant whenNotPaused onlyBot {
+    function startCryptoDuel(string memory _duelId, int256 _startTokenPrice)
+        external
+        nonReentrant
+        whenNotPaused
+        onlyBot
+    {
         CryptoDuel storage cryptoDuel = cryptoDuels[_duelId];
 
         require(isValidDuelId[_duelId] && cryptoDuel.createTime != 0, "Duel doesn't exist");
@@ -479,13 +464,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             );
         }
 
-        // uint256 duelTokensLength = duelIdToTokens[_duelId].length;
-        // for (uint256 i = 0; i < duelTokensLength; i++) {
-        // startPriceToken[_duelId][
-        //     duelIdToTokens[_duelId][i]
-        // ] = getOraclePrice(duelIdToTokens[_duelId][i]);
-        // }
-        startPriceToken[_duelId][cryptoDuel.token] = getOraclePrice(cryptoDuel.token);
+        startPriceToken[_duelId][cryptoDuel.tokenSymbol] = _startTokenPrice;
         // Record the start time and mark the duel as live
         cryptoDuel.startTime = block.timestamp;
         uint256 duelDuration = cryptoDuel.expiryTime - (cryptoDuel.createTime + bootstrapPeriod);
@@ -536,9 +515,10 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @notice Settles the crypto duel with the given ID.
      * @dev Can only be called by the bot. Uses nonReentrant for security.
      * @param _duelId The ID of the duel to settle.
+     * @param _endTokenPrice The end token price.
      */
 
-    function settleCryptoDuel(string memory _duelId) external nonReentrant onlyBot {
+    function settleCryptoDuel(string memory _duelId, int256 _endTokenPrice) external nonReentrant onlyBot {
         string memory winningOption;
         uint256 totalWagerLooser;
         uint256 optionIndex;
@@ -551,15 +531,14 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
 
         string[] memory _options = duelIdToOptions[_duelId];
 
-        int256 currentOraclePrice = getOraclePrice(cryptoDuel.token);
         if (cryptoDuel.triggerType == TriggerType.Absolute) {
             int256 _triggerValue = cryptoDuel.triggerValue;
             if (cryptoDuel.triggerCondition == TriggerCondition.Above) {
-                winningOption = currentOraclePrice > _triggerValue ? _options[0] : _options[1];
+                winningOption = _endTokenPrice > _triggerValue ? _options[0] : _options[1];
                 optionIndex = 0;
                 totalWagerLooser += totalWagerForOption[_duelId][_options[1]];
             } else if (cryptoDuel.triggerCondition == TriggerCondition.Below) {
-                winningOption = currentOraclePrice > _triggerValue ? _options[1] : _options[0];
+                winningOption = _endTokenPrice > _triggerValue ? _options[1] : _options[0];
                 optionIndex = 1;
                 totalWagerLooser += totalWagerForOption[_duelId][_options[0]];
             }
@@ -567,12 +546,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
 
         // @note - currently support only TriggerType.Percentage
         // if (cryptoDuel.triggerType == TriggerType.Percentage) {
-        // }
-
-        // for (uint256 i = 0; i < _options.length; i++) {
-        //     if (i != _optionIndex) {
-        //         totalWagerLooser += totalWagerForOption[_duelId][_options[i]];
-        //     }
         // }
 
         uint256 protocolFee = (totalWagerLooser * protocolFeePercentage) / 10000;
@@ -583,15 +556,9 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
 
         _distributeWinnings(_duelId, optionIndex, winningOption, payout);
 
-        // if (_duelCategory != DuelCategory.Crypto) {
-        //     totalCreatorFeeEarned[duels[_duelId].creator] += creatorFee;
-        //     duels[_duelId].duelStatus = DuelStatus.Settled;
-        // } else {
         totalCreatorFeeEarned[cryptoDuels[_duelId].creator] += creatorFee;
         cryptoDuels[_duelId].duelStatus = DuelStatus.Settled;
-        // }
 
-        // Emit event indicating that the duel has been settled
         emit DuelSettled(_duelId, winningOption, optionIndex);
     }
 
@@ -631,8 +598,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         uint256 optionsLength = duelIdToOptions[_duelId].length;
         for (uint256 i = 0; i < optionsLength; i++) {
             require(
-                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold,
-                "Threshold met, cannot cancel"
+                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold, "Threshold met, cannot cancel"
             );
         }
         if (_duelCategory != DuelCategory.Crypto) {
@@ -668,8 +634,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         uint256 optionsLength = duelIdToOptions[_duelId].length;
         for (uint256 i = 0; i < optionsLength; i++) {
             require(
-                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold,
-                "Threshold met, cannot refund"
+                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold, "Threshold met, cannot refund"
             );
             // Refund users who wagered
             uint256 wager = userWager[msg.sender][_duelId][duelIdToOptions[_duelId][i]];
@@ -680,39 +645,11 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             }
         }
     }
-
-    /// @notice Checks whether threshold has been met or not for a duel
-    /// @param _duelId The unique ID of the duel to be cancelled
-    function checkIfThresholdMet(string calldata _duelId) external view returns (bool) {
-        uint256 optionsLength = duelIdToOptions[_duelId].length;
-        for (uint256 i = 0; i < optionsLength; i++) {
-            if (totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold) {
-                return false; // As soon as any value is below the threshold, return false
-            }
-        }
-        return true; // If no values are below the threshold, return true
-    }
-    /**
-     * @notice Retrieves the user's share for a specific option in an external duel.
-     * @dev This function allows external contracts or users to query the share of a user for a given option in a duel.
-     * @param _duelId The unique ID of the duel.
-     * @param _optionIndex The index of the option in the duel for which the share is being queried.
-     * @param _user The address of the user whose option share is being queried.
-     * @return optionShare The share of the user for the specified option in the duel.
-     */
-
-    function getUserDuelOptionShare(
-        string memory _duelId,
-        uint256 _optionIndex,
-        address _user
-    ) external view returns (uint256 optionShare) {
-        return _getUserDuelOptionShare(_duelId, _optionIndex, _user);
-    }
-
     /**
      * @notice Withdraws earnings for the caller.
      * @param _amount The amount to withdraw.
      */
+
     function withdrawEarnings(uint256 _amount) external {
         uint256 _allTimeEarnings = allTimeEarnings[msg.sender];
         require(_amount <= _allTimeEarnings, "Amount should be less than equal earnings");
@@ -754,42 +691,23 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     receive() external payable {}
 
     // // ========================== View Functions ========================== //
-
-    /**
-     * @notice Gets the wager amount deposited by a user in a duel.
-     * @param _duelId The ID of the duel.
-     * @param _user The address of the user whose wager amount is being queried.
-     */
-    function getWagerAmountDeposited(
-        string memory _duelId,
-        address _user
-    ) public view returns (uint256 _optionsLength, string[] memory _options, uint256[] memory _wagerAmountsForOptions) {
-        _optionsLength = duelIdToOptions[_duelId].length;
-        _options = duelIdToOptions[_duelId];
-        _wagerAmountsForOptions = new uint256[](_optionsLength);
-        for (uint256 i = 0; i < _optionsLength; i++) {
-            _wagerAmountsForOptions[i] = userWager[_user][_duelId][_options[i]];
+    /// @notice Checks whether threshold has been met or not for a duel
+    /// @param _duelId The unique ID of the duel to be cancelled
+    function checkIfThresholdMet(string calldata _duelId) public view returns (bool) {
+        uint256 optionsLength = duelIdToOptions[_duelId].length;
+        for (uint256 i = 0; i < optionsLength; i++) {
+            if (totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold) {
+                return false; // As soon as any value is below the threshold, return false
+            }
         }
+        return true; // If no values are below the threshold, return true
     }
 
-    /**
-     * @notice Gets the price from the oracle for a specific token.
-     * @param _token The address of the token.
-     * @return int256 The latest price from the oracle, in 8 decimals.
-     */
-    function getOraclePrice(address _token) public view returns (int256) {
-        address aggregator = priceAggregator[_token];
-        require(aggregator != address(0), "Price aggregator not set");
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(aggregator);
-        (, int256 price, , , ) = priceFeed.latestRoundData();
-        return price;
-    }
     /**
      * @notice Retrieves the duel IDs created by a specific address.
      * @param _address The address of the duel creator.
      * @return An array of duel IDs associated with the creator.
      */
-
     function getCreatorToDuelIds(address _address) public view returns (string[] memory) {
         return creatorToDuelIds[_address];
     }
@@ -802,44 +720,92 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     function getDuelIdToOptions(string memory _duelId) public view returns (string[] memory) {
         return duelIdToOptions[_duelId];
     }
-    /**
-     * @notice Retrieves the allowed tokens for a specific duel.
-     * @param _duelId The ID of the duel.
-     * @return A token address for the specified duel.
-     */
 
-    function getDuelIdToToken(string memory _duelId) public view returns (address) {
-        CryptoDuel memory cryptoDuel = cryptoDuels[_duelId];
-        return cryptoDuel.token;
+    /**
+     * @notice Retrieves the betting options for a specific duel.
+     * @param _duelId The ID of the duel.
+     * @param _optionIndex The index of the option token.
+     * @return The option token address
+     */
+    function getOptionIndexToOptionToken(string memory _duelId, uint256 _optionIndex) public view returns (address) {
+        return optionIndexToOptionToken[_duelId][_optionIndex];
     }
+
     /**
      * @notice Retrieves the users who have chosen a specific option in a duel.
      * @param _duelId The ID of the duel.
      * @param _option The selected option.
      * @return An array of addresses of users who bet on the specified option.
      */
-
-    function getDuelUsersForOption(
-        string memory _duelId,
-        string memory _option
-    ) public view returns (address[] memory) {
+    function getDuelUsersForOption(string memory _duelId, string memory _option)
+        public
+        view
+        returns (address[] memory)
+    {
         return duelUsersForOption[_duelId][_option];
+    }
+
+    /**
+     * @notice Retrieves the user's share for a specific option in an external duel.
+     * @dev This function allows external contracts or users to query the share of a user for a given option in a duel.
+     * @param _duelId The unique ID of the duel.
+     * @param _optionIndex The index of the option in the duel for which the share is being queried.
+     * @param _user The address of the user whose option share is being queried.
+     * @return optionShare The share of the user for the specified option in the duel.
+     */
+    function getUserDuelOptionShare(string memory _duelId, uint256 _optionIndex, address _user)
+        public
+        view
+        returns (uint256 optionShare)
+    {
+        return _getUserDuelOptionShare(_duelId, _optionIndex, _user);
+    }
+
+    /**
+     * @notice Gets the wager amount deposited by a user in a duel.
+     * @param _duelId The ID of the duel.
+     * @param _user The address of the user whose wager amount is being queried.
+     */
+    function getWagerAmountDeposited(string memory _duelId, address _user)
+        public
+        view
+        returns (uint256 _optionsLength, string[] memory _options, uint256[] memory _wagerAmountsForOptions)
+    {
+        _optionsLength = duelIdToOptions[_duelId].length;
+        _options = duelIdToOptions[_duelId];
+        _wagerAmountsForOptions = new uint256[](_optionsLength);
+        for (uint256 i = 0; i < _optionsLength; i++) {
+            _wagerAmountsForOptions[i] = userWager[_user][_duelId][_options[i]];
+        }
+    }
+    /**
+     * @notice Retrieves the allowed tokens for a specific duel.
+     * @param _duelId The ID of the duel.
+     * @return A token address for the specified duel.
+     */
+
+    function getDuelIdToTokenSymbol(string memory _duelId) public view returns (string memory) {
+        CryptoDuel memory cryptoDuel = cryptoDuels[_duelId];
+        return cryptoDuel.tokenSymbol;
     }
 
     /**
      * @notice Calculates the price delta for tokens in a duel.
      * @param _duelId The duel Id.
-     * @param _token The token address.
+     * @param _tokenSymbol The token symbol.
+     * @param _currentOraclePrice The current oracle price.
      * @return _endPrice The end price of token.
      * @return _startPrice The start price of token.
      * @return _delta The price change of token.
      * @return _isEndPriceGreater Returns true if end price greater than stat price.
      */
-    function getPriceDelta(
-        string memory _duelId,
-        address _token
-    ) public view returns (int256 _endPrice, int256 _startPrice, int256 _delta, bool _isEndPriceGreater) {
-        (_endPrice, _startPrice, _delta, _isEndPriceGreater) = _getPriceDelta(_duelId, _token);
+    function getPriceDelta(string memory _duelId, string memory _tokenSymbol, int256 _currentOraclePrice)
+        public
+        view
+        returns (int256 _endPrice, int256 _startPrice, int256 _delta, bool _isEndPriceGreater)
+    {
+        (_endPrice, _startPrice, _delta, _isEndPriceGreater) =
+            _getPriceDelta(_duelId, _tokenSymbol, _currentOraclePrice);
     }
 
     // ========================== Internal Functions ========================== //
@@ -907,16 +873,9 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         for (uint256 i = 0; i < winners.length; i++) {
             address winner = winners[i];
             uint256 winnerShare = _getUserDuelOptionShare(_duelId, _optionIndex, winner);
-            // uint256 winnerWager = userWager[winner][_duelId][_winningOption];
-            // uint256 winnerShare = (winnerWager * 1e18) / totalWinningWagers;
             uint256 winnerWinningTokenAmount = (winnerShare * winningOptionPoolBalance) / 1e18;
 
             allTimeEarnings[winner] += winnerWinningTokenAmount;
-            // Transfer the winning token amount to the winner
-            // require(
-            //     IERC20(usdc).transfer(winner, (winnerWager + winnerWinningTokenAmount)),
-            //     "Winning token transfer failed"
-            // );
         }
     }
     /**
@@ -928,11 +887,11 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @return optionShare The share of the user for the specified option in the duel.
      */
 
-    function _getUserDuelOptionShare(
-        string memory _duelId,
-        uint256 _optionIndex,
-        address _user
-    ) internal view returns (uint256 optionShare) {
+    function _getUserDuelOptionShare(string memory _duelId, uint256 _optionIndex, address _user)
+        internal
+        view
+        returns (uint256 optionShare)
+    {
         address optionToken = optionIndexToOptionToken[_duelId][_optionIndex];
         uint256 optionTokenBalance = IERC20(optionToken).balanceOf(_user);
         uint256 totalOptionTokenSupply = IERC20(optionToken).totalSupply();
@@ -942,19 +901,22 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /**
      * @notice Gets the price delta of both tokens in a duel using their oracle data.
      * @param _duelId The duel ID.
-     * @param _token The token address.
+     * @param _tokenSymbol The token symbol.
+     * @param _currentOraclePrice The current oracle price.
      * @return endPrice The end price of token.
      * @return startPrice The start price of token.
      * @return delta The price change of token.
      * @return isEndPriceGreater Returns true if end price greater than stat price.
      */
-    function _getPriceDelta(
-        string memory _duelId,
-        address _token
-    ) internal view returns (int256 endPrice, int256 startPrice, int256 delta, bool isEndPriceGreater) {
-        require(supportedTokens[_token], "Invalid supported tokens");
-        endPrice = getOraclePrice(_token);
-        startPrice = startPriceToken[_duelId][_token];
+    function _getPriceDelta(string memory _duelId, string memory _tokenSymbol, int256 _currentOraclePrice)
+        internal
+        view
+        returns (int256 endPrice, int256 startPrice, int256 delta, bool isEndPriceGreater)
+    {
+        require(supportedTokenSymbols[_tokenSymbol], "Invalid supported tokens");
+        // endPrice = getOraclePrice(_token);
+        endPrice = _currentOraclePrice;
+        startPrice = startPriceToken[_duelId][_tokenSymbol];
         delta = endPrice - startPrice;
         isEndPriceGreater = endPrice > startPrice;
     }
