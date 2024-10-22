@@ -52,7 +52,7 @@ const config: HardhatUserConfig = {
         clear: true,
         flat: true,
         spacing: 4,
-        only: ["FlashDuels", "FLASHUSDC", "FlashDuelsMarketplace"]
+        only: ["FlashDuels", "FLASHUSDC", "FlashDuelsMarketplace", "OptionToken"]
     },
     sourcify: {
         enabled: false

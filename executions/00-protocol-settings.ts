@@ -25,14 +25,9 @@ const main = async () => {
     const pythSupportedTokens: any = []
     const pythSupportedTokensAggrgators: any = []
 
-    tx = await flashDuels.setSupportedTokens(pythSupportedTokens)
-    await tx.wait(1)
-    console.log("Set Pyth Supported tokens")
-
-    tx = await flashDuels.setPriceAggregators(pythSupportedTokens, pythSupportedTokensAggrgators)
-    await tx.wait(1)
-
-    console.log("Set Pyth Supported tokens aggrgator")
+    // tx = await flashDuels.setSupportedTokenSymbols(pythSupportedTokens)
+    // await tx.wait(1)
+    // console.log("Set Pyth Supported tokens")
 
     tx = await flashDuels.setProtocolAddress(networkConfig[networkName].protocolTreasury)
     await tx.wait(1)

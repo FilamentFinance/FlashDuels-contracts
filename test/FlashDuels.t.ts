@@ -62,7 +62,7 @@ describe("FlashDuels Contract", function () {
 
         // Add supported tokens
         // await flashDuels.setSupportedTokenSymbols([tokenA.target, tokenB.target])
-        await flashDuels.setSupportedTokenSymbols(["tokenA", "tokenB"])
+        // await flashDuels.setSupportedTokenSymbols(["tokenA", "tokenB"])
         // await flashDuels.setSupportedToken(tokenB.target);
 
         // await flashDuels.setPriceAggregators([tokenA.target, tokenB.target], [mockOracleA.target, mockOracleB.target])
@@ -535,19 +535,19 @@ describe("FlashDuels Contract", function () {
             expect(duel.minWager).to.equal(minWager)
         })
 
-        it("should fail if unsupported tokens are provided", async function () {
-            const duelDuration = 0 // 3 hours
-            const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            const RandomToken = await ethers.getContractFactory("MockERC20")
-            randomToken = await RandomToken.deploy("Random Token", "RND", 18)
-            await randomToken.waitForDeployment()
+        // it("should fail if unsupported tokens are provided", async function () {
+        //     const duelDuration = 0 // 3 hours
+        //     const minWager = ethers.parseUnits("10", 6) // 10 USDC
+        //     const RandomToken = await ethers.getContractFactory("MockERC20")
+        //     randomToken = await RandomToken.deploy("Random Token", "RND", 18)
+        //     await randomToken.waitForDeployment()
 
-            await expect(
-                flashDuels
-                    .connect(addr1)
-                    .createCryptoDuel(randomToken.target, ["Yes", "No"], minWager, 6500000000000, 0, 0, duelDuration)
-            ).to.be.revertedWith("Unsupported token")
-        })
+        //     await expect(
+        //         flashDuels
+        //             .connect(addr1)
+        //             .createCryptoDuel(randomToken.target, ["Yes", "No"], minWager, 6500000000000, 0, 0, duelDuration)
+        //     ).to.be.revertedWith("Unsupported token")
+        // })
     })
 
     describe("Crypto Duel Joining", function () {
@@ -632,24 +632,17 @@ describe("FlashDuels Contract", function () {
             ).to.be.revertedWithCustomError(flashDuels, "FlashDuels__InvalidBot")
         })
 
-        it("should fail if token is not part of the duel", async function () {
-            const amount = ethers.parseUnits("60", 6)
-            const optionPrice = ethers.parseUnits("10", 6)
+        // it("should fail if token is not part of the duel", async function () {
+        //     const amount = ethers.parseUnits("60", 6)
+        //     const optionPrice = ethers.parseUnits("10", 6)
+        //     const randomToken = "randomToken"
+        //     const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address)
+        //     expect(duelIds.length).to.equal(1)
 
-            // const RandomToken = await ethers.getContractFactory("MockERC20")
-            // const randomToken = await RandomToken.deploy("Random Token", "RND", 6)
-            // await randomToken.waitForDeployment()
-
-            // await randomToken.connect(owner).mint(addr2.address, amount)
-            // await randomToken.connect(addr2).approve(flashDuels.target, amount)
-            const randomToken = "randomToken"
-            const duelIds = await flashDuels.getCreatorToDuelIds(addr1.address)
-            expect(duelIds.length).to.equal(1)
-
-            await expect(
-                flashDuels.connect(addr2).joinCryptoDuel(duelIds[0], "No", randomToken, 1, optionPrice, amount)
-            ).to.be.revertedWith("Invalid token for this duel")
-        })
+        //     await expect(
+        //         flashDuels.connect(addr2).joinCryptoDuel(duelIds[0], "No", randomToken, 1, optionPrice, amount)
+        //     ).to.be.revertedWith("Invalid token for this duel")
+        // })
 
         it("should fail if wager is below minimum", async function () {
             const amount = ethers.parseUnits("5", 6) // 5 USDC

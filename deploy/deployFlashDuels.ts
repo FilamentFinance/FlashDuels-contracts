@@ -36,7 +36,7 @@ const main = async () => {
     console.log("FlashDuels deployed to:", flashDuelsAddress.target)
 
     const FlashDuelsMarketplace = await ethers.getContractFactory("FlashDuelsMarketplace")
-    const flashDuelsMarketplace = await upgrades.deployProxy(FlashDuelsMarketplace, [usdAddress])
+    const flashDuelsMarketplace = await upgrades.deployProxy(FlashDuelsMarketplace, [usdAddress, flashDuelsAddress.target, networkConfig[networkName].protocolTreasury])
     const flashDuelsMarketplaceAddress = await flashDuelsMarketplace.waitForDeployment()
     console.log("FlashDuelsMarketplace deployed to:", flashDuelsMarketplaceAddress.target)
 

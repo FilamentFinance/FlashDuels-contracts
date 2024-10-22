@@ -1433,19 +1433,6 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "string[]",
-                "name": "_tokenSymbols",
-                "type": "string[]"
-            }
-        ],
-        "name": "removeSupportedTokenSymbols",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
         "inputs": [],
         "name": "renounceOwnership",
         "outputs": [],
@@ -1500,19 +1487,6 @@
             }
         ],
         "name": "setProtocolAddress",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string[]",
-                "name": "_tokenSymbols",
-                "type": "string[]"
-            }
-        ],
-        "name": "setSupportedTokenSymbols",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1603,25 +1577,6 @@
                 "internalType": "int256",
                 "name": "",
                 "type": "int256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
-            }
-        ],
-        "name": "supportedTokenSymbols",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
             }
         ],
         "stateMutability": "view",

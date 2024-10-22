@@ -34,7 +34,7 @@ export const networkConfig: networkConfigInfo = {
         goldskySlug: "sei-testnet",
         deployer: "0x91C2352245065B9e5d2514a313b60c1f01BfF60F",
         usdcAdmin: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
-        bot: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
+        bot: "0x2Eb671E6e0cd965A79A80caF35c5123b7a5D8ebb",
         protocolTreasury: "0x81F20658e0265d89f4Cca7BAf8FB3933B4FcA6Be"
     },
     seiMainnet: {

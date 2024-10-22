@@ -72,8 +72,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     mapping(uint256 => string) public optionIndexToOption;
     /// @notice Mapping to track total earnings for participants
     mapping(address => uint256) public allTimeEarnings;
-    /// @notice Mapping of supported token symbol (specifically for pyth)
-    mapping(string => bool) public supportedTokenSymbols;
     /// @notice Mapping to track valid duel IDs to prevent duplicates
     mapping(string => bool) public isValidDuelId;
     /// @notice Mapping of duel IDs to duel information
@@ -130,30 +128,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /// @dev Can only be called by the owner to resume normal contract operations
     function unpause() external onlyOwner {
         _unpause();
-    }
-
-    /**
-     * @notice Marks a token symbol as supported in the contract, (specifically for Pyth Oracle)
-     * @dev Can only be called by the owner to add tokens that can be used in duels
-     * @param _tokenSymbols The addresses of the tokens to be supported
-     */
-    function setSupportedTokenSymbols(string[] memory _tokenSymbols) external onlyOwner {
-        uint256 length = _tokenSymbols.length;
-        for (uint256 i = 0; i < length; i++) {
-            supportedTokenSymbols[_tokenSymbols[i]] = true;
-        }
-    }
-
-    /**
-     * @notice Removes from the supported token symbol in the contract (specifically for Pyth oracle)
-     * @dev Can only be called by the owner to add tokens that can be used in duels
-     * @param _tokenSymbols The addresses of the tokens to be removed
-     */
-    function removeSupportedTokenSymbols(string[] memory _tokenSymbols) external onlyOwner {
-        uint256 length = _tokenSymbols.length;
-        for (uint256 i = 0; i < length; i++) {
-            supportedTokenSymbols[_tokenSymbols[i]] = false;
-        }
     }
 
     /**
@@ -273,7 +247,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         TriggerCondition _triggerCondition,
         DuelDuration _duelDuration
     ) external nonReentrant whenNotPaused returns (string memory) {
-        require(supportedTokenSymbols[_tokenSymbol], "Unsupported token");
         // Transfer USDC fee for duel creation
         require(IERC20(usdc).transferFrom(msg.sender, address(this), createDuelFee), "USDC transfer failed");
         totalProtocolFeesGenerated = totalProtocolFeesGenerated + createDuelFee;
@@ -382,7 +355,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
         require(block.timestamp < duel.expiryTime, "Duel expired");
-        require(supportedTokenSymbols[_tokenSymbol], "Invalid token for this duel");
         require(_amount >= duel.minWager, "Wager below minimum");
         // Transfer the wager amount in USDC to the contract
         require(IERC20(usdc).transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
@@ -913,8 +885,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         view
         returns (int256 endPrice, int256 startPrice, int256 delta, bool isEndPriceGreater)
     {
-        require(supportedTokenSymbols[_tokenSymbol], "Invalid supported tokens");
-        // endPrice = getOraclePrice(_token);
         endPrice = _currentOraclePrice;
         startPrice = startPriceToken[_duelId][_tokenSymbol];
         delta = endPrice - startPrice;

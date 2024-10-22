@@ -45,7 +45,7 @@ describe("FlashDuels Marketplace Contract", function () {
         const flashDuelsProxy = await upgrades.deployProxy(FlashDuelsFactory, [usdAddress, bot.address])
         flashDuels = await flashDuelsProxy.waitForDeployment()
 
-        await flashDuels.setSupportedTokenSymbols(["tokenA", "tokenB"])
+        // await flashDuels.setSupportedTokenSymbols(["tokenA", "tokenB"])
 
         // Deploy FlashDuelsMarketplace
         const FlashDuelsMarketplace = await ethers.getContractFactory("FlashDuelsMarketplace")
