@@ -203,10 +203,11 @@ event RefundIssued(string duelId, string option, address recipient, uint256 amou
 event DuelCancelled(string duelId, uint256 duelStartTime, uint256 duelCancelTime);
 
 interface IFlashDuels {
+    function getDuel(string memory duelId) external view returns (Duel memory);
     function duels(string memory duelId) external view returns (Duel memory);
     function cryptoDuels(string memory cryptoDuelId) external view returns (CryptoDuel memory);
-    function getOptionIndexToOptionToken(string memory cryptoDuelId, uint256 optionIndex)
-        external
-        view
-        returns (address);
+    function getOptionIndexToOptionToken(
+        string memory cryptoDuelId,
+        uint256 optionIndex
+    ) external view returns (address);
 }

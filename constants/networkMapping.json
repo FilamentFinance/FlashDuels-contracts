@@ -8,5 +8,10 @@
         "FLASHUSDC": "0x33C9DECe45b993ff4bb56a34c70E6c93e5d8B68C",
         "FlashDuels": "0xa19058FE6dAc39602e749b8efe3Dd9e8a7a43d7D",
         "FlashDuelsMarketplace": "0xb4299055066E256fBdB1a18b309fBf7466D6d3BD"
+    },
+    "localhost": {
+        "FLASHUSDC": "0x33C9DECe45b993ff4bb56a34c70E6c93e5d8B68C",
+        "FlashDuels": "0xa19058FE6dAc39602e749b8efe3Dd9e8a7a43d7D",
+        "FlashDuelsMarketplace": "0xb4299055066E256fBdB1a18b309fBf7466D6d3BD"
     }
 }
