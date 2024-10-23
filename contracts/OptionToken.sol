@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract OptionToken is ERC20 {
-
     /// @notice Thrown when the flashDuels address is invalid
     error OptionToken__InvalidFlashDuels();
 

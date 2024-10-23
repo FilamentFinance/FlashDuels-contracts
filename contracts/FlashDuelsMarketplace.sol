@@ -14,12 +14,7 @@ error FlashDuelsMarketplace__DuelEnded(string duelId);
 /// @title Flash Duels Marketplace Contract
 /// @notice This contract allows users to create, cancel, and purchase sales of tokens tied to Flash Duels.
 /// @dev Implements ERC20 token functionality with pausable and upgradeable features.
-contract FlashDuelsMarketplace is
-    UUPSUpgradeable,
-    OwnableUpgradeable,
-    PausableUpgradeable,
-    ReentrancyGuardUpgradeable
-{
+contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20 for IERC20;
 
     struct Sale {
@@ -46,13 +41,13 @@ contract FlashDuelsMarketplace is
     /// @param token The address of the token being sold
     /// @param quantity The quantity of tokens being sold
     /// @param totalPrice The total price for the sale
-    event SaleCreated(uint256 saleId, address seller, address token, uint256 quantity, uint256 totalPrice);
+    event SaleCreated(uint256 saleId, address indexed seller, address token, uint256 quantity, uint256 totalPrice);
 
     /// @notice Emitted when a sale is cancelled
     /// @param saleId The ID of the sale
     /// @param seller The address of the seller
     /// @param token The address of the token for the cancelled sale
-    event SaleCancelled(uint256 saleId, address seller, address token);
+    event SaleCancelled(uint256 saleId, address indexed seller, address token);
 
     /// @notice Emitted when tokens are purchased
     /// @param buyer The address of the buyer
@@ -60,7 +55,13 @@ contract FlashDuelsMarketplace is
     /// @param token The address of the token being purchased
     /// @param quantity The quantity of tokens purchased
     /// @param totalPrice The total price paid by the buyer
-    event TokensPurchased(address buyer, address seller, address token, uint256 quantity, uint256 totalPrice);
+    event TokensPurchased(
+        address indexed buyer,
+        address indexed seller,
+        address token,
+        uint256 quantity,
+        uint256 totalPrice
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -113,9 +114,13 @@ contract FlashDuelsMarketplace is
     /// @param optionIndex The index of the option
     /// @param quantity The quantity of tokens to be sold
     /// @param totalPrice The total price for the sale
-    function sell(address token, string memory duelId, uint256 optionIndex, uint256 quantity, uint256 totalPrice)
-        external
-    {
+    function sell(
+        address token,
+        string memory duelId,
+        uint256 optionIndex,
+        uint256 quantity,
+        uint256 totalPrice
+    ) external {
         // tokenToDuelId[token] = duelId;
         require(token == flashDuels.getOptionIndexToOptionToken(duelId, optionIndex), "Invalid option");
         require(quantity > 0, "Amount must be greater than zero");
@@ -143,17 +148,17 @@ contract FlashDuelsMarketplace is
     /// @param duelId The duel id of the duel.
     /// @param saleId The ID of the sale to buy from
     function buy(address token, string memory duelId, uint256 saleId) external {
-        Duel memory duel = flashDuels.duels(duelId);
+        Duel memory duel = flashDuels.getDuel(duelId);
         if (duel.duelStatus == DuelStatus.Settled || duel.duelStatus == DuelStatus.Cancelled) {
             revert FlashDuelsMarketplace__DuelEnded(duelId);
         }
         Sale memory sale = sales[token][saleId];
         IERC20 erc20 = IERC20(token);
-
         if (erc20.allowance(sale.seller, address(this)) < sale.quantity && sale.strike <= maxStrikes) {
             sale.strike += 1;
             return;
         }
+
         if (sale.strike > maxStrikes) {
             delete sales[token][saleId];
             emit SaleCancelled(saleId, msg.sender, token);

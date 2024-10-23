@@ -108,7 +108,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "creator",
                 "type": "address"
@@ -124,12 +124,6 @@
                 "internalType": "string",
                 "name": "duelId",
                 "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string[]",
-                "name": "options",
-                "type": "string[]"
             },
             {
                 "indexed": false,
@@ -187,7 +181,7 @@
                 "type": "string"
             },
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "participant",
                 "type": "address"
@@ -255,7 +249,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "creator",
                 "type": "address"
@@ -271,12 +265,6 @@
                 "internalType": "string",
                 "name": "topic",
                 "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string[]",
-                "name": "options",
-                "type": "string[]"
             },
             {
                 "indexed": false,
@@ -322,7 +310,7 @@
                 "type": "string"
             },
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "participant",
                 "type": "address"
@@ -460,7 +448,7 @@
                 "type": "string"
             },
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "recipient",
                 "type": "address"
@@ -505,7 +493,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "user",
                 "type": "address"
@@ -524,7 +512,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "user",
                 "type": "address"
@@ -543,7 +531,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "user",
                 "type": "address"
@@ -980,6 +968,67 @@
                 "internalType": "string[]",
                 "name": "",
                 "type": "string[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            }
+        ],
+        "name": "getDuel",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "topic",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "createTime",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "startTime",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "expiryTime",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "minWager",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "enum DuelStatus",
+                        "name": "duelStatus",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "enum DuelCategory",
+                        "name": "category",
+                        "type": "uint8"
+                    }
+                ],
+                "internalType": "struct Duel",
+                "name": "",
+                "type": "tuple"
             }
         ],
         "stateMutability": "view",

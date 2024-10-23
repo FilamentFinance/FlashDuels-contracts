@@ -7,26 +7,7 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {OptionToken} from "./OptionToken.sol";
-import {
-    Duel,
-    CryptoDuel,
-    DuelCategory,
-    DuelDuration,
-    TriggerType,
-    TriggerCondition,
-    DuelStatus,
-    DuelCreated,
-    CryptoDuelCreated,
-    DuelJoined,
-    CryptoDuelJoined,
-    DuelStarted,
-    DuelSettled,
-    DuelCancelled,
-    RefundIssued,
-    WithdrawEarning,
-    WithdrawCreatorEarning,
-    WithdrawProtocolFee
-} from "./interfaces/IFlashDuels.sol";
+import {Duel, CryptoDuel, DuelCategory, DuelDuration, TriggerType, TriggerCondition, DuelStatus, DuelCreated, CryptoDuelCreated, DuelJoined, CryptoDuelJoined, DuelStarted, DuelSettled, DuelCancelled, RefundIssued, WithdrawEarning, WithdrawCreatorEarning, WithdrawProtocolFee} from "./interfaces/IFlashDuels.sol";
 
 /// @title FlashDuels
 /// @notice This contract allows users to create and participate in duels by betting on the options.
@@ -220,9 +201,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         duelIdToOptions[_duelId] = _options;
         creatorToDuelIds[msg.sender].push(_duelId);
 
-        emit DuelCreated(
-            msg.sender, _duelId, _topic, _options, block.timestamp, duel.expiryTime, createDuelFee, _category
-        );
+        emit DuelCreated(msg.sender, _duelId, _topic, block.timestamp, duel.expiryTime, createDuelFee, _category);
 
         return _duelId;
     }
@@ -281,7 +260,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             msg.sender,
             _tokenSymbol,
             _duelId,
-            _options,
             block.timestamp,
             duel.expiryTime,
             createDuelFee,
@@ -332,7 +310,13 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         totalBetsOnOption[_duelId][_optionsIndex][_option] += amountTokenToMint;
 
         emit DuelJoined(
-            _duelId, duel.topic, msg.sender, _amount, address(newOptionToken), amountTokenToMint, block.timestamp
+            _duelId,
+            duel.topic,
+            msg.sender,
+            _amount,
+            address(newOptionToken),
+            amountTokenToMint,
+            block.timestamp
         );
     }
 
@@ -375,7 +359,13 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         totalBetsOnOption[_duelId][_optionsIndex][_option] += amountTokenToMint;
 
         emit CryptoDuelJoined(
-            _duelId, msg.sender, _tokenSymbol, _amount, address(newOptionToken), amountTokenToMint, block.timestamp
+            _duelId,
+            msg.sender,
+            _tokenSymbol,
+            _amount,
+            address(newOptionToken),
+            amountTokenToMint,
+            block.timestamp
         );
     }
 
@@ -414,12 +404,10 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @param _startTokenPrice The start price of the token.
      */
 
-    function startCryptoDuel(string memory _duelId, int256 _startTokenPrice)
-        external
-        nonReentrant
-        whenNotPaused
-        onlyBot
-    {
+    function startCryptoDuel(
+        string memory _duelId,
+        int256 _startTokenPrice
+    ) external nonReentrant whenNotPaused onlyBot {
         CryptoDuel storage cryptoDuel = cryptoDuels[_duelId];
 
         require(isValidDuelId[_duelId] && cryptoDuel.createTime != 0, "Duel doesn't exist");
@@ -570,7 +558,8 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         uint256 optionsLength = duelIdToOptions[_duelId].length;
         for (uint256 i = 0; i < optionsLength; i++) {
             require(
-                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold, "Threshold met, cannot cancel"
+                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold,
+                "Threshold met, cannot cancel"
             );
         }
         if (_duelCategory != DuelCategory.Crypto) {
@@ -606,7 +595,8 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         uint256 optionsLength = duelIdToOptions[_duelId].length;
         for (uint256 i = 0; i < optionsLength; i++) {
             require(
-                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold, "Threshold met, cannot refund"
+                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold,
+                "Threshold met, cannot refund"
             );
             // Refund users who wagered
             uint256 wager = userWager[msg.sender][_duelId][duelIdToOptions[_duelId][i]];
@@ -709,11 +699,10 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @param _option The selected option.
      * @return An array of addresses of users who bet on the specified option.
      */
-    function getDuelUsersForOption(string memory _duelId, string memory _option)
-        public
-        view
-        returns (address[] memory)
-    {
+    function getDuelUsersForOption(
+        string memory _duelId,
+        string memory _option
+    ) public view returns (address[] memory) {
         return duelUsersForOption[_duelId][_option];
     }
 
@@ -725,11 +714,11 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @param _user The address of the user whose option share is being queried.
      * @return optionShare The share of the user for the specified option in the duel.
      */
-    function getUserDuelOptionShare(string memory _duelId, uint256 _optionIndex, address _user)
-        public
-        view
-        returns (uint256 optionShare)
-    {
+    function getUserDuelOptionShare(
+        string memory _duelId,
+        uint256 _optionIndex,
+        address _user
+    ) public view returns (uint256 optionShare) {
         return _getUserDuelOptionShare(_duelId, _optionIndex, _user);
     }
 
@@ -738,11 +727,10 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @param _duelId The ID of the duel.
      * @param _user The address of the user whose wager amount is being queried.
      */
-    function getWagerAmountDeposited(string memory _duelId, address _user)
-        public
-        view
-        returns (uint256 _optionsLength, string[] memory _options, uint256[] memory _wagerAmountsForOptions)
-    {
+    function getWagerAmountDeposited(
+        string memory _duelId,
+        address _user
+    ) public view returns (uint256 _optionsLength, string[] memory _options, uint256[] memory _wagerAmountsForOptions) {
         _optionsLength = duelIdToOptions[_duelId].length;
         _options = duelIdToOptions[_duelId];
         _wagerAmountsForOptions = new uint256[](_optionsLength);
@@ -761,6 +749,10 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         return cryptoDuel.tokenSymbol;
     }
 
+    function getDuel(string memory _duelId) public view returns (Duel memory) {
+        return duels[_duelId];
+    }
+
     /**
      * @notice Calculates the price delta for tokens in a duel.
      * @param _duelId The duel Id.
@@ -771,13 +763,16 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @return _delta The price change of token.
      * @return _isEndPriceGreater Returns true if end price greater than stat price.
      */
-    function getPriceDelta(string memory _duelId, string memory _tokenSymbol, int256 _currentOraclePrice)
-        public
-        view
-        returns (int256 _endPrice, int256 _startPrice, int256 _delta, bool _isEndPriceGreater)
-    {
-        (_endPrice, _startPrice, _delta, _isEndPriceGreater) =
-            _getPriceDelta(_duelId, _tokenSymbol, _currentOraclePrice);
+    function getPriceDelta(
+        string memory _duelId,
+        string memory _tokenSymbol,
+        int256 _currentOraclePrice
+    ) public view returns (int256 _endPrice, int256 _startPrice, int256 _delta, bool _isEndPriceGreater) {
+        (_endPrice, _startPrice, _delta, _isEndPriceGreater) = _getPriceDelta(
+            _duelId,
+            _tokenSymbol,
+            _currentOraclePrice
+        );
     }
 
     // ========================== Internal Functions ========================== //
@@ -859,11 +854,11 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @return optionShare The share of the user for the specified option in the duel.
      */
 
-    function _getUserDuelOptionShare(string memory _duelId, uint256 _optionIndex, address _user)
-        internal
-        view
-        returns (uint256 optionShare)
-    {
+    function _getUserDuelOptionShare(
+        string memory _duelId,
+        uint256 _optionIndex,
+        address _user
+    ) internal view returns (uint256 optionShare) {
         address optionToken = optionIndexToOptionToken[_duelId][_optionIndex];
         uint256 optionTokenBalance = IERC20(optionToken).balanceOf(_user);
         uint256 totalOptionTokenSupply = IERC20(optionToken).totalSupply();
@@ -880,11 +875,11 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @return delta The price change of token.
      * @return isEndPriceGreater Returns true if end price greater than stat price.
      */
-    function _getPriceDelta(string memory _duelId, string memory _tokenSymbol, int256 _currentOraclePrice)
-        internal
-        view
-        returns (int256 endPrice, int256 startPrice, int256 delta, bool isEndPriceGreater)
-    {
+    function _getPriceDelta(
+        string memory _duelId,
+        string memory _tokenSymbol,
+        int256 _currentOraclePrice
+    ) internal view returns (int256 endPrice, int256 startPrice, int256 delta, bool isEndPriceGreater) {
         endPrice = _currentOraclePrice;
         startPrice = startPriceToken[_duelId][_tokenSymbol];
         delta = endPrice - startPrice;
