@@ -88,16 +88,14 @@ enum TriggerCondition {
 /// @param creator The address of the duel creator
 /// @param duelId The unique ID of the duel
 /// @param topic The description of duel
-/// @param options The options of the duel
 /// @param createTime The time the duel was created
 /// @param expiryTime The time the duel will expire
 /// @param createDuelFee The fee paid for creating the duel
 /// @param category The category of the duel
 event DuelCreated(
-    address creator,
+    address indexed creator,
     string duelId,
     string topic,
-    string[] options,
     uint256 createTime,
     uint256 expiryTime,
     uint256 createDuelFee,
@@ -108,16 +106,14 @@ event DuelCreated(
 /// @param creator The address of the duel creator
 /// @param tokenSymbol The symbol of token
 /// @param duelId The unique ID of the duel
-/// @param options The options of the duel
 /// @param createTime The time the duel was created
 /// @param expiryTime The time the duel will expire
 /// @param createDuelFee The fee paid for creating the duel
 /// @param category The category of the duel
 event CryptoDuelCreated(
-    address creator,
+    address indexed creator,
     string tokenSymbol,
     string duelId,
-    string[] options,
     uint256 createTime,
     uint256 expiryTime,
     uint256 createDuelFee,
@@ -138,7 +134,7 @@ event CryptoDuelCreated(
 event DuelJoined(
     string duelId,
     string topic,
-    address participant,
+    address indexed participant,
     uint256 amount,
     address optionToken,
     uint256 amountOptionToken,
@@ -155,7 +151,7 @@ event DuelJoined(
 /// @param joinTime The time the participant joined the duel
 event CryptoDuelJoined(
     string duelId,
-    address participant,
+    address indexed participant,
     string tokenSymbol,
     uint256 amount,
     address optionToken,
@@ -177,24 +173,24 @@ event DuelSettled(string duelId, string winningTopic, uint256 optionIndex);
 /// @notice Emitted when a user withdraws their earnings
 /// @param user The address of the user withdrawing earnings
 /// @param amount The amount withdrawn
-event WithdrawEarning(address user, uint256 amount);
+event WithdrawEarning(address indexed user, uint256 amount);
 
 /// @notice Emitted when a duel creator withdraws their creator fees
 /// @param user The address of the duel creator
 /// @param creatorFee The fee withdrawn by the creator
-event WithdrawCreatorEarning(address user, uint256 creatorFee);
+event WithdrawCreatorEarning(address indexed user, uint256 creatorFee);
 
 /// @notice Emitted when protocol fees are withdrawn
 /// @param user The address of the protocol
 /// @param protocolBalance The amount withdrawn as protocol fees
-event WithdrawProtocolFee(address user, uint256 protocolBalance);
+event WithdrawProtocolFee(address indexed user, uint256 protocolBalance);
 
 /// @notice Emitted when a refund is issued for a cancelled duel
 /// @param duelId The ID of the cancelled duel
 /// @param option The option for which refund issued
 /// @param recipient The address receiving the refund
 /// @param amount The amount refunded for option
-event RefundIssued(string duelId, string option, address recipient, uint256 amount);
+event RefundIssued(string duelId, string option, address indexed recipient, uint256 amount);
 
 /// @notice Emitted when a duel is cancelled
 /// @param duelId The ID of the cancelled duel

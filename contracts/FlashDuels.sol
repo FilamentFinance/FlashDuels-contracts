@@ -201,16 +201,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         duelIdToOptions[_duelId] = _options;
         creatorToDuelIds[msg.sender].push(_duelId);
 
-        emit DuelCreated(
-            msg.sender,
-            _duelId,
-            _topic,
-            _options,
-            block.timestamp,
-            duel.expiryTime,
-            createDuelFee,
-            _category
-        );
+        emit DuelCreated(msg.sender, _duelId, _topic, block.timestamp, duel.expiryTime, createDuelFee, _category);
 
         return _duelId;
     }
@@ -269,7 +260,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             msg.sender,
             _tokenSymbol,
             _duelId,
-            _options,
             block.timestamp,
             duel.expiryTime,
             createDuelFee,

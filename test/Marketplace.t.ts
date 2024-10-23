@@ -205,7 +205,6 @@ describe("FlashDuels Marketplace Contract", function () {
                 await usdcToken.connect(owner).mint(buyer.address, amount)
                 await usdcToken.connect(buyer).approve(flashDuelsMarketplace.target, ethers.parseUnits("10", 6))
                 let tx = await flashDuels.duels(duelIds[0])
-                console.log("flashduels", tx)
                 await flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 0)
                 const sale = await flashDuelsMarketplace.sales(sellerOptionToken, 0)
                 expect(sale.seller).to.equal("0x0000000000000000000000000000000000000000") // Ensure the sale is deleted
@@ -217,7 +216,6 @@ describe("FlashDuels Marketplace Contract", function () {
                 await usdcToken.connect(owner).mint(buyer.address, amount)
                 await usdcToken.connect(buyer).approve(flashDuelsMarketplace.target, ethers.parseUnits("10", 6))
                 let tx = await flashDuels.duels(duelIds[0])
-                console.log("flashduels", tx)
                 await expect(flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 0))
                     .to.emit(flashDuelsMarketplace, "TokensPurchased")
                     .withArgs(

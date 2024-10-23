@@ -1,7 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config"
 import "@nomicfoundation/hardhat-toolbox"
 import "@openzeppelin/hardhat-upgrades"
-// import "./tasks"
+import "./tasks"
 import * as dotenv from "dotenv"
 import "solidity-docgen"
 import "hardhat-abi-exporter"

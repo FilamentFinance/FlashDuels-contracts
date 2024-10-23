@@ -41,13 +41,13 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
     /// @param token The address of the token being sold
     /// @param quantity The quantity of tokens being sold
     /// @param totalPrice The total price for the sale
-    event SaleCreated(uint256 saleId, address seller, address token, uint256 quantity, uint256 totalPrice);
+    event SaleCreated(uint256 saleId, address indexed seller, address token, uint256 quantity, uint256 totalPrice);
 
     /// @notice Emitted when a sale is cancelled
     /// @param saleId The ID of the sale
     /// @param seller The address of the seller
     /// @param token The address of the token for the cancelled sale
-    event SaleCancelled(uint256 saleId, address seller, address token);
+    event SaleCancelled(uint256 saleId, address indexed seller, address token);
 
     /// @notice Emitted when tokens are purchased
     /// @param buyer The address of the buyer
@@ -55,7 +55,13 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
     /// @param token The address of the token being purchased
     /// @param quantity The quantity of tokens purchased
     /// @param totalPrice The total price paid by the buyer
-    event TokensPurchased(address buyer, address seller, address token, uint256 quantity, uint256 totalPrice);
+    event TokensPurchased(
+        address indexed buyer,
+        address indexed seller,
+        address token,
+        uint256 quantity,
+        uint256 totalPrice
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
