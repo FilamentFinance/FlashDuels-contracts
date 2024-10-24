@@ -29,7 +29,6 @@ const main = async () => {
 
     tx = await flashDuels.updateBootstrapPeriod("120")
     await tx.wait(1)
-
     console.log("Update bootstrap period done")
 
     console.log("🚀🚀🚀 Protocol Settings Done 🚀🚀🚀")
