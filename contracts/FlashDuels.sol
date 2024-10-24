@@ -31,7 +31,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     uint256 private nonce;
     /// @notice Mapping of user to the duelId to the option to the user wager amount
     mapping(address => mapping(string => mapping(string => uint256))) public userWager;
-    /// @notice Mapping of optionIndex to the option token address
+    /// @notice Mapping of duelId to optionIndex to the option token address
     mapping(string => mapping(uint256 => address)) public optionIndexToOptionToken;
     /// @notice Mapping of duelId to the option to the total wager for option
     mapping(string => mapping(string => uint256)) public totalWagerForOption;
@@ -45,7 +45,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     mapping(string => mapping(uint256 => mapping(string => uint256))) public totalBetsOnOption;
     /// @notice Mapping to track total fees earned by duel creators
     mapping(address => uint256) public totalCreatorFeeEarned;
-    /// @notice Mapping to store multiple duel IDs for the same combination
+    /// @notice Mapping to store multiple duel IDs for the same creator
     mapping(address => string[]) public creatorToDuelIds;
     /// @notice Mapping of duelId to their options
     mapping(string => string[]) public duelIdToOptions;
@@ -210,7 +210,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @param _options Betting options for the duel.
      * @param _triggerValue Value that triggers the outcome.
      * @param _triggerType Type of trigger (e.g., absolute, percentage).
-     * @param _triggerCondition Condition for triggering (e.g., above, below.
+     * @param _triggerCondition Condition for triggering (e.g., above, below).
      * @param _duelDuration Duration of the duel.
      * @return Duel ID as a string.
      */
@@ -262,7 +262,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         return _duelId;
     }
 
-    /// @notice Allows a user to join an existing duel by placing a wager on one of the two sides.
+    /// @notice Allows a user to join an existing duel by placing a wager on one of the options.
     /// @param _duelId The ID of the duel to join.
     /// @param _option The option of the duel.
     /// @param _optionsIndex The option index.
@@ -310,7 +310,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         );
     }
 
-    /// @notice Allows a user to join an existing duel by placing a wager on one of the two sides.
+    /// @notice Allows a user to join an existing duel by placing a wager on one of the options.
     /// @param _duelId The ID of the duel to join.
     /// @param _option The option of the duel.
     /// @param _tokenSymbol Allowed token symbol for wagering.
@@ -360,7 +360,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     }
 
     /**
-     * @notice Starts the duel once the bootstrap period has ended and both sides have met the minimum wager requirements.
+     * @notice Starts the duel once the bootstrap period has ended and both sides have met the minimum threshold requirements.
      * @param _duelId The ID of the duel to be started.
      * Emits a {DuelStarted} event upon successful execution.
      */
@@ -832,7 +832,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         string memory _winningOption,
         uint256 _payout
     ) internal {
-        address[] storage winners = duelUsersForOption[_duelId][_winningOption]; // @note -  while transferring tokens, need to update the duelUsers as well
+        address[] storage winners = duelUsersForOption[_duelId][_winningOption];
         uint256 totalWinningWagers = totalWagerForOption[_duelId][_winningOption];
         uint256 winningOptionPoolBalance = totalWinningWagers + _payout;
 
