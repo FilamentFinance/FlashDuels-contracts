@@ -197,6 +197,12 @@
                 "internalType": "address",
                 "name": "token",
                 "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "saleCancelledTime",
+                "type": "uint256"
             }
         ],
         "name": "SaleCancelled",
@@ -234,6 +240,12 @@
                 "internalType": "uint256",
                 "name": "totalPrice",
                 "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "saleTime",
+                "type": "uint256"
             }
         ],
         "name": "SaleCreated",
@@ -270,6 +282,12 @@
                 "indexed": false,
                 "internalType": "uint256",
                 "name": "totalPrice",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tokenPurchasedTime",
                 "type": "uint256"
             }
         ],

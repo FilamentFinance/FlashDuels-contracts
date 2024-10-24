@@ -5,13 +5,13 @@
         "FlashDuelsMarketplace": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
     },
     "seiTestnet": {
-        "FLASHUSDC": "0xA8fb223145617a9B15DACE5459d22D4fAeAdb9d1",
-        "FlashDuels": "0x371ebfa76D5Ffa7a7CaFa08029A2d5Ee3234d4DD",
-        "FlashDuelsMarketplace": "0xB33d1e5d255EC6E2Ed6Ca288Fd8ea7F5Ccc358eF"
+        "FLASHUSDC": "0xBa186a014874962249dadaceCDd36b7d2Ae0e3eC",
+        "FlashDuels": "0x7868Ed47F2f89E21e808eD083B8dc137955E08aC",
+        "FlashDuelsMarketplace": "0x0277Ca1E5d9C730967110f297d9eBA8f1CADcacC"
     },
     "localhost": {
-        "FLASHUSDC": "0xA8fb223145617a9B15DACE5459d22D4fAeAdb9d1",
-        "FlashDuels": "0x371ebfa76D5Ffa7a7CaFa08029A2d5Ee3234d4DD",
-        "FlashDuelsMarketplace": "0xB33d1e5d255EC6E2Ed6Ca288Fd8ea7F5Ccc358eF"
+        "FLASHUSDC": "0xBa186a014874962249dadaceCDd36b7d2Ae0e3eC",
+        "FlashDuels": "0x7868Ed47F2f89E21e808eD083B8dc137955E08aC",
+        "FlashDuelsMarketplace": "0x0277Ca1E5d9C730967110f297d9eBA8f1CADcacC"
     }
 }

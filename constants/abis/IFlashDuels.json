@@ -37,11 +37,6 @@
                         "type": "uint256"
                     },
                     {
-                        "internalType": "uint256",
-                        "name": "minWager",
-                        "type": "uint256"
-                    },
-                    {
                         "internalType": "int256",
                         "name": "triggerValue",
                         "type": "int256"
@@ -54,6 +49,11 @@
                     {
                         "internalType": "enum TriggerCondition",
                         "name": "triggerCondition",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "enum DuelDuration",
+                        "name": "duelDuration",
                         "type": "uint8"
                     },
                     {
@@ -108,9 +108,9 @@
                         "type": "uint256"
                     },
                     {
-                        "internalType": "uint256",
-                        "name": "minWager",
-                        "type": "uint256"
+                        "internalType": "enum DuelDuration",
+                        "name": "duelDuration",
+                        "type": "uint8"
                     },
                     {
                         "internalType": "enum DuelStatus",
@@ -169,9 +169,9 @@
                         "type": "uint256"
                     },
                     {
-                        "internalType": "uint256",
-                        "name": "minWager",
-                        "type": "uint256"
+                        "internalType": "enum DuelDuration",
+                        "name": "duelDuration",
+                        "type": "uint8"
                     },
                     {
                         "internalType": "enum DuelStatus",

@@ -31,7 +31,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     uint256 private nonce;
     /// @notice Mapping of user to the duelId to the option to the user wager amount
     mapping(address => mapping(string => mapping(string => uint256))) public userWager;
-    /// @notice Mapping of optionIndex to the option token address
+    /// @notice Mapping of duelId to optionIndex to the option token address
     mapping(string => mapping(uint256 => address)) public optionIndexToOptionToken;
     /// @notice Mapping of duelId to the option to the total wager for option
     mapping(string => mapping(string => uint256)) public totalWagerForOption;
@@ -45,7 +45,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     mapping(string => mapping(uint256 => mapping(string => uint256))) public totalBetsOnOption;
     /// @notice Mapping to track total fees earned by duel creators
     mapping(address => uint256) public totalCreatorFeeEarned;
-    /// @notice Mapping to store multiple duel IDs for the same combination
+    /// @notice Mapping to store multiple duel IDs for the same creator
     mapping(address => string[]) public creatorToDuelIds;
     /// @notice Mapping of duelId to their options
     mapping(string => string[]) public duelIdToOptions;
@@ -168,7 +168,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @param _category The category of the duel (e.g., Politics, or other categories).
      * @param _topic A string representing the topic or title or description or questions in the duel.
      * @param _options A string representing the first option for the duel.
-     * @param _minWager The minimum wager amount required to participate in the duel (in the supported token).
      * @param _duelDuration The duration of the duel, chosen from predefined options (3 hours, 6 hours, or 12 hours).
      * @return _duelId A unique string representing the ID of the created duel.
      */
@@ -176,40 +175,32 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         DuelCategory _category,
         string memory _topic,
         string[] memory _options,
-        uint256 _minWager,
         DuelDuration _duelDuration
     ) external nonReentrant whenNotPaused returns (string memory) {
         require(_category != DuelCategory.Crypto, "Should not crypto category duel");
-
         // Transfer USDC fee for duel creation
         require(IERC20(usdc).transferFrom(msg.sender, address(this), createDuelFee), "USDC transfer failed");
         totalProtocolFeesGenerated = totalProtocolFeesGenerated + createDuelFee;
 
-        // Determine the expiry duration based on the selected enum value
-        uint256 duelDuration;
-        if (_duelDuration == DuelDuration.ThreeHours) {
-            duelDuration = 3 hours;
-        } else if (_duelDuration == DuelDuration.SixHours) {
-            duelDuration = 6 hours;
-        } else if (_duelDuration == DuelDuration.TwelveHours) {
-            duelDuration = 12 hours;
-        } else {
-            revert("Invalid expiry time");
-        }
+        require(
+            _duelDuration == DuelDuration.ThreeHours ||
+                _duelDuration == DuelDuration.SixHours ||
+                _duelDuration == DuelDuration.TwelveHours,
+            "Invalid duel duration"
+        );
 
         string memory _duelId = generateDuelId(msg.sender);
         Duel storage duel = duels[_duelId];
         duel.creator = msg.sender;
         duel.topic = _topic;
         duel.createTime = block.timestamp;
-        duel.expiryTime = block.timestamp + bootstrapPeriod + duelDuration;
-        duel.minWager = _minWager; // let's say 10 USDC, will be stored as 10 * 1e6
+        duel.duelDuration = _duelDuration;
         duel.duelStatus = DuelStatus.BootStrapped;
         duel.category = _category;
         duelIdToOptions[_duelId] = _options;
         creatorToDuelIds[msg.sender].push(_duelId);
 
-        emit DuelCreated(msg.sender, _duelId, _topic, block.timestamp, duel.expiryTime, createDuelFee, _category);
+        emit DuelCreated(msg.sender, _duelId, _topic, block.timestamp, createDuelFee, _category);
 
         return _duelId;
     }
@@ -217,10 +208,9 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
      * @notice Creates a new crypto duel.
      * @param _tokenSymbol Allowed token symbol for wagering.
      * @param _options Betting options for the duel.
-     * @param _minWager Minimum wager amount.
      * @param _triggerValue Value that triggers the outcome.
      * @param _triggerType Type of trigger (e.g., absolute, percentage).
-     * @param _triggerCondition Condition for triggering (e.g., above, below.
+     * @param _triggerCondition Condition for triggering (e.g., above, below).
      * @param _duelDuration Duration of the duel.
      * @return Duel ID as a string.
      */
@@ -228,7 +218,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     function createCryptoDuel(
         string memory _tokenSymbol,
         string[] memory _options,
-        uint256 _minWager,
         int256 _triggerValue,
         TriggerType _triggerType,
         TriggerCondition _triggerCondition,
@@ -238,25 +227,19 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         require(IERC20(usdc).transferFrom(msg.sender, address(this), createDuelFee), "USDC transfer failed");
         totalProtocolFeesGenerated = totalProtocolFeesGenerated + createDuelFee;
 
-        // Determine the expiry duration based on the selected enum value
-        uint256 duelDuration;
-        if (_duelDuration == DuelDuration.ThreeHours) {
-            duelDuration = 3 hours;
-        } else if (_duelDuration == DuelDuration.SixHours) {
-            duelDuration = 6 hours;
-        } else if (_duelDuration == DuelDuration.TwelveHours) {
-            duelDuration = 12 hours;
-        } else {
-            revert("Invalid expiry time");
-        }
+        require(
+            _duelDuration == DuelDuration.ThreeHours ||
+                _duelDuration == DuelDuration.SixHours ||
+                _duelDuration == DuelDuration.TwelveHours,
+            "Invalid duel duration"
+        );
 
         string memory _duelId = generateDuelId(msg.sender);
         CryptoDuel storage duel = cryptoDuels[_duelId];
         duel.creator = msg.sender;
         duel.tokenSymbol = _tokenSymbol;
         duel.createTime = block.timestamp;
-        duel.expiryTime = block.timestamp + bootstrapPeriod + duelDuration;
-        duel.minWager = _minWager; // let's say 10 USDC, will be stored as 10 * 1e6
+        duel.duelDuration = _duelDuration;
         duel.triggerValue = _triggerValue;
         duel.triggerType = _triggerType;
         duel.triggerCondition = _triggerCondition;
@@ -269,7 +252,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             _tokenSymbol,
             _duelId,
             block.timestamp,
-            duel.expiryTime,
             createDuelFee,
             _triggerValue,
             _triggerType,
@@ -280,7 +262,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         return _duelId;
     }
 
-    /// @notice Allows a user to join an existing duel by placing a wager on one of the two sides.
+    /// @notice Allows a user to join an existing duel by placing a wager on one of the options.
     /// @param _duelId The ID of the duel to join.
     /// @param _option The option of the duel.
     /// @param _optionsIndex The option index.
@@ -297,8 +279,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.category != DuelCategory.Crypto, "Should not a crypto duel");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
-        require(block.timestamp < duel.expiryTime, "Duel expired");
-        require(_amount >= duel.minWager, "Wager below minimum");
+        require(_amount >= _optionPrice, "Less than minimum wager");
         // Transfer the wager amount in USDC to the contract
         require(IERC20(usdc).transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
 
@@ -320,15 +301,17 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         emit DuelJoined(
             _duelId,
             duel.topic,
+            _option,
             msg.sender,
-            _amount,
             address(newOptionToken),
+            _optionsIndex,
+            _amount,
             amountTokenToMint,
             block.timestamp
         );
     }
 
-    /// @notice Allows a user to join an existing duel by placing a wager on one of the two sides.
+    /// @notice Allows a user to join an existing duel by placing a wager on one of the options.
     /// @param _duelId The ID of the duel to join.
     /// @param _option The option of the duel.
     /// @param _tokenSymbol Allowed token symbol for wagering.
@@ -346,8 +329,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         CryptoDuel storage duel = cryptoDuels[_duelId];
         require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
-        require(block.timestamp < duel.expiryTime, "Duel expired");
-        require(_amount >= duel.minWager, "Wager below minimum");
+        require(_amount >= _optionPrice, "Less than minimum wager");
         // Transfer the wager amount in USDC to the contract
         require(IERC20(usdc).transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
 
@@ -368,17 +350,19 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
 
         emit CryptoDuelJoined(
             _duelId,
-            msg.sender,
             _tokenSymbol,
-            _amount,
+            _option,
+            msg.sender,
             address(newOptionToken),
+            _optionsIndex,
+            _amount,
             amountTokenToMint,
             block.timestamp
         );
     }
 
     /**
-     * @notice Starts the duel once the bootstrap period has ended and both sides have met the minimum wager requirements.
+     * @notice Starts the duel once the bootstrap period has ended and both sides have met the minimum threshold requirements.
      * @param _duelId The ID of the duel to be started.
      * Emits a {DuelStarted} event upon successful execution.
      */
@@ -399,11 +383,16 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         }
         // Record the start time and mark the duel as live
         duel.startTime = block.timestamp;
-        uint256 duelDuration = duel.expiryTime - (duel.createTime + bootstrapPeriod);
+        // uint256 duelDuration = duel.expiryTime - (duel.createTime + bootstrapPeriod);
+        uint256 duelDuration = duel.duelDuration == DuelDuration.ThreeHours
+            ? 3 hours
+            : duel.duelDuration == DuelDuration.SixHours
+                ? 6 hours
+                : 12 hours;
         duel.expiryTime = block.timestamp + duelDuration;
         duel.duelStatus = DuelStatus.Live;
 
-        emit DuelStarted(_duelId, block.timestamp);
+        emit DuelStarted(_duelId, block.timestamp, duel.expiryTime);
     }
     /**
      * @notice Starts the crypto duel with the specified ID.
@@ -417,7 +406,6 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         int256 _startTokenPrice
     ) external nonReentrant whenNotPaused onlyBot {
         CryptoDuel storage cryptoDuel = cryptoDuels[_duelId];
-
         require(isValidDuelId[_duelId] && cryptoDuel.createTime != 0, "Duel doesn't exist");
         // Ensure the bootstrap period has ended
         require(block.timestamp >= cryptoDuel.createTime + bootstrapPeriod, "Bootstrap period not ended");
@@ -435,11 +423,16 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         startPriceToken[_duelId][cryptoDuel.tokenSymbol] = _startTokenPrice;
         // Record the start time and mark the duel as live
         cryptoDuel.startTime = block.timestamp;
-        uint256 duelDuration = cryptoDuel.expiryTime - (cryptoDuel.createTime + bootstrapPeriod);
+        // uint256 duelDuration = cryptoDuel.expiryTime - (cryptoDuel.createTime + bootstrapPeriod);
+        uint256 duelDuration = cryptoDuel.duelDuration == DuelDuration.ThreeHours
+            ? 3 hours
+            : cryptoDuel.duelDuration == DuelDuration.SixHours
+                ? 6 hours
+                : 12 hours;
         cryptoDuel.expiryTime = block.timestamp + duelDuration;
         cryptoDuel.duelStatus = DuelStatus.Live;
 
-        emit DuelStarted(_duelId, block.timestamp);
+        emit DuelStarted(_duelId, block.timestamp, cryptoDuel.expiryTime);
     }
 
     /**
@@ -477,7 +470,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         duels[_duelId].duelStatus = DuelStatus.Settled;
 
         // Emit event indicating that the duel has been settled
-        emit DuelSettled(_duelId, winningOption, _optionIndex);
+        emit DuelSettled(_duelId, winningOption, _optionIndex, block.timestamp);
     }
     /**
      * @notice Settles the crypto duel with the given ID.
@@ -527,7 +520,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         totalCreatorFeeEarned[cryptoDuels[_duelId].creator] += creatorFee;
         cryptoDuels[_duelId].duelStatus = DuelStatus.Settled;
 
-        emit DuelSettled(_duelId, winningOption, optionIndex);
+        emit DuelSettled(_duelId, winningOption, optionIndex, block.timestamp);
     }
 
     /// @notice Cancels the duel if the threshold amount is not met after the bootstrap period
@@ -611,7 +604,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             if (wager > 0) {
                 userWager[msg.sender][_duelId][duelIdToOptions[_duelId][i]] = 0;
                 IERC20(usdc).transfer(msg.sender, wager);
-                emit RefundIssued(_duelId, duelIdToOptions[_duelId][i], msg.sender, wager);
+                emit RefundIssued(_duelId, duelIdToOptions[_duelId][i], msg.sender, wager, block.timestamp);
             }
         }
     }
@@ -625,7 +618,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         require(_amount <= _allTimeEarnings, "Amount should be less than equal earnings");
         IERC20(usdc).transfer(msg.sender, _amount);
         allTimeEarnings[msg.sender] -= _amount;
-        emit WithdrawEarning(msg.sender, _amount);
+        emit WithdrawEarning(msg.sender, _amount, block.timestamp);
     }
 
     /**
@@ -636,7 +629,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         require(creatorFee > 0, "No funds available");
         IERC20(usdc).transfer(msg.sender, creatorFee);
         totalCreatorFeeEarned[msg.sender] = 0;
-        emit WithdrawCreatorEarning(msg.sender, creatorFee);
+        emit WithdrawCreatorEarning(msg.sender, creatorFee, block.timestamp);
     }
     /**
      * @notice Withdraws protocol fees by the owner.
@@ -647,7 +640,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         require(protocolBalance > 0, "No funds available");
         IERC20(usdc).transfer(msg.sender, protocolBalance);
         totalProtocolFeesGenerated = 0;
-        emit WithdrawProtocolFee(msg.sender, protocolBalance);
+        emit WithdrawProtocolFee(msg.sender, protocolBalance, block.timestamp);
     }
 
     /**
@@ -841,7 +834,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         string memory _winningOption,
         uint256 _payout
     ) internal {
-        address[] storage winners = duelUsersForOption[_duelId][_winningOption]; // @note -  while transferring tokens, need to update the duelUsers as well
+        address[] storage winners = duelUsersForOption[_duelId][_winningOption];
         uint256 totalWinningWagers = totalWagerForOption[_duelId][_winningOption];
         uint256 winningOptionPoolBalance = totalWinningWagers + _payout;
 
