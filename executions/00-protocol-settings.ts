@@ -22,7 +22,6 @@ const main = async () => {
     const flashDuels: FlashDuels = new ethers.Contract(netMap[networkName].FlashDuels, FlashDuelsABI, deployer)
     const flashUSDC: FLASHUSDC = new ethers.Contract(netMap[networkName].FLASHUSDC, FLASHUSDCABI, deployer)
 
-
     tx = await flashDuels.setProtocolAddress(networkConfig[networkName].protocolTreasury)
     await tx.wait(1)
 
