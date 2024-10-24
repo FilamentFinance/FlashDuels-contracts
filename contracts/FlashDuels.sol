@@ -154,6 +154,14 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     }
 
     /**
+     * @notice Updates the bootstrap period.
+     * @param _bootstrapPeriod The new bootstrap period.
+     */
+    function updateBootstrapPeriod(uint256 _bootstrapPeriod) external onlyOwner {
+        bootstrapPeriod = _bootstrapPeriod;
+    }
+
+    /**
      * @notice Creates a new duel with the specified parameters
      * @dev Allows any user to create a duel with a predefined duel duration.
      *      A USDC fee is required for duel creation, and the duel starts after the bootstrap period.
