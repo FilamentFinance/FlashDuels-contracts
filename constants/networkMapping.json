@@ -5,9 +5,9 @@
         "FlashDuelsMarketplace": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
     },
     "seiTestnet": {
-        "FLASHUSDC": "0xBa186a014874962249dadaceCDd36b7d2Ae0e3eC",
-        "FlashDuels": "0x7868Ed47F2f89E21e808eD083B8dc137955E08aC",
-        "FlashDuelsMarketplace": "0x0277Ca1E5d9C730967110f297d9eBA8f1CADcacC"
+        "FLASHUSDC": "0x3c401b1DA2A0373cB137347d4fc76cF25C9dB128",
+        "FlashDuels": "0x3B0Ac6bB0Eb8e593C4616Bf3C328C94eDe1468Aa",
+        "FlashDuelsMarketplace": "0xDcaF54D307729705Cf28614f5AebD1533342535c"
     },
     "localhost": {
         "FLASHUSDC": "0xBa186a014874962249dadaceCDd36b7d2Ae0e3eC",
