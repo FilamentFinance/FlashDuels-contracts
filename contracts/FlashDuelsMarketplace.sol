@@ -41,13 +41,22 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
     /// @param token The address of the token being sold
     /// @param quantity The quantity of tokens being sold
     /// @param totalPrice The total price for the sale
-    event SaleCreated(uint256 saleId, address indexed seller, address token, uint256 quantity, uint256 totalPrice);
+    /// @param saleTime The sale created time
+    event SaleCreated(
+        uint256 saleId,
+        address indexed seller,
+        address token,
+        uint256 quantity,
+        uint256 totalPrice,
+        uint256 saleTime
+    );
 
     /// @notice Emitted when a sale is cancelled
     /// @param saleId The ID of the sale
     /// @param seller The address of the seller
     /// @param token The address of the token for the cancelled sale
-    event SaleCancelled(uint256 saleId, address indexed seller, address token);
+    /// @param saleCancelledTime The sale cancelled time
+    event SaleCancelled(uint256 saleId, address indexed seller, address token, uint256 saleCancelledTime);
 
     /// @notice Emitted when tokens are purchased
     /// @param buyer The address of the buyer
@@ -55,12 +64,14 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
     /// @param token The address of the token being purchased
     /// @param quantity The quantity of tokens purchased
     /// @param totalPrice The total price paid by the buyer
+    /// @param tokenPurchasedTime The token purchased time
     event TokensPurchased(
         address indexed buyer,
         address indexed seller,
         address token,
         uint256 quantity,
-        uint256 totalPrice
+        uint256 totalPrice,
+        uint256 tokenPurchasedTime
     );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -128,7 +139,7 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
         IERC20 erc20 = IERC20(token);
         require(erc20.allowance(msg.sender, address(this)) >= quantity, "Insufficient allowance for the contract");
         sales[token][saleCounter] = Sale({seller: msg.sender, quantity: quantity, totalPrice: totalPrice, strike: 0});
-        emit SaleCreated(saleCounter, msg.sender, token, quantity, totalPrice);
+        emit SaleCreated(saleCounter, msg.sender, token, quantity, totalPrice, block.timestamp);
         ++saleCounter;
     }
 
@@ -140,7 +151,7 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
         require(sale.seller == msg.sender, "You are not the seller");
         require(sale.quantity > 0, "No active sale");
         delete sales[token][saleId];
-        emit SaleCancelled(saleId, msg.sender, token);
+        emit SaleCancelled(saleId, msg.sender, token, block.timestamp);
     }
 
     /// @notice Allows a user to buy tokens from a sale
@@ -161,14 +172,14 @@ contract FlashDuelsMarketplace is UUPSUpgradeable, OwnableUpgradeable, PausableU
 
         if (sale.strike > maxStrikes) {
             delete sales[token][saleId];
-            emit SaleCancelled(saleId, msg.sender, token);
+            emit SaleCancelled(saleId, msg.sender, token, block.timestamp);
         } else {
             uint256 platformFee = (sale.totalPrice * fees) / BPS;
             uint256 receivables = sale.totalPrice - platformFee;
             usdc.safeTransferFrom(msg.sender, sale.seller, receivables);
             usdc.safeTransferFrom(msg.sender, protocolTreasury, platformFee);
             erc20.safeTransferFrom(sale.seller, msg.sender, sale.quantity);
-            emit TokensPurchased(msg.sender, sale.seller, token, sale.quantity, sale.totalPrice);
+            emit TokensPurchased(msg.sender, sale.seller, token, sale.quantity, sale.totalPrice, block.timestamp);
             delete sales[token][saleId];
         }
     }

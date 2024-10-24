@@ -2,85 +2,25 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0x653796DbeA08A21bD468e36C447456fc810c4EB4",
-      "txHash": "0x4b49e106c6e5993573b91c22f3200ac7c50f3064144ffc4c3343b60265e68bc4",
+      "address": "0x3c401b1DA2A0373cB137347d4fc76cF25C9dB128",
+      "txHash": "0x24822b1e20dd4445312b4ef41ad3e523abcde1c7cba7b1683c52b786b9777880",
       "kind": "uups"
     },
     {
-      "address": "0x63B528dc0e51694dA4b690A045fC82bCf2E1BDA5",
-      "txHash": "0xb5de8560857574718ce1e53562f1b30c73f465b58c4576d3b7b193ed8d706f0a",
+      "address": "0x3B0Ac6bB0Eb8e593C4616Bf3C328C94eDe1468Aa",
+      "txHash": "0x61f2ed9a3bcb8db06df69e997c6a38f587ed8b72a41cfe4f0957d7fe972487bb",
       "kind": "uups"
     },
     {
-      "address": "0x454C0C96fE5ADEf1c16665381Ed674BE4706d4cc",
-      "txHash": "0x602d815241faabc8250c7d6a22552810be893698f773be2494bf3ba9b3fbe7cc",
-      "kind": "uups"
-    },
-    {
-      "address": "0x91A91Aba60f85aB15656F2aFd27B8Ffb80a824Ed",
-      "txHash": "0xafb23f36a15217af628b1af6790f843b22abbbaa40bc1f5bd04771cf1d7e51a3",
-      "kind": "uups"
-    },
-    {
-      "address": "0xc0027D9E61a32544546E4a5e390C239f05ac8b82",
-      "txHash": "0xdd284aa466f48c90c42d8591f2ec2a54981cf0760b8d8a8f08c027d00c115cdd",
-      "kind": "uups"
-    },
-    {
-      "address": "0x35D490B5D9CC6af75CE2FFE0a3e6fC03f06f9Fe0",
-      "txHash": "0xa65a62e2cb5986518934b8810d0da2d82d5c4333cad9803bea11e7eb3831140d",
-      "kind": "uups"
-    },
-    {
-      "address": "0xd93c026ba9Ff18724D63944eFdE0Bb10548cC806",
-      "txHash": "0x7e9dc12a17d552797cdf0ddee9708ad7e07c520e2ac09711a0ff831eb4f61b8b",
-      "kind": "uups"
-    },
-    {
-      "address": "0xDe8Bd69310E39c4bA19bC76D244a9D261eFF260F",
-      "txHash": "0x600a51f7187c1b725435c20f397b8d32a98f58d55db7c5bd24d9c4fe5e382d95",
-      "kind": "uups"
-    },
-    {
-      "address": "0x1fBAEcA646EfE1A4c0bbAf229A6F8b14619668e5",
-      "txHash": "0xd57f5947b7091cee20436d34b3ce93fddfc18d1cf9f3fd845b7e14762226afd6",
-      "kind": "uups"
-    },
-    {
-      "address": "0xB52C788c281b51E54216a6312a0ad075067cf5BD",
-      "txHash": "0x3fefecd68480674a6938bff69fce0fd4b4843b73a05d1aa94842c37907927bbf",
-      "kind": "uups"
-    },
-    {
-      "address": "0x0613C7c8186f9d548D9A473975DF82aA863B2154",
-      "txHash": "0x6b95889d66d3177c04533a93b96d383d2750fa9daf590869a317db0a424a0d95",
-      "kind": "uups"
-    },
-    {
-      "address": "0xf15741d807F12C778803B782aF686F7126521FE4",
-      "txHash": "0x05eccda26ff3c52e1261edfa173243f8dd9df9d5138332704023a8a96fbccbc5",
-      "kind": "uups"
-    },
-    {
-      "address": "0x33C9DECe45b993ff4bb56a34c70E6c93e5d8B68C",
-      "txHash": "0xd050cf62da6279ba87498ea06a4130a10987534ecacb47b58617af94b67efd08",
-      "kind": "uups"
-    },
-    {
-      "address": "0xa19058FE6dAc39602e749b8efe3Dd9e8a7a43d7D",
-      "txHash": "0xce3bcd93067db9872c5f2dca6159cafd15d8220737fd0428629dd32422d1704e",
-      "kind": "uups"
-    },
-    {
-      "address": "0xb4299055066E256fBdB1a18b309fBf7466D6d3BD",
-      "txHash": "0x27cb4385da4d4ba4999fddd457249694d5f325b1d0c1068ae0fc40f384c36a65",
+      "address": "0xDcaF54D307729705Cf28614f5AebD1533342535c",
+      "txHash": "0xd124d44caf89996f3699c9a1ddf58932aee1efde48d6c1bc6e60db6104de9a71",
       "kind": "uups"
     }
   ],
   "impls": {
     "b504b47d81ae40fd45d25055625cc039bd99c6112691f7f8bf79b8513f657b54": {
-      "address": "0x8227ACf77B5f78bDCf23B696E0916FcA3332cC12",
-      "txHash": "0x5c99de4b54ab733d60a4d4e8f1b196a6fdd2d24ffcee42b2e9bcf484687625c2",
+      "address": "0x02F65FB74523523f09A60e63c47f32F1fA36ec53",
+      "txHash": "0xdcefc8f49df4907a67d78b24f5975e489bcae3ae9a0d76052626567ea315fc35",
       "layout": {
         "solcVersion": "0.8.26",
         "storage": [
@@ -130,7 +70,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(ERC20Storage)280_storage": {
+          "t_struct(ERC20Storage)234_storage": {
             "label": "struct ERC20Upgradeable.ERC20Storage",
             "members": [
               {
@@ -166,7 +106,7 @@
             ],
             "numberOfBytes": "160"
           },
-          "t_struct(InitializableStorage)126_storage": {
+          "t_struct(InitializableStorage)80_storage": {
             "label": "struct Initializable.InitializableStorage",
             "members": [
               {
@@ -184,7 +124,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(OwnableStorage)59_storage": {
+          "t_struct(OwnableStorage)13_storage": {
             "label": "struct OwnableUpgradeable.OwnableStorage",
             "members": [
               {
@@ -283,9 +223,9 @@
         }
       }
     },
-    "81237e5c39952935e567eccf06cb66a28683892c235b8bca14fd015eaa3eae79": {
-      "address": "0xc1Cf6F49510E018343DF91EAbE6d7970eF505876",
-      "txHash": "0xc5e8179f9ea9d6971762e7b8c9e408e7c9760b30daf85dc97aacc423dccd6e79",
+    "07f64a3d07978beb6923c47da27732697ca37fcf5ac9ce2aa5a8b8d1f9052c9f": {
+      "address": "0x2Cc9219dAdD7C46E91daeF5DdfBf41e077483de8",
+      "txHash": "0x65d94e1a8fe0dd62af131fd3e1225a26f07b1fb8c16fece5d49d9442a33c8694",
       "layout": {
         "solcVersion": "0.8.26",
         "storage": [
@@ -381,7 +321,7 @@
             "label": "startPriceToken",
             "offset": 0,
             "slot": "11",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_address,t_int256))",
+            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_int256))",
             "contract": "FlashDuels",
             "src": "contracts/FlashDuels.sol:41"
           },
@@ -434,1495 +374,60 @@
             "src": "contracts/FlashDuels.sol:53"
           },
           {
-            "label": "priceAggregator",
+            "label": "allTimeEarnings",
             "offset": 0,
             "slot": "18",
-            "type": "t_mapping(t_address,t_address)",
+            "type": "t_mapping(t_address,t_uint256)",
             "contract": "FlashDuels",
             "src": "contracts/FlashDuels.sol:55"
           },
           {
-            "label": "allTimeEarnings",
+            "label": "isValidDuelId",
             "offset": 0,
             "slot": "19",
-            "type": "t_mapping(t_address,t_uint256)",
+            "type": "t_mapping(t_string_memory_ptr,t_bool)",
             "contract": "FlashDuels",
             "src": "contracts/FlashDuels.sol:57"
           },
           {
-            "label": "supportedTokens",
+            "label": "duels",
             "offset": 0,
             "slot": "20",
-            "type": "t_mapping(t_address,t_bool)",
+            "type": "t_mapping(t_string_memory_ptr,t_struct(Duel)6799_storage)",
             "contract": "FlashDuels",
             "src": "contracts/FlashDuels.sol:59"
           },
           {
-            "label": "isValidDuelId",
+            "label": "cryptoDuels",
             "offset": 0,
             "slot": "21",
-            "type": "t_mapping(t_string_memory_ptr,t_bool)",
+            "type": "t_mapping(t_string_memory_ptr,t_struct(CryptoDuel)6835_storage)",
             "contract": "FlashDuels",
             "src": "contracts/FlashDuels.sol:61"
           },
           {
-            "label": "duels",
+            "label": "usdc",
             "offset": 0,
             "slot": "22",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(Duel)3299_storage)",
+            "type": "t_address",
             "contract": "FlashDuels",
             "src": "contracts/FlashDuels.sol:63"
           },
           {
-            "label": "cryptoDuels",
+            "label": "bot",
             "offset": 0,
             "slot": "23",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(CryptoDuel)3334_storage)",
+            "type": "t_address",
             "contract": "FlashDuels",
             "src": "contracts/FlashDuels.sol:65"
           },
           {
-            "label": "usdc",
+            "label": "protocolAddress",
             "offset": 0,
             "slot": "24",
             "type": "t_address",
             "contract": "FlashDuels",
             "src": "contracts/FlashDuels.sol:67"
-          },
-          {
-            "label": "bot",
-            "offset": 0,
-            "slot": "25",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:69"
-          },
-          {
-            "label": "protocolAddress",
-            "offset": 0,
-            "slot": "26",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:71"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_struct(InitializableStorage)126_storage": {
-            "label": "struct Initializable.InitializableStorage",
-            "members": [
-              {
-                "label": "_initialized",
-                "type": "t_uint64",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "_initializing",
-                "type": "t_bool",
-                "offset": 8,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(OwnableStorage)59_storage": {
-            "label": "struct OwnableUpgradeable.OwnableStorage",
-            "members": [
-              {
-                "label": "_owner",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(PausableStorage)498_storage": {
-            "label": "struct PausableUpgradeable.PausableStorage",
-            "members": [
-              {
-                "label": "_paused",
-                "type": "t_bool",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(ReentrancyGuardStorage)569_storage": {
-            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
-            "members": [
-              {
-                "label": "_status",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint64": {
-            "label": "uint64",
-            "numberOfBytes": "8"
-          },
-          "t_array(t_address)dyn_storage": {
-            "label": "address[]",
-            "numberOfBytes": "32"
-          },
-          "t_array(t_string_storage)dyn_storage": {
-            "label": "string[]",
-            "numberOfBytes": "32"
-          },
-          "t_enum(DuelCategory)3355": {
-            "label": "enum FlashDuels.DuelCategory",
-            "members": [
-              "Any",
-              "Crypto",
-              "Politics",
-              "Sports",
-              "Twitter",
-              "NFTs",
-              "News"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_enum(DuelStatus)3346": {
-            "label": "enum FlashDuels.DuelStatus",
-            "members": [
-              "NotStarted",
-              "BootStrapped",
-              "Live",
-              "Settled",
-              "Cancelled"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_enum(TriggerCondition)3363": {
-            "label": "enum FlashDuels.TriggerCondition",
-            "members": [
-              "Above",
-              "Below"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_enum(TriggerType)3359": {
-            "label": "enum FlashDuels.TriggerType",
-            "members": [
-              "Absolute",
-              "Percentage"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_int256": {
-            "label": "int256",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_address)": {
-            "label": "mapping(address => address)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_array(t_string_storage)dyn_storage)": {
-            "label": "mapping(address => string[])",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_int256)": {
-            "label": "mapping(address => int256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256)))": {
-            "label": "mapping(address => mapping(string => mapping(string => uint256)))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_uint256)": {
-            "label": "mapping(address => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage)": {
-            "label": "mapping(string => address[])",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_array(t_string_storage)dyn_storage)": {
-            "label": "mapping(string => string[])",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_bool)": {
-            "label": "mapping(string => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_address,t_int256))": {
-            "label": "mapping(string => mapping(address => int256))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage))": {
-            "label": "mapping(string => mapping(string => address[]))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256))": {
-            "label": "mapping(string => mapping(string => uint256))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_address))": {
-            "label": "mapping(string => mapping(uint256 => address))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_uint256)))": {
-            "label": "mapping(string => mapping(uint256 => mapping(string => uint256)))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_struct(CryptoDuel)3334_storage)": {
-            "label": "mapping(string => struct FlashDuels.CryptoDuel)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_struct(Duel)3299_storage)": {
-            "label": "mapping(string => struct FlashDuels.Duel)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_uint256)": {
-            "label": "mapping(string => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_address)": {
-            "label": "mapping(uint256 => address)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_uint256))": {
-            "label": "mapping(uint256 => mapping(string => uint256))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_string_storage)": {
-            "label": "mapping(uint256 => string)",
-            "numberOfBytes": "32"
-          },
-          "t_string_memory_ptr": {
-            "label": "string",
-            "numberOfBytes": "32"
-          },
-          "t_string_storage": {
-            "label": "string",
-            "numberOfBytes": "32"
-          },
-          "t_struct(CryptoDuel)3334_storage": {
-            "label": "struct FlashDuels.CryptoDuel",
-            "members": [
-              {
-                "label": "creator",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "token",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "createTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "2"
-              },
-              {
-                "label": "startTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "3"
-              },
-              {
-                "label": "expiryTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "4"
-              },
-              {
-                "label": "minWager",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "5"
-              },
-              {
-                "label": "triggerValue",
-                "type": "t_int256",
-                "offset": 0,
-                "slot": "6"
-              },
-              {
-                "label": "triggerType",
-                "type": "t_enum(TriggerType)3359",
-                "offset": 0,
-                "slot": "7"
-              },
-              {
-                "label": "triggerCondition",
-                "type": "t_enum(TriggerCondition)3363",
-                "offset": 1,
-                "slot": "7"
-              },
-              {
-                "label": "duelStatus",
-                "type": "t_enum(DuelStatus)3346",
-                "offset": 2,
-                "slot": "7"
-              }
-            ],
-            "numberOfBytes": "256"
-          },
-          "t_struct(Duel)3299_storage": {
-            "label": "struct FlashDuels.Duel",
-            "members": [
-              {
-                "label": "creator",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "topic",
-                "type": "t_string_storage",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "createTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "2"
-              },
-              {
-                "label": "startTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "3"
-              },
-              {
-                "label": "expiryTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "4"
-              },
-              {
-                "label": "minWager",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "5"
-              },
-              {
-                "label": "duelStatus",
-                "type": "t_enum(DuelStatus)3346",
-                "offset": 0,
-                "slot": "6"
-              },
-              {
-                "label": "category",
-                "type": "t_enum(DuelCategory)3355",
-                "offset": 1,
-                "slot": "6"
-              }
-            ],
-            "numberOfBytes": "224"
-          }
-        },
-        "namespaces": {
-          "erc7201:openzeppelin.storage.ReentrancyGuard": [
-            {
-              "contract": "ReentrancyGuardUpgradeable",
-              "label": "_status",
-              "type": "t_uint256",
-              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:40",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Pausable": [
-            {
-              "contract": "PausableUpgradeable",
-              "label": "_paused",
-              "type": "t_bool",
-              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Ownable": [
-            {
-              "contract": "OwnableUpgradeable",
-              "label": "_owner",
-              "type": "t_address",
-              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Initializable": [
-            {
-              "contract": "Initializable",
-              "label": "_initialized",
-              "type": "t_uint64",
-              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
-              "offset": 0,
-              "slot": "0"
-            },
-            {
-              "contract": "Initializable",
-              "label": "_initializing",
-              "type": "t_bool",
-              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
-              "offset": 8,
-              "slot": "0"
-            }
-          ]
-        }
-      }
-    },
-    "567356e41bd3b818fb05e7381a0d2dfb0e86c11f397face59728e81cdc2080d5": {
-      "address": "0x40b1D71fA2f9dAdE9D74beeD141BB70490f5C6Da",
-      "txHash": "0x0a17becf2ecf7b1fb9edfcdf8fee7c0e61761e444c629ff9316ec4d233648fe8",
-      "layout": {
-        "solcVersion": "0.8.26",
-        "storage": [
-          {
-            "label": "totalProtocolFeesGenerated",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:20"
-          },
-          {
-            "label": "protocolFeePercentage",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:22"
-          },
-          {
-            "label": "creatorFeePercentage",
-            "offset": 0,
-            "slot": "2",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:24"
-          },
-          {
-            "label": "bootstrapPeriod",
-            "offset": 0,
-            "slot": "3",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:26"
-          },
-          {
-            "label": "createDuelFee",
-            "offset": 0,
-            "slot": "4",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:28"
-          },
-          {
-            "label": "minThreshold",
-            "offset": 0,
-            "slot": "5",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:30"
-          },
-          {
-            "label": "nonce",
-            "offset": 0,
-            "slot": "6",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:32"
-          },
-          {
-            "label": "userWager",
-            "offset": 0,
-            "slot": "7",
-            "type": "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256)))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:34"
-          },
-          {
-            "label": "optionIndexToOptionToken",
-            "offset": 0,
-            "slot": "8",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_address))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:36"
-          },
-          {
-            "label": "totalWagerForOption",
-            "offset": 0,
-            "slot": "9",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:38"
-          },
-          {
-            "label": "duelUsersForOption",
-            "offset": 0,
-            "slot": "10",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:40"
-          },
-          {
-            "label": "startPriceToken",
-            "offset": 0,
-            "slot": "11",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_address,t_int256))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:42"
-          },
-          {
-            "label": "totalBetsOnDuel",
-            "offset": 0,
-            "slot": "12",
-            "type": "t_mapping(t_string_memory_ptr,t_uint256)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:44"
-          },
-          {
-            "label": "totalBetsOnOption",
-            "offset": 0,
-            "slot": "13",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_uint256)))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:46"
-          },
-          {
-            "label": "totalCreatorFeeEarned",
-            "offset": 0,
-            "slot": "14",
-            "type": "t_mapping(t_address,t_uint256)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:48"
-          },
-          {
-            "label": "creatorToDuelIds",
-            "offset": 0,
-            "slot": "15",
-            "type": "t_mapping(t_address,t_array(t_string_storage)dyn_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:50"
-          },
-          {
-            "label": "duelIdToOptions",
-            "offset": 0,
-            "slot": "16",
-            "type": "t_mapping(t_string_memory_ptr,t_array(t_string_storage)dyn_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:52"
-          },
-          {
-            "label": "optionIndexToOption",
-            "offset": 0,
-            "slot": "17",
-            "type": "t_mapping(t_uint256,t_string_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:54"
-          },
-          {
-            "label": "priceAggregator",
-            "offset": 0,
-            "slot": "18",
-            "type": "t_mapping(t_address,t_address)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:56"
-          },
-          {
-            "label": "allTimeEarnings",
-            "offset": 0,
-            "slot": "19",
-            "type": "t_mapping(t_address,t_uint256)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:58"
-          },
-          {
-            "label": "supportedTokens",
-            "offset": 0,
-            "slot": "20",
-            "type": "t_mapping(t_address,t_bool)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:60"
-          },
-          {
-            "label": "isValidDuelId",
-            "offset": 0,
-            "slot": "21",
-            "type": "t_mapping(t_string_memory_ptr,t_bool)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:62"
-          },
-          {
-            "label": "duels",
-            "offset": 0,
-            "slot": "22",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(Duel)10936_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:64"
-          },
-          {
-            "label": "cryptoDuels",
-            "offset": 0,
-            "slot": "23",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(CryptoDuel)10971_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:66"
-          },
-          {
-            "label": "usdc",
-            "offset": 0,
-            "slot": "24",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:68"
-          },
-          {
-            "label": "bot",
-            "offset": 0,
-            "slot": "25",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:70"
-          },
-          {
-            "label": "protocolAddress",
-            "offset": 0,
-            "slot": "26",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:72"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_struct(InitializableStorage)126_storage": {
-            "label": "struct Initializable.InitializableStorage",
-            "members": [
-              {
-                "label": "_initialized",
-                "type": "t_uint64",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "_initializing",
-                "type": "t_bool",
-                "offset": 8,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(OwnableStorage)59_storage": {
-            "label": "struct OwnableUpgradeable.OwnableStorage",
-            "members": [
-              {
-                "label": "_owner",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(PausableStorage)498_storage": {
-            "label": "struct PausableUpgradeable.PausableStorage",
-            "members": [
-              {
-                "label": "_paused",
-                "type": "t_bool",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(ReentrancyGuardStorage)569_storage": {
-            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
-            "members": [
-              {
-                "label": "_status",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint64": {
-            "label": "uint64",
-            "numberOfBytes": "8"
-          },
-          "t_array(t_address)dyn_storage": {
-            "label": "address[]",
-            "numberOfBytes": "32"
-          },
-          "t_array(t_string_storage)dyn_storage": {
-            "label": "string[]",
-            "numberOfBytes": "32"
-          },
-          "t_enum(DuelCategory)10992": {
-            "label": "enum DuelCategory",
-            "members": [
-              "Any",
-              "Crypto",
-              "Politics",
-              "Sports",
-              "Twitter",
-              "NFTs",
-              "News"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_enum(DuelStatus)10983": {
-            "label": "enum DuelStatus",
-            "members": [
-              "NotStarted",
-              "BootStrapped",
-              "Live",
-              "Settled",
-              "Cancelled"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_enum(TriggerCondition)11000": {
-            "label": "enum TriggerCondition",
-            "members": [
-              "Above",
-              "Below"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_enum(TriggerType)10996": {
-            "label": "enum TriggerType",
-            "members": [
-              "Absolute",
-              "Percentage"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_int256": {
-            "label": "int256",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_address)": {
-            "label": "mapping(address => address)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_array(t_string_storage)dyn_storage)": {
-            "label": "mapping(address => string[])",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_int256)": {
-            "label": "mapping(address => int256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256)))": {
-            "label": "mapping(address => mapping(string => mapping(string => uint256)))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_uint256)": {
-            "label": "mapping(address => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage)": {
-            "label": "mapping(string => address[])",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_array(t_string_storage)dyn_storage)": {
-            "label": "mapping(string => string[])",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_bool)": {
-            "label": "mapping(string => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_address,t_int256))": {
-            "label": "mapping(string => mapping(address => int256))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage))": {
-            "label": "mapping(string => mapping(string => address[]))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256))": {
-            "label": "mapping(string => mapping(string => uint256))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_address))": {
-            "label": "mapping(string => mapping(uint256 => address))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_uint256)))": {
-            "label": "mapping(string => mapping(uint256 => mapping(string => uint256)))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_struct(CryptoDuel)10971_storage)": {
-            "label": "mapping(string => struct CryptoDuel)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_struct(Duel)10936_storage)": {
-            "label": "mapping(string => struct Duel)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_uint256)": {
-            "label": "mapping(string => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_address)": {
-            "label": "mapping(uint256 => address)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_uint256))": {
-            "label": "mapping(uint256 => mapping(string => uint256))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_string_storage)": {
-            "label": "mapping(uint256 => string)",
-            "numberOfBytes": "32"
-          },
-          "t_string_memory_ptr": {
-            "label": "string",
-            "numberOfBytes": "32"
-          },
-          "t_string_storage": {
-            "label": "string",
-            "numberOfBytes": "32"
-          },
-          "t_struct(CryptoDuel)10971_storage": {
-            "label": "struct CryptoDuel",
-            "members": [
-              {
-                "label": "creator",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "token",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "createTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "2"
-              },
-              {
-                "label": "startTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "3"
-              },
-              {
-                "label": "expiryTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "4"
-              },
-              {
-                "label": "minWager",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "5"
-              },
-              {
-                "label": "triggerValue",
-                "type": "t_int256",
-                "offset": 0,
-                "slot": "6"
-              },
-              {
-                "label": "triggerType",
-                "type": "t_enum(TriggerType)10996",
-                "offset": 0,
-                "slot": "7"
-              },
-              {
-                "label": "triggerCondition",
-                "type": "t_enum(TriggerCondition)11000",
-                "offset": 1,
-                "slot": "7"
-              },
-              {
-                "label": "duelStatus",
-                "type": "t_enum(DuelStatus)10983",
-                "offset": 2,
-                "slot": "7"
-              }
-            ],
-            "numberOfBytes": "256"
-          },
-          "t_struct(Duel)10936_storage": {
-            "label": "struct Duel",
-            "members": [
-              {
-                "label": "creator",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "topic",
-                "type": "t_string_storage",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "createTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "2"
-              },
-              {
-                "label": "startTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "3"
-              },
-              {
-                "label": "expiryTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "4"
-              },
-              {
-                "label": "minWager",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "5"
-              },
-              {
-                "label": "duelStatus",
-                "type": "t_enum(DuelStatus)10983",
-                "offset": 0,
-                "slot": "6"
-              },
-              {
-                "label": "category",
-                "type": "t_enum(DuelCategory)10992",
-                "offset": 1,
-                "slot": "6"
-              }
-            ],
-            "numberOfBytes": "224"
-          }
-        },
-        "namespaces": {
-          "erc7201:openzeppelin.storage.ReentrancyGuard": [
-            {
-              "contract": "ReentrancyGuardUpgradeable",
-              "label": "_status",
-              "type": "t_uint256",
-              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:40",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Pausable": [
-            {
-              "contract": "PausableUpgradeable",
-              "label": "_paused",
-              "type": "t_bool",
-              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Ownable": [
-            {
-              "contract": "OwnableUpgradeable",
-              "label": "_owner",
-              "type": "t_address",
-              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Initializable": [
-            {
-              "contract": "Initializable",
-              "label": "_initialized",
-              "type": "t_uint64",
-              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
-              "offset": 0,
-              "slot": "0"
-            },
-            {
-              "contract": "Initializable",
-              "label": "_initializing",
-              "type": "t_bool",
-              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
-              "offset": 8,
-              "slot": "0"
-            }
-          ]
-        }
-      }
-    },
-    "7a525948d74c1affdddaf5af49111ade0ac7707cbfa7e99d264c94be81f33313": {
-      "address": "0xA78F94dBc54e7C1DCA6C0eFb684786E1828aE4bC",
-      "txHash": "0x42731e86577d7fa42fe762cf576eb60283f3dec3a29d0e79270dc6d79ec63e8e",
-      "layout": {
-        "solcVersion": "0.8.26",
-        "storage": [
-          {
-            "label": "sales",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(Sale)6422_storage))",
-            "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:22"
-          },
-          {
-            "label": "saleCounter",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_uint256",
-            "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:23"
-          },
-          {
-            "label": "usdc",
-            "offset": 0,
-            "slot": "2",
-            "type": "t_contract(IERC20)2697",
-            "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:24"
-          },
-          {
-            "label": "maxStrikes",
-            "offset": 0,
-            "slot": "3",
-            "type": "t_uint256",
-            "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:25"
-          },
-          {
-            "label": "fees",
-            "offset": 0,
-            "slot": "4",
-            "type": "t_uint256",
-            "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:27"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_struct(InitializableStorage)126_storage": {
-            "label": "struct Initializable.InitializableStorage",
-            "members": [
-              {
-                "label": "_initialized",
-                "type": "t_uint64",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "_initializing",
-                "type": "t_bool",
-                "offset": 8,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(OwnableStorage)59_storage": {
-            "label": "struct OwnableUpgradeable.OwnableStorage",
-            "members": [
-              {
-                "label": "_owner",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(PausableStorage)498_storage": {
-            "label": "struct PausableUpgradeable.PausableStorage",
-            "members": [
-              {
-                "label": "_paused",
-                "type": "t_bool",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(ReentrancyGuardStorage)569_storage": {
-            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
-            "members": [
-              {
-                "label": "_status",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint64": {
-            "label": "uint64",
-            "numberOfBytes": "8"
-          },
-          "t_contract(IERC20)2697": {
-            "label": "contract IERC20",
-            "numberOfBytes": "20"
-          },
-          "t_mapping(t_address,t_mapping(t_uint256,t_struct(Sale)6422_storage))": {
-            "label": "mapping(address => mapping(uint256 => struct FlashDuelsMarketplace.Sale))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_struct(Sale)6422_storage)": {
-            "label": "mapping(uint256 => struct FlashDuelsMarketplace.Sale)",
-            "numberOfBytes": "32"
-          },
-          "t_struct(Sale)6422_storage": {
-            "label": "struct FlashDuelsMarketplace.Sale",
-            "members": [
-              {
-                "label": "seller",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "qnty",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "strike",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "2"
-              },
-              {
-                "label": "totalPrice",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "3"
-              }
-            ],
-            "numberOfBytes": "128"
-          }
-        },
-        "namespaces": {
-          "erc7201:openzeppelin.storage.ReentrancyGuard": [
-            {
-              "contract": "ReentrancyGuardUpgradeable",
-              "label": "_status",
-              "type": "t_uint256",
-              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:40",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Pausable": [
-            {
-              "contract": "PausableUpgradeable",
-              "label": "_paused",
-              "type": "t_bool",
-              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Ownable": [
-            {
-              "contract": "OwnableUpgradeable",
-              "label": "_owner",
-              "type": "t_address",
-              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Initializable": [
-            {
-              "contract": "Initializable",
-              "label": "_initialized",
-              "type": "t_uint64",
-              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
-              "offset": 0,
-              "slot": "0"
-            },
-            {
-              "contract": "Initializable",
-              "label": "_initializing",
-              "type": "t_bool",
-              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
-              "offset": 8,
-              "slot": "0"
-            }
-          ]
-        }
-      }
-    },
-    "48806a28979dff64f94f35b406957e1dbbb4ba9862379f64ae14bc7075e3401d": {
-      "address": "0x8f024cc0bF00EdbAFa9159ef39e4fea93e1AEA0b",
-      "txHash": "0xee4bfea62d854ebbe9d0ced646371c87f290d3f53067363e90841bb64d853a34",
-      "layout": {
-        "solcVersion": "0.8.26",
-        "storage": [
-          {
-            "label": "totalProtocolFeesGenerated",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:38"
-          },
-          {
-            "label": "protocolFeePercentage",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:40"
-          },
-          {
-            "label": "creatorFeePercentage",
-            "offset": 0,
-            "slot": "2",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:42"
-          },
-          {
-            "label": "bootstrapPeriod",
-            "offset": 0,
-            "slot": "3",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:44"
-          },
-          {
-            "label": "createDuelFee",
-            "offset": 0,
-            "slot": "4",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:46"
-          },
-          {
-            "label": "minThreshold",
-            "offset": 0,
-            "slot": "5",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:48"
-          },
-          {
-            "label": "nonce",
-            "offset": 0,
-            "slot": "6",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:50"
-          },
-          {
-            "label": "userWager",
-            "offset": 0,
-            "slot": "7",
-            "type": "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256)))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:52"
-          },
-          {
-            "label": "optionIndexToOptionToken",
-            "offset": 0,
-            "slot": "8",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_address))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:54"
-          },
-          {
-            "label": "totalWagerForOption",
-            "offset": 0,
-            "slot": "9",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:56"
-          },
-          {
-            "label": "duelUsersForOption",
-            "offset": 0,
-            "slot": "10",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:58"
-          },
-          {
-            "label": "startPriceToken",
-            "offset": 0,
-            "slot": "11",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_int256))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:60"
-          },
-          {
-            "label": "totalBetsOnDuel",
-            "offset": 0,
-            "slot": "12",
-            "type": "t_mapping(t_string_memory_ptr,t_uint256)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:62"
-          },
-          {
-            "label": "totalBetsOnOption",
-            "offset": 0,
-            "slot": "13",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_uint256)))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:64"
-          },
-          {
-            "label": "totalCreatorFeeEarned",
-            "offset": 0,
-            "slot": "14",
-            "type": "t_mapping(t_address,t_uint256)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:66"
-          },
-          {
-            "label": "creatorToDuelIds",
-            "offset": 0,
-            "slot": "15",
-            "type": "t_mapping(t_address,t_array(t_string_storage)dyn_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:68"
-          },
-          {
-            "label": "duelIdToOptions",
-            "offset": 0,
-            "slot": "16",
-            "type": "t_mapping(t_string_memory_ptr,t_array(t_string_storage)dyn_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:70"
-          },
-          {
-            "label": "optionIndexToOption",
-            "offset": 0,
-            "slot": "17",
-            "type": "t_mapping(t_uint256,t_string_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:72"
-          },
-          {
-            "label": "allTimeEarnings",
-            "offset": 0,
-            "slot": "18",
-            "type": "t_mapping(t_address,t_uint256)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:74"
-          },
-          {
-            "label": "supportedTokenSymbols",
-            "offset": 0,
-            "slot": "19",
-            "type": "t_mapping(t_string_memory_ptr,t_bool)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:76"
-          },
-          {
-            "label": "isValidDuelId",
-            "offset": 0,
-            "slot": "20",
-            "type": "t_mapping(t_string_memory_ptr,t_bool)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:78"
-          },
-          {
-            "label": "duels",
-            "offset": 0,
-            "slot": "21",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(Duel)5432_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:80"
-          },
-          {
-            "label": "cryptoDuels",
-            "offset": 0,
-            "slot": "22",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(CryptoDuel)5467_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:82"
-          },
-          {
-            "label": "usdc",
-            "offset": 0,
-            "slot": "23",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:84"
-          },
-          {
-            "label": "bot",
-            "offset": 0,
-            "slot": "24",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:86"
-          },
-          {
-            "label": "protocolAddress",
-            "offset": 0,
-            "slot": "25",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:88"
           }
         ],
         "types": {
@@ -1964,7 +469,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(PausableStorage)241_storage": {
+          "t_struct(PausableStorage)452_storage": {
             "label": "struct PausableUpgradeable.PausableStorage",
             "members": [
               {
@@ -1976,7 +481,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(ReentrancyGuardStorage)312_storage": {
+          "t_struct(ReentrancyGuardStorage)523_storage": {
             "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
             "members": [
               {
@@ -2004,7 +509,7 @@
             "label": "string[]",
             "numberOfBytes": "32"
           },
-          "t_enum(DuelCategory)5488": {
+          "t_enum(DuelCategory)6856": {
             "label": "enum DuelCategory",
             "members": [
               "Any",
@@ -2017,7 +522,16 @@
             ],
             "numberOfBytes": "1"
           },
-          "t_enum(DuelStatus)5479": {
+          "t_enum(DuelDuration)6840": {
+            "label": "enum DuelDuration",
+            "members": [
+              "ThreeHours",
+              "SixHours",
+              "TwelveHours"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_enum(DuelStatus)6847": {
             "label": "enum DuelStatus",
             "members": [
               "NotStarted",
@@ -2028,7 +542,7 @@
             ],
             "numberOfBytes": "1"
           },
-          "t_enum(TriggerCondition)5496": {
+          "t_enum(TriggerCondition)6864": {
             "label": "enum TriggerCondition",
             "members": [
               "Above",
@@ -2036,7 +550,7 @@
             ],
             "numberOfBytes": "1"
           },
-          "t_enum(TriggerType)5492": {
+          "t_enum(TriggerType)6860": {
             "label": "enum TriggerType",
             "members": [
               "Absolute",
@@ -2096,11 +610,11 @@
             "label": "mapping(string => mapping(uint256 => mapping(string => uint256)))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_string_memory_ptr,t_struct(CryptoDuel)5467_storage)": {
+          "t_mapping(t_string_memory_ptr,t_struct(CryptoDuel)6835_storage)": {
             "label": "mapping(string => struct CryptoDuel)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_string_memory_ptr,t_struct(Duel)5432_storage)": {
+          "t_mapping(t_string_memory_ptr,t_struct(Duel)6799_storage)": {
             "label": "mapping(string => struct Duel)",
             "numberOfBytes": "32"
           },
@@ -2128,7 +642,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(CryptoDuel)5467_storage": {
+          "t_struct(CryptoDuel)6835_storage": {
             "label": "struct CryptoDuel",
             "members": [
               {
@@ -2162,39 +676,39 @@
                 "slot": "4"
               },
               {
-                "label": "minWager",
-                "type": "t_uint256",
+                "label": "triggerValue",
+                "type": "t_int256",
                 "offset": 0,
                 "slot": "5"
               },
               {
-                "label": "triggerValue",
-                "type": "t_int256",
+                "label": "triggerType",
+                "type": "t_enum(TriggerType)6860",
                 "offset": 0,
                 "slot": "6"
               },
               {
-                "label": "triggerType",
-                "type": "t_enum(TriggerType)5492",
-                "offset": 0,
-                "slot": "7"
+                "label": "triggerCondition",
+                "type": "t_enum(TriggerCondition)6864",
+                "offset": 1,
+                "slot": "6"
               },
               {
-                "label": "triggerCondition",
-                "type": "t_enum(TriggerCondition)5496",
-                "offset": 1,
-                "slot": "7"
+                "label": "duelDuration",
+                "type": "t_enum(DuelDuration)6840",
+                "offset": 2,
+                "slot": "6"
               },
               {
                 "label": "duelStatus",
-                "type": "t_enum(DuelStatus)5479",
-                "offset": 2,
-                "slot": "7"
+                "type": "t_enum(DuelStatus)6847",
+                "offset": 3,
+                "slot": "6"
               }
             ],
-            "numberOfBytes": "256"
+            "numberOfBytes": "224"
           },
-          "t_struct(Duel)5432_storage": {
+          "t_struct(Duel)6799_storage": {
             "label": "struct Duel",
             "members": [
               {
@@ -2228,25 +742,25 @@
                 "slot": "4"
               },
               {
-                "label": "minWager",
-                "type": "t_uint256",
+                "label": "duelDuration",
+                "type": "t_enum(DuelDuration)6840",
                 "offset": 0,
                 "slot": "5"
               },
               {
                 "label": "duelStatus",
-                "type": "t_enum(DuelStatus)5479",
-                "offset": 0,
-                "slot": "6"
+                "type": "t_enum(DuelStatus)6847",
+                "offset": 1,
+                "slot": "5"
               },
               {
                 "label": "category",
-                "type": "t_enum(DuelCategory)5488",
-                "offset": 1,
-                "slot": "6"
+                "type": "t_enum(DuelCategory)6856",
+                "offset": 2,
+                "slot": "5"
               }
             ],
-            "numberOfBytes": "224"
+            "numberOfBytes": "192"
           }
         },
         "namespaces": {
@@ -2301,9 +815,9 @@
         }
       }
     },
-    "d3788c81b24130272f397680582ffb4330b858b90e95a73a50930d5172aad28b": {
-      "address": "0x4E31450eFEc7bc296655DB2a51C94B1Aaa3b7fc9",
-      "txHash": "0xc6b24cd1b8f00e9a1aa1386c4aca49033d455b6bdb5b700c68b2b43e1b12596c",
+    "b2c900a11ebd5214b1f34921fe6eee7c3ee9ba4d3204043f19de4c7c10649b20": {
+      "address": "0x588EB0eD8BDC4276316C3e9aaF1C0880B1dcecaa",
+      "txHash": "0x921df2d53481f8e56370b209fa146a51476beed3fa3b8232403f306a5ec72b19",
       "layout": {
         "solcVersion": "0.8.26",
         "storage": [
@@ -2313,7 +827,7 @@
             "slot": "0",
             "type": "t_address",
             "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:32"
+            "src": "contracts/FlashDuelsMarketplace.sol:27"
           },
           {
             "label": "saleCounter",
@@ -2321,7 +835,7 @@
             "slot": "1",
             "type": "t_uint256",
             "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:33"
+            "src": "contracts/FlashDuelsMarketplace.sol:28"
           },
           {
             "label": "maxStrikes",
@@ -2329,7 +843,7 @@
             "slot": "2",
             "type": "t_uint256",
             "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:34"
+            "src": "contracts/FlashDuelsMarketplace.sol:29"
           },
           {
             "label": "fees",
@@ -2337,15 +851,15 @@
             "slot": "3",
             "type": "t_uint256",
             "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:36"
+            "src": "contracts/FlashDuelsMarketplace.sol:31"
           },
           {
             "label": "flashDuels",
             "offset": 0,
             "slot": "4",
-            "type": "t_contract(IFlashDuels)7132",
+            "type": "t_contract(IFlashDuels)7049",
             "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:37"
+            "src": "contracts/FlashDuelsMarketplace.sol:32"
           },
           {
             "label": "usdc",
@@ -2353,15 +867,15 @@
             "slot": "5",
             "type": "t_contract(IERC20)2651",
             "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:38"
+            "src": "contracts/FlashDuelsMarketplace.sol:33"
           },
           {
             "label": "sales",
             "offset": 0,
             "slot": "6",
-            "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(Sale)6332_storage))",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_struct(Sale)6204_storage))",
             "contract": "FlashDuelsMarketplace",
-            "src": "contracts/FlashDuelsMarketplace.sol:41"
+            "src": "contracts/FlashDuelsMarketplace.sol:36"
           }
         ],
         "types": {
@@ -2439,19 +953,19 @@
             "label": "contract IERC20",
             "numberOfBytes": "20"
           },
-          "t_contract(IFlashDuels)7132": {
+          "t_contract(IFlashDuels)7049": {
             "label": "contract IFlashDuels",
             "numberOfBytes": "20"
           },
-          "t_mapping(t_address,t_mapping(t_uint256,t_struct(Sale)6332_storage))": {
+          "t_mapping(t_address,t_mapping(t_uint256,t_struct(Sale)6204_storage))": {
             "label": "mapping(address => mapping(uint256 => struct FlashDuelsMarketplace.Sale))",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Sale)6332_storage)": {
+          "t_mapping(t_uint256,t_struct(Sale)6204_storage)": {
             "label": "mapping(uint256 => struct FlashDuelsMarketplace.Sale)",
             "numberOfBytes": "32"
           },
-          "t_struct(Sale)6332_storage": {
+          "t_struct(Sale)6204_storage": {
             "label": "struct FlashDuelsMarketplace.Sale",
             "members": [
               {
@@ -2480,589 +994,6 @@
               }
             ],
             "numberOfBytes": "128"
-          }
-        },
-        "namespaces": {
-          "erc7201:openzeppelin.storage.ReentrancyGuard": [
-            {
-              "contract": "ReentrancyGuardUpgradeable",
-              "label": "_status",
-              "type": "t_uint256",
-              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:40",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Pausable": [
-            {
-              "contract": "PausableUpgradeable",
-              "label": "_paused",
-              "type": "t_bool",
-              "src": "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:21",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Ownable": [
-            {
-              "contract": "OwnableUpgradeable",
-              "label": "_owner",
-              "type": "t_address",
-              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
-              "offset": 0,
-              "slot": "0"
-            }
-          ],
-          "erc7201:openzeppelin.storage.Initializable": [
-            {
-              "contract": "Initializable",
-              "label": "_initialized",
-              "type": "t_uint64",
-              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
-              "offset": 0,
-              "slot": "0"
-            },
-            {
-              "contract": "Initializable",
-              "label": "_initializing",
-              "type": "t_bool",
-              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
-              "offset": 8,
-              "slot": "0"
-            }
-          ]
-        }
-      }
-    },
-    "a162e0a1a51358d962ab100df742a7f1c7aa0cb08e468d8e55b055de13df1a81": {
-      "address": "0x30c680729ED1fa1C3625047ADd2080F14f7403A3",
-      "txHash": "0x9437ec56dc9e98deafb519e50da0d4c34998c3a109b8f82d5d058a96c9e58949",
-      "layout": {
-        "solcVersion": "0.8.26",
-        "storage": [
-          {
-            "label": "totalProtocolFeesGenerated",
-            "offset": 0,
-            "slot": "0",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:38"
-          },
-          {
-            "label": "protocolFeePercentage",
-            "offset": 0,
-            "slot": "1",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:40"
-          },
-          {
-            "label": "creatorFeePercentage",
-            "offset": 0,
-            "slot": "2",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:42"
-          },
-          {
-            "label": "bootstrapPeriod",
-            "offset": 0,
-            "slot": "3",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:44"
-          },
-          {
-            "label": "createDuelFee",
-            "offset": 0,
-            "slot": "4",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:46"
-          },
-          {
-            "label": "minThreshold",
-            "offset": 0,
-            "slot": "5",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:48"
-          },
-          {
-            "label": "nonce",
-            "offset": 0,
-            "slot": "6",
-            "type": "t_uint256",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:50"
-          },
-          {
-            "label": "userWager",
-            "offset": 0,
-            "slot": "7",
-            "type": "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256)))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:52"
-          },
-          {
-            "label": "optionIndexToOptionToken",
-            "offset": 0,
-            "slot": "8",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_address))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:54"
-          },
-          {
-            "label": "totalWagerForOption",
-            "offset": 0,
-            "slot": "9",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:56"
-          },
-          {
-            "label": "duelUsersForOption",
-            "offset": 0,
-            "slot": "10",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:58"
-          },
-          {
-            "label": "startPriceToken",
-            "offset": 0,
-            "slot": "11",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_int256))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:60"
-          },
-          {
-            "label": "totalBetsOnDuel",
-            "offset": 0,
-            "slot": "12",
-            "type": "t_mapping(t_string_memory_ptr,t_uint256)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:62"
-          },
-          {
-            "label": "totalBetsOnOption",
-            "offset": 0,
-            "slot": "13",
-            "type": "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_uint256)))",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:64"
-          },
-          {
-            "label": "totalCreatorFeeEarned",
-            "offset": 0,
-            "slot": "14",
-            "type": "t_mapping(t_address,t_uint256)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:66"
-          },
-          {
-            "label": "creatorToDuelIds",
-            "offset": 0,
-            "slot": "15",
-            "type": "t_mapping(t_address,t_array(t_string_storage)dyn_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:68"
-          },
-          {
-            "label": "duelIdToOptions",
-            "offset": 0,
-            "slot": "16",
-            "type": "t_mapping(t_string_memory_ptr,t_array(t_string_storage)dyn_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:70"
-          },
-          {
-            "label": "optionIndexToOption",
-            "offset": 0,
-            "slot": "17",
-            "type": "t_mapping(t_uint256,t_string_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:72"
-          },
-          {
-            "label": "allTimeEarnings",
-            "offset": 0,
-            "slot": "18",
-            "type": "t_mapping(t_address,t_uint256)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:74"
-          },
-          {
-            "label": "isValidDuelId",
-            "offset": 0,
-            "slot": "19",
-            "type": "t_mapping(t_string_memory_ptr,t_bool)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:76"
-          },
-          {
-            "label": "duels",
-            "offset": 0,
-            "slot": "20",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(Duel)6816_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:78"
-          },
-          {
-            "label": "cryptoDuels",
-            "offset": 0,
-            "slot": "21",
-            "type": "t_mapping(t_string_memory_ptr,t_struct(CryptoDuel)6851_storage)",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:80"
-          },
-          {
-            "label": "usdc",
-            "offset": 0,
-            "slot": "22",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:82"
-          },
-          {
-            "label": "bot",
-            "offset": 0,
-            "slot": "23",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:84"
-          },
-          {
-            "label": "protocolAddress",
-            "offset": 0,
-            "slot": "24",
-            "type": "t_address",
-            "contract": "FlashDuels",
-            "src": "contracts/FlashDuels.sol:86"
-          }
-        ],
-        "types": {
-          "t_address": {
-            "label": "address",
-            "numberOfBytes": "20"
-          },
-          "t_bool": {
-            "label": "bool",
-            "numberOfBytes": "1"
-          },
-          "t_struct(InitializableStorage)80_storage": {
-            "label": "struct Initializable.InitializableStorage",
-            "members": [
-              {
-                "label": "_initialized",
-                "type": "t_uint64",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "_initializing",
-                "type": "t_bool",
-                "offset": 8,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(OwnableStorage)13_storage": {
-            "label": "struct OwnableUpgradeable.OwnableStorage",
-            "members": [
-              {
-                "label": "_owner",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(PausableStorage)452_storage": {
-            "label": "struct PausableUpgradeable.PausableStorage",
-            "members": [
-              {
-                "label": "_paused",
-                "type": "t_bool",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_struct(ReentrancyGuardStorage)523_storage": {
-            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
-            "members": [
-              {
-                "label": "_status",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "0"
-              }
-            ],
-            "numberOfBytes": "32"
-          },
-          "t_uint256": {
-            "label": "uint256",
-            "numberOfBytes": "32"
-          },
-          "t_uint64": {
-            "label": "uint64",
-            "numberOfBytes": "8"
-          },
-          "t_array(t_address)dyn_storage": {
-            "label": "address[]",
-            "numberOfBytes": "32"
-          },
-          "t_array(t_string_storage)dyn_storage": {
-            "label": "string[]",
-            "numberOfBytes": "32"
-          },
-          "t_enum(DuelCategory)6872": {
-            "label": "enum DuelCategory",
-            "members": [
-              "Any",
-              "Crypto",
-              "Politics",
-              "Sports",
-              "Twitter",
-              "NFTs",
-              "News"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_enum(DuelStatus)6863": {
-            "label": "enum DuelStatus",
-            "members": [
-              "NotStarted",
-              "BootStrapped",
-              "Live",
-              "Settled",
-              "Cancelled"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_enum(TriggerCondition)6880": {
-            "label": "enum TriggerCondition",
-            "members": [
-              "Above",
-              "Below"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_enum(TriggerType)6876": {
-            "label": "enum TriggerType",
-            "members": [
-              "Absolute",
-              "Percentage"
-            ],
-            "numberOfBytes": "1"
-          },
-          "t_int256": {
-            "label": "int256",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_array(t_string_storage)dyn_storage)": {
-            "label": "mapping(address => string[])",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256)))": {
-            "label": "mapping(address => mapping(string => mapping(string => uint256)))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_address,t_uint256)": {
-            "label": "mapping(address => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage)": {
-            "label": "mapping(string => address[])",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_array(t_string_storage)dyn_storage)": {
-            "label": "mapping(string => string[])",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_bool)": {
-            "label": "mapping(string => bool)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_int256)": {
-            "label": "mapping(string => int256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_array(t_address)dyn_storage))": {
-            "label": "mapping(string => mapping(string => address[]))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_int256))": {
-            "label": "mapping(string => mapping(string => int256))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_string_memory_ptr,t_uint256))": {
-            "label": "mapping(string => mapping(string => uint256))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_address))": {
-            "label": "mapping(string => mapping(uint256 => address))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_uint256)))": {
-            "label": "mapping(string => mapping(uint256 => mapping(string => uint256)))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_struct(CryptoDuel)6851_storage)": {
-            "label": "mapping(string => struct CryptoDuel)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_struct(Duel)6816_storage)": {
-            "label": "mapping(string => struct Duel)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_string_memory_ptr,t_uint256)": {
-            "label": "mapping(string => uint256)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_address)": {
-            "label": "mapping(uint256 => address)",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_mapping(t_string_memory_ptr,t_uint256))": {
-            "label": "mapping(uint256 => mapping(string => uint256))",
-            "numberOfBytes": "32"
-          },
-          "t_mapping(t_uint256,t_string_storage)": {
-            "label": "mapping(uint256 => string)",
-            "numberOfBytes": "32"
-          },
-          "t_string_memory_ptr": {
-            "label": "string",
-            "numberOfBytes": "32"
-          },
-          "t_string_storage": {
-            "label": "string",
-            "numberOfBytes": "32"
-          },
-          "t_struct(CryptoDuel)6851_storage": {
-            "label": "struct CryptoDuel",
-            "members": [
-              {
-                "label": "creator",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "tokenSymbol",
-                "type": "t_string_storage",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "createTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "2"
-              },
-              {
-                "label": "startTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "3"
-              },
-              {
-                "label": "expiryTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "4"
-              },
-              {
-                "label": "minWager",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "5"
-              },
-              {
-                "label": "triggerValue",
-                "type": "t_int256",
-                "offset": 0,
-                "slot": "6"
-              },
-              {
-                "label": "triggerType",
-                "type": "t_enum(TriggerType)6876",
-                "offset": 0,
-                "slot": "7"
-              },
-              {
-                "label": "triggerCondition",
-                "type": "t_enum(TriggerCondition)6880",
-                "offset": 1,
-                "slot": "7"
-              },
-              {
-                "label": "duelStatus",
-                "type": "t_enum(DuelStatus)6863",
-                "offset": 2,
-                "slot": "7"
-              }
-            ],
-            "numberOfBytes": "256"
-          },
-          "t_struct(Duel)6816_storage": {
-            "label": "struct Duel",
-            "members": [
-              {
-                "label": "creator",
-                "type": "t_address",
-                "offset": 0,
-                "slot": "0"
-              },
-              {
-                "label": "topic",
-                "type": "t_string_storage",
-                "offset": 0,
-                "slot": "1"
-              },
-              {
-                "label": "createTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "2"
-              },
-              {
-                "label": "startTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "3"
-              },
-              {
-                "label": "expiryTime",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "4"
-              },
-              {
-                "label": "minWager",
-                "type": "t_uint256",
-                "offset": 0,
-                "slot": "5"
-              },
-              {
-                "label": "duelStatus",
-                "type": "t_enum(DuelStatus)6863",
-                "offset": 0,
-                "slot": "6"
-              },
-              {
-                "label": "category",
-                "type": "t_enum(DuelCategory)6872",
-                "offset": 1,
-                "slot": "6"
-              }
-            ],
-            "numberOfBytes": "224"
           }
         },
         "namespaces": {

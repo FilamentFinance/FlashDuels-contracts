@@ -13,8 +13,8 @@ struct Duel {
     uint256 startTime;
     /// @notice UNIX timestamp when the duel expires
     uint256 expiryTime;
-    /// @notice Minimum wager amount in the duel option
-    uint256 minWager;
+    /// @notice Duel duration
+    DuelDuration duelDuration;
     /// @notice Status of the duel
     DuelStatus duelStatus;
     /// @notice Category of the duel
@@ -25,7 +25,7 @@ struct Duel {
 struct CryptoDuel {
     /// @notice Address of the duel creator
     address creator;
-    /// @notice Sybol of the token
+    /// @notice Symbol of the token
     string tokenSymbol;
     /// @notice UNIX timestamp when the duel creates
     uint256 createTime;
@@ -33,14 +33,14 @@ struct CryptoDuel {
     uint256 startTime;
     /// @notice UNIX timestamp when the duel expires
     uint256 expiryTime;
-    /// @notice Minimum wager amount in the duel option
-    uint256 minWager;
-    /// @notice Trigger value
+    /// @notice Trigger value of the token
     int256 triggerValue;
     /// @notice Trigger type
     TriggerType triggerType;
     /// @notice Trigger condition
     TriggerCondition triggerCondition;
+    /// @notice Duel duration
+    DuelDuration duelDuration;
     /// @notice Status of the duel
     DuelStatus duelStatus;
 }
@@ -89,7 +89,6 @@ enum TriggerCondition {
 /// @param duelId The unique ID of the duel
 /// @param topic The description of duel
 /// @param createTime The time the duel was created
-/// @param expiryTime The time the duel will expire
 /// @param createDuelFee The fee paid for creating the duel
 /// @param category The category of the duel
 event DuelCreated(
@@ -97,17 +96,15 @@ event DuelCreated(
     string duelId,
     string topic,
     uint256 createTime,
-    uint256 expiryTime,
     uint256 createDuelFee,
     DuelCategory category
 );
 
-/// @notice Emitted when a new duel is created
+/// @notice Emitted when a new crypto duel is created
 /// @param creator The address of the duel creator
 /// @param tokenSymbol The symbol of token
 /// @param duelId The unique ID of the duel
 /// @param createTime The time the duel was created
-/// @param expiryTime The time the duel will expire
 /// @param createDuelFee The fee paid for creating the duel
 /// @param category The category of the duel
 event CryptoDuelCreated(
@@ -115,7 +112,6 @@ event CryptoDuelCreated(
     string tokenSymbol,
     string duelId,
     uint256 createTime,
-    uint256 expiryTime,
     uint256 createDuelFee,
     int256 triggerValue,
     TriggerType triggerType,
@@ -125,7 +121,7 @@ event CryptoDuelCreated(
 
 /// @notice Emitted when a participant joins a duel
 /// @param duelId The ID of the duel being joined
-/// @param topic The topic related to the token
+/// @param topic The topic/description related to the duel
 /// @param participant The address of the participant
 /// @param amount The amount wagered
 /// @param optionToken The option token
@@ -134,15 +130,18 @@ event CryptoDuelCreated(
 event DuelJoined(
     string duelId,
     string topic,
+    string option,
     address indexed participant,
-    uint256 amount,
     address optionToken,
+    uint256 optionIndex,
+    uint256 amount,
     uint256 amountOptionToken,
     uint256 joinTime
 );
 
-/// @notice Emitted when a participant joins a duel
+/// @notice Emitted when a participant joins a crypto duel
 /// @param duelId The ID of the duel being joined
+/// @param tokenSymbol The token symbol
 /// @param participant The address of the participant
 /// @param tokenSymbol The token symbol being wagered on
 /// @param amount The amount wagered
@@ -151,10 +150,12 @@ event DuelJoined(
 /// @param joinTime The time the participant joined the duel
 event CryptoDuelJoined(
     string duelId,
-    address indexed participant,
     string tokenSymbol,
-    uint256 amount,
+    string option,
+    address indexed participant,
     address optionToken,
+    uint256 optionIndex,
+    uint256 amount,
     uint256 amountOptionToken,
     uint256 joinTime
 );
@@ -162,35 +163,41 @@ event CryptoDuelJoined(
 /// @notice Emitted when a duel starts
 /// @param duelId The ID of the duel that started
 /// @param startTime The time the duel started
-event DuelStarted(string duelId, uint256 startTime);
+/// @param expiryTime The time the duel will expire
+event DuelStarted(string duelId, uint256 startTime, uint256 expiryTime);
 
 /// @notice Emitted when a duel is settled and the winner is determined
 /// @param duelId The ID of the duel that was settled
-/// @param winningTopic The topic associated with the winning token
+/// @param winningOption The winning option
 /// @param optionIndex The option index
-event DuelSettled(string duelId, string winningTopic, uint256 optionIndex);
+/// @param settleTime The time the duel will settle
+event DuelSettled(string duelId, string winningOption, uint256 optionIndex, uint256 settleTime);
 
 /// @notice Emitted when a user withdraws their earnings
 /// @param user The address of the user withdrawing earnings
 /// @param amount The amount withdrawn
-event WithdrawEarning(address indexed user, uint256 amount);
+/// @param withdrawEarningTime The earnings withdraw timestamp
+event WithdrawEarning(address indexed user, uint256 amount, uint256 withdrawEarningTime);
 
 /// @notice Emitted when a duel creator withdraws their creator fees
 /// @param user The address of the duel creator
 /// @param creatorFee The fee withdrawn by the creator
-event WithdrawCreatorEarning(address indexed user, uint256 creatorFee);
+/// @param withdrawCreatorEarningTime The creator earnings withdraw timestamp
+event WithdrawCreatorEarning(address indexed user, uint256 creatorFee, uint256 withdrawCreatorEarningTime);
 
 /// @notice Emitted when protocol fees are withdrawn
 /// @param user The address of the protocol
 /// @param protocolBalance The amount withdrawn as protocol fees
-event WithdrawProtocolFee(address indexed user, uint256 protocolBalance);
+/// @param withdrawProtocolFeeTime The protocol fees withdraw timestamp
+event WithdrawProtocolFee(address indexed user, uint256 protocolBalance, uint256 withdrawProtocolFeeTime);
 
 /// @notice Emitted when a refund is issued for a cancelled duel
 /// @param duelId The ID of the cancelled duel
 /// @param option The option for which refund issued
 /// @param recipient The address receiving the refund
 /// @param amount The amount refunded for option
-event RefundIssued(string duelId, string option, address indexed recipient, uint256 amount);
+/// @param refundTime The refund time for the duel
+event RefundIssued(string duelId, string option, address indexed recipient, uint256 amount, uint256 refundTime);
 
 /// @notice Emitted when a duel is cancelled
 /// @param duelId The ID of the cancelled duel
