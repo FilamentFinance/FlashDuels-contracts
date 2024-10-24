@@ -279,6 +279,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.category != DuelCategory.Crypto, "Should not a crypto duel");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
+        require(_amount >= _optionPrice, "Less than minimum wager");
         // Transfer the wager amount in USDC to the contract
         require(IERC20(usdc).transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
 
@@ -328,6 +329,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         CryptoDuel storage duel = cryptoDuels[_duelId];
         require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
+        require(_amount >= _optionPrice, "Less than minimum wager");
         // Transfer the wager amount in USDC to the contract
         require(IERC20(usdc).transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
 
