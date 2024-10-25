@@ -7,16 +7,17 @@ import netMap from "../constants/networkMapping.json"
 import { forkedChain, networkConfig } from "../helper-hardhat-config"
 
 const main = async () => {
-    let tx, txr, deployer, sequencer, liquidator, rajeeb, addr1: any
+    let tx, txr, deployer, bot, liquidator, rajeeb, addr1: any
     const networkName: any = network.name as keyof typeof netMap
 
     if (forkedChain.includes(networkName)) {
-        console.log("here")
+        console.log("Forked Chain")
         await helpers.mine()
         const provider = ethers.provider
         deployer = new ethers.Wallet(process.env.PRIVATE_KEY_ADMIN!.toString(), provider)
+        bot = new ethers.Wallet(process.env.PRIVATE_KEY_BOT!.toString(), provider)
     } else {
-        ;[deployer, , sequencer, liquidator, addr1] = await ethers.getSigners()
+        ;[deployer, , bot, liquidator, addr1] = await ethers.getSigners()
     }
 
     const flashDuels: FlashDuels = new ethers.Contract(netMap[networkName].FlashDuels, FlashDuelsABI, deployer)
@@ -25,20 +26,29 @@ const main = async () => {
     const expiryTime = 1
     const minWager = ethers.parseUnits("10", 6) // 10 USDC
     // await flashUSDC.connect(deployer).mint(addr1.address, ethers.parseUnits("10", 6))
-    await flashUSDC.connect(deployer).approve(flashDuels.target, ethers.parseUnits("10", 6))
-    let receipt = await flashDuels
-        .connect(deployer)
-        .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], minWager, expiryTime)
-    txr = await receipt.wait(1)
+    await flashUSDC.connect(deployer).approve(flashDuels.target, ethers.parseUnits("170", 6))
+    tx = await flashDuels.connect(deployer).createCryptoDuel("BTC", ["Yes", "No"], "70000000000", 0, 0, 0)
+    txr = await tx.wait(1)
+
+    let duelId = txr?.logs[1].args[2].toString() as string
+    console.log("duelId", duelId)
+
+    let yes = await flashDuels.duelIdToOptions(duelId, 0)
+
+    let no = await flashDuels.duelIdToOptions(duelId, 1)
+    console.log(`${yes} --- ${no}`)
+    tx = await flashDuels.connect(deployer).joinCryptoDuel(duelId, "Yes", "BTC", 1, 50000000, 80000000)
+    txr = await tx.wait(1)
+
+    tx = await flashDuels.connect(deployer).joinCryptoDuel(duelId, "No", "BTC", 0, 50000000, 80000000)
+    txr = await tx.wait(1)
+
+    await ethers.provider.send("evm_increaseTime", [2 * 60])
+    await ethers.provider.send("evm_mine", [])
+
+    tx = await flashDuels.connect(bot).startCryptoDuel(duelId, 50000000)
+    txr = await tx.wait(1)
     console.log(txr?.logs)
-    // // console.log("Total logs length: ", txr?.logs.length)
-    // let duelId
-    // for (let i = 0; i < txr?.logs.length; i++) {
-    //     if (txr?.logs[i]["args"]) {
-    //         // console.log("duelId: ", txr?.logs[i]["args"][1]);
-    //         duelId = txr?.logs[i]["args"][1]
-    //     }
-    // }
 }
 
 main()
