@@ -7,7 +7,7 @@ import netMap from "../constants/networkMapping.json"
 import { forkedChain, networkConfig } from "../helper-hardhat-config"
 
 const main = async () => {
-    let tx, txr, deployer, sequencer, liquidator, rajeeb
+    let tx, txr, deployer, sequencer, liquidator, rajeeb, addr1: any
     const networkName: any = network.name as keyof typeof netMap
 
     if (forkedChain.includes(networkName)) {
@@ -16,22 +16,24 @@ const main = async () => {
         const provider = ethers.provider
         deployer = new ethers.Wallet(process.env.PRIVATE_KEY_ADMIN!.toString(), provider)
     } else {
-        ;[deployer, , sequencer, liquidator] = await ethers.getSigners()
+        ;[deployer, , sequencer, liquidator, addr1] = await ethers.getSigners()
     }
 
     const flashDuels: FlashDuels = new ethers.Contract(netMap[networkName].FlashDuels, FlashDuelsABI, deployer)
     const flashUSDC: FLASHUSDC = new ethers.Contract(netMap[networkName].FLASHUSDC, FLASHUSDCABI, deployer)
 
-    tx = await flashDuels.setProtocolAddress(networkConfig[networkName].protocolTreasury)
-    await tx.wait(1)
-
-    console.log("Set protocol address done")
-
-    tx = await flashDuels.updateBootstrapPeriod("1800") // 30 mins
-    await tx.wait(1)
-    console.log("Update bootstrap period done")
-
-    console.log("🚀🚀🚀 Protocol Settings Done 🚀🚀🚀")
+    tx = await flashDuels.getDuel("")
+    console.log(tx)
+    tx = await flashDuels.cryptoDuels("")
+    console.log(tx)
+    // // console.log("Total logs length: ", txr?.logs.length)
+    // let duelId
+    // for (let i = 0; i < txr?.logs.length; i++) {
+    //     if (txr?.logs[i]["args"]) {
+    //         // console.log("duelId: ", txr?.logs[i]["args"][1]);
+    //         duelId = txr?.logs[i]["args"][1]
+    //     }
+    // }
 }
 
 main()
