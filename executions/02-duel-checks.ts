@@ -26,6 +26,13 @@ const main = async () => {
     console.log(tx)
     tx = await flashDuels.cryptoDuels("")
     console.log(tx)
+    tx = await flashDuels.totalBetsOnDuel("83ed863e6dc1cbd2a4cb34e87d15219a9d8529501f54330da92cd701eacfc3a7");
+    console.log(tx)
+    tx = await flashDuels.totalBetsOnOption("83ed863e6dc1cbd2a4cb34e87d15219a9d8529501f54330da92cd701eacfc3a7", "0", "YES");
+    console.log(tx)
+    tx = await flashDuels.totalBetsOnOption("83ed863e6dc1cbd2a4cb34e87d15219a9d8529501f54330da92cd701eacfc3a7", "1", "NO");
+    console.log(tx)
+
     // // console.log("Total logs length: ", txr?.logs.length)
     // let duelId
     // for (let i = 0; i < txr?.logs.length; i++) {
