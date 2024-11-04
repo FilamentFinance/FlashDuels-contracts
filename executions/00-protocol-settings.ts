@@ -30,7 +30,10 @@ const main = async () => {
     tx = await flashDuels.updateBootstrapPeriod("1800") // 30 mins
     await tx.wait(1)
     console.log("Update bootstrap period done")
-
+  
+    tx = await flashDuels.setCreateDuelFee(5000000)
+    await tx.wait(1)
+    
     console.log("🚀🚀🚀 Protocol Settings Done 🚀🚀🚀")
 }
 
