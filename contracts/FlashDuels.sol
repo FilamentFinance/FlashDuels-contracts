@@ -658,12 +658,13 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /// @param _duelId The unique ID of the duel to be cancelled
     function checkIfThresholdMet(string calldata _duelId) public view returns (bool) {
         uint256 optionsLength = duelIdToOptions[_duelId].length;
+        uint256 totalWager = 0;
+
         for (uint256 i = 0; i < optionsLength; i++) {
-            if (totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold) {
-                return false; // As soon as any value is below the threshold, return false
-            }
+            totalWager += totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]];
         }
-        return true; // If no values are below the threshold, return true
+        // Check if the total wager meets the minimum threshold
+        return totalWager >= minThreshold;
     }
 
     /**
