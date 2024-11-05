@@ -289,11 +289,18 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         userWager[msg.sender][_duelId][duelIdToOptions[_duelId][_optionsIndex]] += _amount;
 
         uint256 amountTokenToMint = (_amount * 1e18) / _optionPrice;
-        // Deploy a new ERC-20 token contract
-        OptionToken newOptionToken = new OptionToken(_option, _option);
-        // Mint the specified amount of option tokens to the recipient address
-        newOptionToken.mint(msg.sender, amountTokenToMint);
-        optionIndexToOptionToken[_duelId][_optionsIndex] = address(newOptionToken);
+        // @note - zokyo-audit-fix: 2
+        address optionToken = optionIndexToOptionToken[_duelId][_optionsIndex];
+        if (optionToken == address(0)) {
+            // Deploy a new ERC-20 token contract
+            OptionToken newOptionToken = new OptionToken(_option, _option);
+            // Mint the specified amount of option tokens to the recipient address
+            newOptionToken.mint(msg.sender, amountTokenToMint);
+            optionToken = address(newOptionToken);
+            optionIndexToOptionToken[_duelId][_optionsIndex] = address(newOptionToken);
+        } else {
+            OptionToken(optionToken).mint(msg.sender, amountTokenToMint);
+        }
 
         totalBetsOnDuel[_duelId] += amountTokenToMint;
         totalBetsOnOption[_duelId][_optionsIndex][_option] += amountTokenToMint;
@@ -303,7 +310,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             duel.topic,
             _option,
             msg.sender,
-            address(newOptionToken),
+            optionToken,
             _optionsIndex,
             _amount,
             amountTokenToMint,
@@ -337,13 +344,19 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         totalWagerForOption[_duelId][duelIdToOptions[_duelId][_optionsIndex]] += _amount;
         duelUsersForOption[_duelId][duelIdToOptions[_duelId][_optionsIndex]].push(msg.sender);
         userWager[msg.sender][_duelId][duelIdToOptions[_duelId][_optionsIndex]] += _amount;
-
         uint256 amountTokenToMint = (_amount * 1e18) / _optionPrice;
-        // Deploy a new ERC-20 token contract
-        OptionToken newOptionToken = new OptionToken(_option, _option);
-        // Mint the specified amount of option tokens to the recipient address
-        newOptionToken.mint(msg.sender, amountTokenToMint);
-        optionIndexToOptionToken[_duelId][_optionsIndex] = address(newOptionToken);
+        // @note - zokyo-audit-fix: 2
+        address optionToken = optionIndexToOptionToken[_duelId][_optionsIndex];
+        if (optionToken == address(0)) {
+            // Deploy a new ERC-20 token contract
+            OptionToken newOptionToken = new OptionToken(_option, _option);
+            // Mint the specified amount of option tokens to the recipient address
+            newOptionToken.mint(msg.sender, amountTokenToMint);
+            optionToken = address(newOptionToken);
+            optionIndexToOptionToken[_duelId][_optionsIndex] = address(newOptionToken);
+        } else {
+            OptionToken(optionToken).mint(msg.sender, amountTokenToMint);
+        }
 
         totalBetsOnDuel[_duelId] += amountTokenToMint;
         totalBetsOnOption[_duelId][_optionsIndex][_option] += amountTokenToMint;
@@ -353,7 +366,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             _tokenSymbol,
             _option,
             msg.sender,
-            address(newOptionToken),
+            optionToken,
             _optionsIndex,
             _amount,
             amountTokenToMint,
@@ -369,10 +382,15 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     function startDuel(string memory _duelId) external nonReentrant whenNotPaused onlyBot {
         Duel storage duel = duels[_duelId];
         require(isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
-        // Ensure the bootstrap period has ended
-        require(block.timestamp >= duel.createTime + bootstrapPeriod, "Bootstrap period not ended");
         // Ensure the duel is not already live
         require(duel.duelStatus == DuelStatus.BootStrapped, "Duel has already started or settled");
+        bool _isThresholdMet = _checkIfThresholdMet(_duelId);
+        // Ensure the bootstrap period has ended
+        // require(
+        //     block.timestamp >= duel.createTime + bootstrapPeriod || _isThresholdMet,
+        //     "Bootstrap period not ended or threshold not met"
+        // );
+        require(_isThresholdMet, "Threshold not met");
         // Ensure both tokens have met the minimum wager requirements
         uint256 optionsLength = duelIdToOptions[_duelId].length;
         for (uint256 i = 0; i < optionsLength; i++) {
@@ -407,10 +425,15 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     ) external nonReentrant whenNotPaused onlyBot {
         CryptoDuel storage cryptoDuel = cryptoDuels[_duelId];
         require(isValidDuelId[_duelId] && cryptoDuel.createTime != 0, "Duel doesn't exist");
-        // Ensure the bootstrap period has ended
-        require(block.timestamp >= cryptoDuel.createTime + bootstrapPeriod, "Bootstrap period not ended");
         // Ensure the duel is not already live
         require(cryptoDuel.duelStatus == DuelStatus.BootStrapped, "Duel has already started or settled");
+        bool _isThresholdMet = _checkIfThresholdMet(_duelId);
+        // Ensure the bootstrap period has ended
+        // require(
+        //     block.timestamp >= cryptoDuel.createTime + bootstrapPeriod || _isThresholdMet,
+        //     "Bootstrap period not ended or threshold not met"
+        // );
+        require(_isThresholdMet, "Threshold not met");
         // Ensure both tokens have met the minimum wager requirements
         uint256 optionsLength = duelIdToOptions[_duelId].length;
         for (uint256 i = 0; i < optionsLength; i++) {
@@ -603,7 +626,8 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             uint256 wager = userWager[msg.sender][_duelId][duelIdToOptions[_duelId][i]];
             if (wager > 0) {
                 userWager[msg.sender][_duelId][duelIdToOptions[_duelId][i]] = 0;
-                IERC20(usdc).transfer(msg.sender, wager);
+                // @note - zokyo-audit-fix-7
+                require(IERC20(usdc).transfer(msg.sender, wager), "Transfer failed");
                 emit RefundIssued(_duelId, duelIdToOptions[_duelId][i], msg.sender, wager, block.timestamp);
             }
         }
@@ -616,7 +640,8 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     function withdrawEarnings(uint256 _amount) external {
         uint256 _allTimeEarnings = allTimeEarnings[msg.sender];
         require(_amount <= _allTimeEarnings, "Amount should be less than equal earnings");
-        IERC20(usdc).transfer(msg.sender, _amount);
+        // @note - zokyo-audit-fix-7
+        require(IERC20(usdc).transfer(msg.sender, _amount), "Transfer failed");
         allTimeEarnings[msg.sender] -= _amount;
         emit WithdrawEarning(msg.sender, _amount, block.timestamp);
     }
@@ -627,7 +652,8 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     function withdrawCreatorFee() external {
         uint256 creatorFee = totalCreatorFeeEarned[msg.sender];
         require(creatorFee > 0, "No funds available");
-        IERC20(usdc).transfer(msg.sender, creatorFee);
+        // @note - zokyo-audit-fix-7
+        require(IERC20(usdc).transfer(msg.sender, creatorFee), "Transfer failed");
         totalCreatorFeeEarned[msg.sender] = 0;
         emit WithdrawCreatorEarning(msg.sender, creatorFee, block.timestamp);
     }
@@ -638,7 +664,8 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     function withdrawProtocolFees() external onlyOwner {
         uint256 protocolBalance = totalProtocolFeesGenerated;
         require(protocolBalance > 0, "No funds available");
-        IERC20(usdc).transfer(msg.sender, protocolBalance);
+        // @note - zokyo-audit-fix-7
+        require(IERC20(usdc).transfer(msg.sender, protocolBalance), "Transfer failed");
         totalProtocolFeesGenerated = 0;
         emit WithdrawProtocolFee(msg.sender, protocolBalance, block.timestamp);
     }
@@ -657,14 +684,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /// @notice Checks whether threshold has been met or not for a duel
     /// @param _duelId The unique ID of the duel to be cancelled
     function checkIfThresholdMet(string calldata _duelId) public view returns (bool) {
-        uint256 optionsLength = duelIdToOptions[_duelId].length;
-        uint256 totalWager = 0;
-
-        for (uint256 i = 0; i < optionsLength; i++) {
-            totalWager += totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]];
-        }
-        // Check if the total wager meets the minimum threshold
-        return totalWager >= minThreshold;
+        return _checkIfThresholdMet(_duelId);
     }
 
     /**
@@ -886,6 +906,18 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         startPrice = startPriceToken[_duelId][_tokenSymbol];
         delta = endPrice - startPrice;
         isEndPriceGreater = endPrice > startPrice;
+    }
+
+    /// @notice Checks whether threshold has been met or not for a duel
+    /// @param _duelId The unique ID of the duel to be cancelled
+    function _checkIfThresholdMet(string memory _duelId) internal view returns (bool) {
+        uint256 optionsLength = duelIdToOptions[_duelId].length;
+        for (uint256 i = 0; i < optionsLength; i++) {
+            if (totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold) {
+                return false; // As soon as any value is below the threshold, return false
+            }
+        }
+        return true; // If no values are below the threshold, return true
     }
 
     /// @notice Authorize an upgrade to a new implementation
