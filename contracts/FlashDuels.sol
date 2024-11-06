@@ -683,7 +683,7 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     // // ========================== View Functions ========================== //
     /// @notice Checks whether threshold has been met or not for a duel
     /// @param _duelId The unique ID of the duel to be cancelled
-    function checkIfThresholdMet(string calldata _duelId) public view returns (bool) {
+    function checkIfThresholdMet(string memory _duelId) public view returns (bool) {
         return _checkIfThresholdMet(_duelId);
     }
 
@@ -908,16 +908,17 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         isEndPriceGreater = endPrice > startPrice;
     }
 
-    /// @notice Checks whether threshold has been met or not for a duel
-    /// @param _duelId The unique ID of the duel to be cancelled
-    function _checkIfThresholdMet(string memory _duelId) internal view returns (bool) {
+    /// @notice Checks whether the threshold has been met for a duel.
+    /// @param _duelId The unique ID of the duel to be checked.
+    /// @return Returns true if the threshold is met for all options in the duel; otherwise, false.
+    function _checkIfThresholdMet(string memory _duelId) public view returns (bool) {
         uint256 optionsLength = duelIdToOptions[_duelId].length;
         for (uint256 i = 0; i < optionsLength; i++) {
             if (totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold) {
-                return false; // As soon as any value is below the threshold, return false
+                return false; // Returns false if any option is below the threshold
             }
         }
-        return true; // If no values are below the threshold, return true
+        return true; // Returns true if all options meet or exceed the threshold
     }
 
     /// @notice Authorize an upgrade to a new implementation
