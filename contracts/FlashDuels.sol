@@ -913,12 +913,14 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
     /// @return Returns true if the threshold is met for all options in the duel; otherwise, false.
     function _checkIfThresholdMet(string memory _duelId) public view returns (bool) {
         uint256 optionsLength = duelIdToOptions[_duelId].length;
+        uint256 totalWager = 0;
+
         for (uint256 i = 0; i < optionsLength; i++) {
-            if (totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold) {
-                return false; // Returns false if any option is below the threshold
-            }
+            totalWager += totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]];
         }
-        return true; // Returns true if all options meet or exceed the threshold
+
+        // Check if the total wager meets the minimum threshold
+        return totalWager >= minThreshold;
     }
 
     /// @notice Authorize an upgrade to a new implementation
