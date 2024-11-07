@@ -392,13 +392,13 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         // );
         require(_isThresholdMet, "Threshold not met");
         // Ensure both tokens have met the minimum wager requirements
-        uint256 optionsLength = duelIdToOptions[_duelId].length;
-        for (uint256 i = 0; i < optionsLength; i++) {
-            require(
-                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] >= minThreshold,
-                "Threshold not reached for each options to start the duel"
-            );
-        }
+        // uint256 optionsLength = duelIdToOptions[_duelId].length;
+        // for (uint256 i = 0; i < optionsLength; i++) {
+        //     require(
+        //         totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] >= minThreshold,
+        //         "Threshold not reached for each options to start the duel"
+        //     );
+        // }
         // Record the start time and mark the duel as live
         duel.startTime = block.timestamp;
         // uint256 duelDuration = duel.expiryTime - (duel.createTime + bootstrapPeriod);
@@ -435,13 +435,13 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
         // );
         require(_isThresholdMet, "Threshold not met");
         // Ensure both tokens have met the minimum wager requirements
-        uint256 optionsLength = duelIdToOptions[_duelId].length;
-        for (uint256 i = 0; i < optionsLength; i++) {
-            require(
-                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] >= minThreshold,
-                "Threshold not reached for each options to start the duel"
-            );
-        }
+        // uint256 optionsLength = duelIdToOptions[_duelId].length;
+        // for (uint256 i = 0; i < optionsLength; i++) {
+        //     require(
+        //         totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] >= minThreshold,
+        //         "Threshold not reached for each options to start the duel"
+        //     );
+        // }
 
         startPriceToken[_duelId][cryptoDuel.tokenSymbol] = _startTokenPrice;
         // Record the start time and mark the duel as live
