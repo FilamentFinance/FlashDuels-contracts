@@ -615,12 +615,11 @@ contract FlashDuels is UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable,
             require(cryptoDuel.duelStatus == DuelStatus.Cancelled, "Duel is live or settled");
         }
         // Check if the total wagers did not meet the minimum threshold
+        bool _isThresholdMet = _checkIfThresholdMet(_duelId);
+
+        require(!_isThresholdMet, "Threshold met, cannot cancel");
         uint256 optionsLength = duelIdToOptions[_duelId].length;
         for (uint256 i = 0; i < optionsLength; i++) {
-            require(
-                totalWagerForOption[_duelId][duelIdToOptions[_duelId][i]] < minThreshold,
-                "Threshold met, cannot refund"
-            );
             // Refund users who wagered
             uint256 wager = userWager[msg.sender][_duelId][duelIdToOptions[_duelId][i]];
             if (wager > 0) {
