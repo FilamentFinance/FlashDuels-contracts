@@ -418,7 +418,7 @@ describe("FlashDuels Contract", function () {
             const bootstrapPeriod = 3600 // Example bootstrap period of 1 hour
             let amount = ethers.parseUnits("70", 6)
             beforeEach(async function () {
-                await flashDuels.connect(owner).setMinimumWagerThreshold(ethers.parseUnits("80", 6))
+                await flashDuels.connect(owner).setMinimumWagerThreshold(ethers.parseUnits("150", 6))
                 await usdcToken.connect(owner).mint(addr2.address, amount)
 
                 await usdcToken.connect(addr2).approve(flashDuels.target, amount)
@@ -911,7 +911,7 @@ describe("FlashDuels Contract", function () {
             const bootstrapPeriod = 3600 // Example bootstrap period of 1 hour
             let amount = ethers.parseUnits("70", 6)
             beforeEach(async function () {
-                await flashDuels.connect(owner).setMinimumWagerThreshold(ethers.parseUnits("80", 6))
+                await flashDuels.connect(owner).setMinimumWagerThreshold(ethers.parseUnits("150", 6))
                 await usdcToken.connect(owner).mint(addr2.address, amount)
 
                 await usdcToken.connect(addr2).approve(flashDuels.target, amount)
