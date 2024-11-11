@@ -1,87 +1,106 @@
 import { ethers, upgrades, network } from "hardhat"
-import { updateContractsJson } from "../utils/updateContracts"
-import verify from "../utils/verify"
 import { networkConfig, testNetworkChains } from "../helper-hardhat-config"
-import FlashDuelsCoreABI from "../constants/abis/FlashDuelsCoreFacet.json"
-import OwnershipABI from "../constants/abis/OwnershipFacet.json"
-import DiamondInitABI from "../constants/abis/FlashDuelsCoreFacet.json"
-// import fs from "fs"
-// import { createSubgraphConfig } from "../utils/subgraph"
+import fs from "fs"
 
 const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
-const main = async () => {
-    let tx, txr, usdAddress
+export const setupContracts = async () => {
+    let tx, txr, usdAddress, USDC
+    let tokenA: any
+    let tokenB: any
+    let mockOracleA: any
+    let mockOracleB: any
     const accounts = await ethers.getSigners()
     const networkName = network.name
     const owner = accounts[0].address
     const deployer = networkConfig[networkName].deployer
 
-    const protocolTreasury = networkConfig[networkName].protocolTreasury
-    const bot = networkConfig[networkName].bot
-
-    const startBlock: any = await ethers.provider.getBlock("latest")
-    console.log(startBlock!.number)
-
     if (deployer?.toLowerCase() !== owner.toLowerCase()) {
         throw Error("Deployer must be the Owner")
     }
-    console.log(owner)
+    // console.log(owner)
 
+    const protocolTreasury = networkConfig[networkName].protocolTreasury
+    const bot = accounts[5].address
+
+    // Deploy USDC and other Tokens contract
+    const startBlock: any = await ethers.provider.getBlock("latest")
+    // console.log(startBlock!.number)
     if (networkName === "seiMainnet") {
         usdAddress = { target: networkConfig[networkName].usdc }
     } else {
-        let USDC = await ethers.getContractFactory("FLASHUSDC")
+        USDC = await ethers.getContractFactory("FLASHUSDC")
         const usdcNew = await upgrades.deployProxy(USDC, [
             "FLASHUSDC",
             "FLASHUSDC",
             networkConfig[networkName].usdcAdmin
         ])
         let flashUSDC = await usdcNew.waitForDeployment()
-        console.log("USDC deployed to:", flashUSDC.target)
+        // console.log("USDC deployed to:", flashUSDC.target)
         usdAddress = flashUSDC.target
     }
+
+    // Deploy mock tokens for the duel
+    const TokenAMock = await ethers.getContractFactory("MockERC20")
+    tokenA = await TokenAMock.deploy("Token A", "TKA", 18)
+    await tokenA.waitForDeployment()
+
+    const TokenBMock = await ethers.getContractFactory("MockERC20")
+    tokenB = await TokenBMock.deploy("Token B", "TKB", 18)
+    await tokenB.waitForDeployment()
+
+    const MockOracleFactoryA = await ethers.getContractFactory("MockOracle")
+    mockOracleA = await MockOracleFactoryA.deploy()
+    await mockOracleA.waitForDeployment()
+
+    await mockOracleA.setPrice(1500)
+
+    const MockOracleFactoryB = await ethers.getContractFactory("MockOracle")
+    mockOracleB = await MockOracleFactoryB.deploy()
+    await mockOracleB.waitForDeployment()
+
+    await mockOracleB.setPrice(2000)
 
     // deploy DiamondCutFacet
     const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet")
     const diamondCutFacet = await DiamondCutFacet.deploy()
     await diamondCutFacet.waitForDeployment()
-    console.log("DiamondCutFacet deployed:", diamondCutFacet.target)
+    // console.log("DiamondCutFacet deployed:", diamondCutFacet.target)
 
     const DiamondLoupeFacet = await ethers.getContractFactory("DiamondLoupeFacet")
     const diamondLoupeFacet = await DiamondLoupeFacet.deploy()
     await diamondLoupeFacet.waitForDeployment()
-    console.log("DiamondLoupeFacet deployed:", diamondLoupeFacet.target)
+    // console.log("DiamondLoupeFacet deployed:", diamondLoupeFacet.target)
 
     const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
     const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
     await flashDuelsCoreFacet.waitForDeployment()
-    console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
+    // console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
 
     const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
     const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
     await flashDuelsMarketplaceFacet.waitForDeployment()
-    console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
+    // console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
     const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
     const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
     await flashDuelsViewFacet.waitForDeployment()
-    console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
+    // console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
 
     const OwnershipFacet = await ethers.getContractFactory("OwnershipFacet")
     const ownershipFacet = await OwnershipFacet.deploy()
     await ownershipFacet.waitForDeployment()
-    console.log("OwnershipFacet deployed:", ownershipFacet.target)
+    // console.log("OwnershipFacet deployed:", ownershipFacet.target)
 
     const DiamondInit = await ethers.getContractFactory("DiamondInit")
     const diamondInit = await DiamondInit.deploy()
     await diamondInit.waitForDeployment()
-    console.log("DiamondInit deployed:", diamondInit.target)
+    // console.log("DiamondInit deployed:", diamondInit.target)
 
     const Diamond = await ethers.getContractFactory("Diamond")
     const diamond = await Diamond.deploy(owner, diamondCutFacet.target)
     await diamond.waitForDeployment()
-    console.log("Diamond deployed:", diamond.target)
+    // console.log("Diamond deployed:", diamond.target)
 
     // const FacetNames = ["DiamondLoupeFacet"]
 
@@ -109,8 +128,7 @@ const main = async () => {
         "0xae650247", // refundDuel(uint8,string)
         "0x6e70096e", // withdrawEarnings(uint256)
         "0xf1675271", // withdrawCreatorFee()
-        "0x8795cccb", // withdrawProtocolFees()
-        "0xef82031a" // continueRefundsInChunks(string)
+        "0x8795cccb" // withdrawProtocolFees()
     ]
 
     const flashDuelsMarketplaceFacetSelectors = [
@@ -153,6 +171,12 @@ const main = async () => {
     const cut = []
 
     cut.push({
+        facetAddress: diamondLoupeFacet.target,
+        action: FacetCutAction.Add,
+        functionSelectors: diamondLoupe
+    })
+
+    cut.push({
         facetAddress: flashDuelsCoreFacet.target,
         action: FacetCutAction.Add,
         functionSelectors: flashDuelsCoreFacetSelectors
@@ -183,57 +207,43 @@ const main = async () => {
         bot
     ])
     tx = await diamondCut.diamondCut(cut, diamondInit.target, functionCall)
-    console.log("Diamond cut tx: ", tx.hash)
+    // console.log("Diamond cut tx: ", tx.hash)
     txr = await tx.wait()
     if (!txr?.status) {
         throw Error(`Diamond upgrade failed: ${tx.hash}`)
     }
-    console.log("Completed diamond cut")
+    // console.log("Completed diamond cut")
 
-    let contracts = [
-        { name: "FLASHUSDC", address: usdAddress },
-        { name: "FlashDuelsCoreFacet", address: flashDuelsCoreFacet.target },
-        {
-            name: "FlashDuelsMarketplaceFacet",
-            address: flashDuelsMarketplaceFacet.target
+    let contracts = {
+        USDC: {
+            usdAddress: usdAddress,
+            usdcContract: USDC
         },
-        {
-            name: "FlashDuelsViewFacet",
-            address: flashDuelsViewFacet.target
+        DiamondCutFacet: { diamondCutFacet: diamondCutFacet.target, diamondCutFacetContract: DiamondCutFacet },
+        DiamondLoupeFacet: {
+            diamondLoupeFacet: diamondLoupeFacet.target,
+            diamondLoupeFacetContract: DiamondLoupeFacet
         },
-        {
-            name: "OwnershipFacet",
-            address: ownershipFacet.target
+        OwnershipFacet: { ownershipFacet: ownershipFacet.target, ownershipFacetContract: OwnershipFacet },
+        FlashDuelsCoreFacet: {
+            flashDuelsCoreFacet: flashDuelsCoreFacet.target,
+            flashDuelsCoreFacetContract: FlashDuelsCoreFacet
         },
-        { name: "DiamondCutFacet", address: diamondCutFacet.target },
-        { name: "DiamondLoupeFacet", address: diamondLoupeFacet.target },
-        { name: "DiamondInit", address: diamondInit.target },
-        { name: "Diamond", address: diamond.target },
-        { name: "StartBlock", address: startBlock.number },
-        {
-            name: "Goldsky_Subgraph",
-            address: ""
-        }
-    ]
-
-    updateContractsJson(contracts)
-    // createSubgraphConfig()
-    console.table(contracts)
-
-    if (
-        testNetworkChains.includes(networkName) &&
-        process.env.SEITRACE_API_KEY &&
-        process.env.VERIFY_CONTRACTS === "true"
-    ) {
-        console.log("Verifying...")
-        await verify(flashDuelsCoreFacet.target.toString(), [])
+        FlashDuelsMarketplaceFacet: {
+            flashDuelsMarketplaceFacet: flashDuelsMarketplaceFacet.target,
+            flashDuelsMarketplaceFacetContract: FlashDuelsMarketplaceFacet
+        },
+        FlashDuelsViewFacet: {
+            flashDuelsViewFacet: flashDuelsViewFacet.target,
+            flashDuelsViewFacetContract: FlashDuelsViewFacet
+        },
+        DiamondInit: { diamondInit: diamondInit.target, diamondInitContract: DiamondInit },
+        Diamond: { diamond: diamond.target, diamondContract: Diamond },
+        Bot: { bot: accounts[5] },
+        ProtocolTreasury: { protocolTreasury: protocolTreasury },
+        TokenA: { tokenA: tokenA.target, tokenAContract: tokenA },
+        TokenB: { tokenB: tokenB.target, tokenBContract: tokenB }
     }
-    console.log("🚀🚀🚀 FlashDuels Deployment Successful 🚀🚀🚀")
-}
 
-main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error)
-        process.exit(1)
-    })
+    return contracts
+}
