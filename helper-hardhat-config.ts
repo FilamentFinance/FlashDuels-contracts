@@ -6,6 +6,7 @@ export interface networkConfigItem {
     usdcAdmin?: string
     bot?: string
     protocolTreasury?: string
+    StartBlock?: number
 }
 
 export interface networkConfigInfo {
@@ -19,7 +20,7 @@ export const networkConfig: networkConfigInfo = {
         deployer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         usdcAdmin: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
         bot: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-        protocolTreasury: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        protocolTreasury: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D"
     },
     localhost: {
         chainId: 31337,
@@ -27,7 +28,7 @@ export const networkConfig: networkConfigInfo = {
         deployer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         usdcAdmin: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
         bot: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-        protocolTreasury: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        protocolTreasury: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D"
     },
     seiTestnet: {
         chainId: 1328,

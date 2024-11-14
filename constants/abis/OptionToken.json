@@ -238,7 +238,7 @@
     },
     {
         "inputs": [],
-        "name": "flashDuels",
+        "name": "flashDuelsDiamond",
         "outputs": [
             {
                 "internalType": "address",
