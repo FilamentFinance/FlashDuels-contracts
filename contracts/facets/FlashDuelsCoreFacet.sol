@@ -417,7 +417,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         require(duel.duelStatus == DuelStatus.Live, "Duel not live or already settled");
         uint256 expiryTime = duel.expiryTime;
         require(block.timestamp >= expiryTime, "Duel not expired");
-        require(block.timestamp <= expiryTime + (48 * 3600), "Resolving time expired");
+        require(block.timestamp <= expiryTime + s.resolvingPeriod, "Resolving time expired");
 
         string[] memory options = s.duelIdToOptions[_duelId];
         string memory winningOption = options[_optionIndex];
@@ -483,7 +483,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         CryptoDuel storage cryptoDuel = s.cryptoDuels[_duelId];
         require(cryptoDuel.duelStatus == DuelStatus.Live, "Duel not live or already settled");
         require(block.timestamp >= cryptoDuel.expiryTime, "Duel not expired");
-        require(block.timestamp <= cryptoDuel.expiryTime + (48 * 3600), "Resolving time expired");
+        require(block.timestamp <= cryptoDuel.expiryTime + s.resolvingPeriod, "Resolving time expired");
 
         // Determine the winning option and total wager of the losing side
         (string memory winningOption, uint256 totalWagerLooser, uint256 optionIndex) = _determineWinningOptionAndWager(
