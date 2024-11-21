@@ -155,6 +155,15 @@ describe("FlashDuels Contract", function () {
             await flashDuels.connect(addr4).joinDuel(duelIds[0], "No", 1, optionPrice, amount)
             const getDuelUsers = await flashDuels.getDuelUsersForOption(duelIds[0], "Yes")
             // console.log(getDuelUsers);
+
+            let tx = await flashDuels.totalBetsOnDuel(duelIds[0])
+            console.log("total bets on duel", tx);
+
+            tx = await flashDuels.totalBetsOnOption(duelIds[0], 0, "Yes");
+            console.log("tota Yes bets", tx);
+            tx = await flashDuels.totalBetsOnOption(duelIds[0], 1, "No");
+            console.log("tota No bets", tx);
+
         })
 
         it("should allow only bot to start a duel", async function () {

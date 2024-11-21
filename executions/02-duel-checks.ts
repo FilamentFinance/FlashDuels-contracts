@@ -26,16 +26,16 @@ const main = async () => {
     console.log(tx)
     tx = await flashDuels.cryptoDuels("")
     console.log(tx)
-    tx = await flashDuels.totalBetsOnDuel("83ed863e6dc1cbd2a4cb34e87d15219a9d8529501f54330da92cd701eacfc3a7")
+    tx = await flashDuels.totalBetsOnDuel("bcafcc9ed1a6c112caa693b5c304495e745bafbec1500ad24ac86cf827578474")
     console.log(tx)
     tx = await flashDuels.totalBetsOnOption(
-        "83ed863e6dc1cbd2a4cb34e87d15219a9d8529501f54330da92cd701eacfc3a7",
+        "bcafcc9ed1a6c112caa693b5c304495e745bafbec1500ad24ac86cf827578474",
         "0",
         "YES"
     )
     console.log(tx)
     tx = await flashDuels.totalBetsOnOption(
-        "83ed863e6dc1cbd2a4cb34e87d15219a9d8529501f54330da92cd701eacfc3a7",
+        "bcafcc9ed1a6c112caa693b5c304495e745bafbec1500ad24ac86cf827578474",
         "1",
         "NO"
     )
