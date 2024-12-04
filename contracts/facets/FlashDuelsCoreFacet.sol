@@ -311,7 +311,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         address _user
     ) external nonReentrant whenNotPaused onlyBot {
         CryptoDuel storage duel = s.cryptoDuels[_duelId];
-        require(s.isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
+        require(s.isValidDuelId[_duelId] && duel.createTime != 0, "Duel ddrawoesn't exist");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
         require(_amount >= _optionPrice, "Less than minimum wager");
         // Transfer the wager amount in USDC to the contract

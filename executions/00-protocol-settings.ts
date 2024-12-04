@@ -22,13 +22,6 @@ const main = async () => {
     const flashDuels: FlashDuels = new ethers.Contract(netMap[networkName].FlashDuels, FlashDuelsABI, deployer)
     const flashUSDC: FLASHUSDC = new ethers.Contract(netMap[networkName].FLASHUSDC, FLASHUSDCABI, deployer)
 
-    const pythSupportedTokens: any = []
-    const pythSupportedTokensAggrgators: any = []
-
-    // tx = await flashDuels.setSupportedTokenSymbols(pythSupportedTokens)
-    // await tx.wait(1)
-    // console.log("Set Pyth Supported tokens")
-
     tx = await flashDuels.setProtocolAddress(networkConfig[networkName].protocolTreasury)
     await tx.wait(1)
 

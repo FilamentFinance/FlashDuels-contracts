@@ -5,6 +5,7 @@ import { networkConfig, testNetworkChains } from "../helper-hardhat-config"
 import FlashDuelsCoreABI from "../constants/abis/FlashDuelsCoreFacet.json"
 import OwnershipABI from "../constants/abis/OwnershipFacet.json"
 import DiamondInitABI from "../constants/abis/FlashDuelsCoreFacet.json"
+import { FlashDuelsCoreFacet } from "../typechain-types"
 // import fs from "fs"
 // import { createSubgraphConfig } from "../utils/subgraph"
 
@@ -26,7 +27,7 @@ const main = async () => {
     if (deployer?.toLowerCase() !== owner.toLowerCase()) {
         throw Error("Deployer must be the Owner")
     }
-    console.log(owner)
+    console.log("Deployer: ", owner)
 
     if (networkName === "seiMainnet") {
         usdAddress = { target: networkConfig[networkName].usdc }
@@ -189,6 +190,11 @@ const main = async () => {
         throw Error(`Diamond upgrade failed: ${tx.hash}`)
     }
     console.log("Completed diamond cut")
+
+    console.log("Setting Protocol Address");
+    const flashDuels: FlashDuelsCoreFacet = await FlashDuelsCoreFacet.attach(diamond.target)
+    tx = await flashDuels.setProtocolAddress(networkConfig[networkName].protocolTreasury)
+    await tx.wait(1)
 
     let contracts = [
         { name: "FLASHUSDC", address: usdAddress },
