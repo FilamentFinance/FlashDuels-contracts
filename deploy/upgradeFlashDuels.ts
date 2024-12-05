@@ -23,20 +23,20 @@ async function main() {
     const DiamondCutFacet = await ethers.getContractAt("IDiamondCut", diamondAddress, deployer)
 
     // Deploy new facet
-    const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
-    const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
-    await flashDuelsCoreFacet.waitForDeployment()
-    console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
+    // const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
+    // const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
+    // await flashDuelsCoreFacet.waitForDeployment()
+    // console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
 
     // const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
     // const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
     // await flashDuelsMarketplaceFacet.waitForDeployment()
     // console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
-    // const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
-    // const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
-    // await flashDuelsViewFacet.waitForDeployment()
-    // console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
+    const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
+    const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
+    await flashDuelsViewFacet.waitForDeployment()
+    console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
 
     // const OwnershipFacet = await ethers.getContractFactory("OwnershipFacet")
     // const ownershipFacet = await OwnershipFacet.deploy()
@@ -45,45 +45,45 @@ async function main() {
 
     // Prepare the cut transaction
     const cut: any = [
-        // {
-        //     facetAddress: flashDuelsCoreFacet.target,
-        //     action: FacetCutAction.Add, // 0 means Add ,  1Replace function
-        //     functionSelectors: [""]
-        // }
+        {
+            facetAddress: flashDuelsViewFacet.target,
+            action: FacetCutAction.Add, // 0 means Add ,  1Replace function
+            functionSelectors: ["0x711cd895"]
+        }
         // {
         //     facetAddress: "0x0000000000000000000000000000000000000000",
         //     action: FacetCutAction.Remove, // 0 means Add ,  1 Replace function , 2 for Remove
         //     functionSelectors: ["0x2abb9b2a"]
         // }
-        {
-            facetAddress: flashDuelsCoreFacet.target,
-            action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function
-            functionSelectors: [
-                "0x8456cb59", // pause()
-                "0x3f4ba83a", // unpause()
-                "0x096d0721", // setCreateDuelFee(uint256)
-                "0x2d4f40c6", // setBotAddress(address)
-                "0x58e47004", // setProtocolAddress(address)
-                "0x78a0003e", // setMinimumWagerThreshold(uint256)
-                "0x67eb8097", // updateBootstrapPeriod(uint256)
-                "0xbb849878", // setResolvingPeriod(uint256)
-                "0xe94e40cd", // setWinnersChunkSizes(uint256)
-                "0x658c0973", // createDuel(uint8,string,string[],uint8)
-                "0xa7b84a0c", // createCryptoDuel(string,string[],int256,uint8,uint8,uint8)
-                "0x1852d000", // joinDuel(string,string,uint256,uint256,uint256,address)
-                "0xde77ba38", // joinCryptoDuel(string,string,string,uint256,uint256,uint256,address)
-                "0xf78283bd", // startDuel(string)
-                "0xb117a1dc", // startCryptoDuel(string,int256)
-                "0xc0dbdcab", // settleDuel(string,uint256)
-                "0x55718670", // continueWinningsDistribution(string,uint256,string,uint256)
-                "0x2afa99d9", // settleCryptoDuel(string,int256)
-                "0x3f3a631b", // cancelDuelIfThresholdNotMet(uint8,string)
-                "0xae650247", // refundDuel(uint8,string)
-                "0x6e70096e", // withdrawEarnings(uint256)
-                "0xf1675271", // withdrawCreatorFee()
-                "0x8795cccb" // withdrawProtocolFees()
-            ]
-        }
+        // {
+        //     facetAddress: flashDuelsCoreFacet.target,
+        //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function
+        //     functionSelectors: [
+        //         "0x8456cb59", // pause()
+        //         "0x3f4ba83a", // unpause()
+        //         "0x096d0721", // setCreateDuelFee(uint256)
+        //         "0x2d4f40c6", // setBotAddress(address)
+        //         "0x58e47004", // setProtocolAddress(address)
+        //         "0x78a0003e", // setMinimumWagerThreshold(uint256)
+        //         "0x67eb8097", // updateBootstrapPeriod(uint256)
+        //         "0xbb849878", // setResolvingPeriod(uint256)
+        //         "0xe94e40cd", // setWinnersChunkSizes(uint256)
+        //         "0x658c0973", // createDuel(uint8,string,string[],uint8)
+        //         "0xa7b84a0c", // createCryptoDuel(string,string[],int256,uint8,uint8,uint8)
+        //         "0x1852d000", // joinDuel(string,string,uint256,uint256,uint256,address)
+        //         "0xde77ba38", // joinCryptoDuel(string,string,string,uint256,uint256,uint256,address)
+        //         "0xf78283bd", // startDuel(string)
+        //         "0xb117a1dc", // startCryptoDuel(string,int256)
+        //         "0xc0dbdcab", // settleDuel(string,uint256)
+        //         "0x55718670", // continueWinningsDistribution(string,uint256,string,uint256)
+        //         "0x2afa99d9", // settleCryptoDuel(string,int256)
+        //         "0x3f3a631b", // cancelDuelIfThresholdNotMet(uint8,string)
+        //         "0xae650247", // refundDuel(uint8,string)
+        //         "0x6e70096e", // withdrawEarnings(uint256)
+        //         "0xf1675271", // withdrawCreatorFee()
+        //         "0x8795cccb" // withdrawProtocolFees()
+        //     ]
+        // }
     ]
 
     try {

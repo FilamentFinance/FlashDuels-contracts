@@ -600,6 +600,25 @@
                 "type": "string"
             }
         ],
+        "name": "isRefundInProgress",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            }
+        ],
         "name": "isValidDuelId",
         "outputs": [
             {

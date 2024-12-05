@@ -138,6 +138,7 @@ const main = async () => {
         "0x56400a3b", // getAllTimeEarnings(address)
         "0xf1e287be", // isValidDuelId(string)
         "0x8f957b70", // getCryptoDuel(string)
+        "0x711cd895", // isRefundInProgress(string)
         "0x9611f3d9", // getProtocolTreasury()
         "0x74e5ed59", // getTotalProtocolFeesGenerated()
         "0x9448cb58", // getCreatorFeesEarned(address)

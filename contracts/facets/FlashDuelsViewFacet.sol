@@ -164,6 +164,13 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
         return s.isValidDuelId[_duelId];
     }
 
+    /// @notice Checks if the refund distribution is in progress for a specific duel.
+    /// @param _duelId The unique identifier of the duel.
+    /// @return A boolean indicating whether the refund distribution is in progress.
+    function isRefundInProgress(string memory _duelId) public view returns (bool) {
+        return s.refundInProgress[_duelId];
+    }
+
     /// @notice Retrieves the address of the protocol's treasury.
     /// @return The address designated as the protocol's treasury.
     function getProtocolTreasury() public view returns (address) {
