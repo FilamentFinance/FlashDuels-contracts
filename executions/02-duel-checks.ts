@@ -41,6 +41,11 @@ const main = async () => {
     )
     console.log(tx)
 
+    tx = await flashDuels.allTimeEarnings("0x2Eb671E6e0cd965A79A80caF35c5123b7a5D8ebb"); // 13466.071343
+    console.log("all time earnings", tx)
+
+    tx = await flashDuels.allTimeEarnings("0xB69787d7e50746eE3aa96501390AdE6dEaD5beCe"); // 1050.768656
+    console.log("all time earnings", tx)
     // // console.log("Total logs length: ", txr?.logs.length)
     // let duelId
     // for (let i = 0; i < txr?.logs.length; i++) {
