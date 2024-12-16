@@ -136,6 +136,7 @@ const main = async () => {
         "0x75a0471c", // getPriceDelta(string,string,int256)
         "0xb63211f1", // getDuels(string)
         "0x56400a3b", // getAllTimeEarnings(address)
+        "0x2da76d29", // getTotalBetsOnOption(string,uint256,string)
         "0xf1e287be", // isValidDuelId(string)
         "0x8f957b70", // getCryptoDuel(string)
         "0x711cd895", // isRefundInProgress(string)

@@ -157,6 +157,15 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
         return s.allTimeEarnings[_user];
     }
 
+    /// @notice Retrieves the total amount of bets placed on a specific option in a duel.
+    /// @param _duelId The unique identifier of the duel.
+    /// @param _optionsIndex The index of the option within the duel.
+    /// @param _option The specific option to retrieve the total bets for.
+    /// @return The total amount of bets placed on the specified option.
+    function getTotalBetsOnOption(string memory _duelId, uint256 _optionsIndex, string memory _option) public view returns (uint256) {
+        return s.totalBetsOnOption[_duelId][_optionsIndex][_option];
+    }
+
     /// @notice Checks if a duel ID is valid within the system.
     /// @param _duelId The duel ID to validate.
     /// @return True if the duel ID is valid; otherwise, false.

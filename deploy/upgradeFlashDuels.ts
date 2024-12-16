@@ -48,7 +48,7 @@ async function main() {
         {
             facetAddress: flashDuelsViewFacet.target,
             action: FacetCutAction.Add, // 0 means Add ,  1Replace function
-            functionSelectors: ["0x711cd895"]
+            functionSelectors: ["0x2da76d29"]
         }
         // {
         //     facetAddress: "0x0000000000000000000000000000000000000000",
