@@ -78,9 +78,12 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
     /// @notice Gets all the function selectors supported by a specific facet.
     /// @param _facet The facet address.
     /// @return _facetFunctionSelectors The selectors associated with a facet address.
-    function facetFunctionSelectors(
-        address _facet
-    ) external view override returns (bytes4[] memory _facetFunctionSelectors) {
+    function facetFunctionSelectors(address _facet)
+        external
+        view
+        override
+        returns (bytes4[] memory _facetFunctionSelectors)
+    {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         uint256 numSelectors;
         _facetFunctionSelectors = new bytes4[](ds.selectorCount);

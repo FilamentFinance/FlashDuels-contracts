@@ -35,7 +35,7 @@ contract DiamondCutFacet is IDiamondCut {
         }
 
         // loop through diamond cut
-        for (uint256 facetIndex; facetIndex < _diamondCut.length; ) {
+        for (uint256 facetIndex; facetIndex < _diamondCut.length;) {
             (selectorCount, selectorSlot) = LibDiamond.addReplaceRemoveFacetSelectors(
                 selectorCount,
                 selectorSlot,

@@ -1,7 +1,40 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {AppStorage, Duel, CryptoDuel, DuelCategory, DuelDuration, TriggerType, TriggerCondition, DuelStatus, DuelCreated, CryptoDuelCreated, DuelJoined, CryptoDuelJoined, DuelStarted, DuelSettled, DuelCancelled, RefundIssued, WithdrawEarning, WithdrawCreatorEarning, WithdrawProtocolFee, CreateDuelFeeUpdated, MinimumWagerThresholdUpdated, BotAddressUpdated, ProtocolTreasuryUpdated, BootstrapPeriodUpdated, ResolvingPeriodUpdated, PartialDuelSettled, PartialWinningsDistributed, WinningsDistributionCompleted, WinnersChunkSizesUpdated, RefundChunkSizesUpdated, PartialRefundsDistributed, RefundsDistributionCompleted} from "../AppStorage.sol";
+import {
+    AppStorage,
+    Duel,
+    CryptoDuel,
+    DuelCategory,
+    DuelDuration,
+    TriggerType,
+    TriggerCondition,
+    DuelStatus,
+    DuelCreated,
+    CryptoDuelCreated,
+    DuelJoined,
+    CryptoDuelJoined,
+    DuelStarted,
+    DuelSettled,
+    DuelCancelled,
+    RefundIssued,
+    WithdrawEarning,
+    WithdrawCreatorEarning,
+    WithdrawProtocolFee,
+    CreateDuelFeeUpdated,
+    MinimumWagerThresholdUpdated,
+    BotAddressUpdated,
+    ProtocolTreasuryUpdated,
+    BootstrapPeriodUpdated,
+    ResolvingPeriodUpdated,
+    PartialDuelSettled,
+    PartialWinningsDistributed,
+    WinningsDistributionCompleted,
+    WinnersChunkSizesUpdated,
+    RefundChunkSizesUpdated,
+    PartialRefundsDistributed,
+    RefundsDistributionCompleted
+} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -159,9 +192,8 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         s.totalProtocolFeesGenerated = s.totalProtocolFeesGenerated + s.createDuelFee;
 
         require(
-            _duelDuration == DuelDuration.ThreeHours ||
-                _duelDuration == DuelDuration.SixHours ||
-                _duelDuration == DuelDuration.TwelveHours,
+            _duelDuration == DuelDuration.ThreeHours || _duelDuration == DuelDuration.SixHours
+                || _duelDuration == DuelDuration.TwelveHours,
             "Invalid duel duration"
         );
 
@@ -201,9 +233,8 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         require(IERC20(s.usdc).transferFrom(msg.sender, address(this), s.createDuelFee), "USDC transfer failed");
         s.totalProtocolFeesGenerated = s.totalProtocolFeesGenerated + s.createDuelFee;
         require(
-            _duelDuration == DuelDuration.ThreeHours ||
-                _duelDuration == DuelDuration.SixHours ||
-                _duelDuration == DuelDuration.TwelveHours,
+            _duelDuration == DuelDuration.ThreeHours || _duelDuration == DuelDuration.SixHours
+                || _duelDuration == DuelDuration.TwelveHours,
             "Invalid duel duration"
         );
 
@@ -259,12 +290,23 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // Transfer the wager amount in USDC to the contract
         require(IERC20(s.usdc).transferFrom(_user, address(this), _amount), "Token transfer failed");
 
+        string memory option = s.duelIdToOptions[_duelId][_optionsIndex];
         // Increment wager for the selected topic
-        s.totalWagerForOption[_duelId][s.duelIdToOptions[_duelId][_optionsIndex]] += _amount;
-        s.duelUsersForOption[_duelId][s.duelIdToOptions[_duelId][_optionsIndex]].push(_user);
-        s.userWager[_user][_duelId][s.duelIdToOptions[_duelId][_optionsIndex]] += _amount;
+        s.totalWagerForOption[_duelId][option] += _amount;
+        s.userWager[_user][_duelId][option] += _amount;
 
         uint256 amountTokenToMint = (_amount * 1e18) / _optionPrice;
+
+        if (!s.userExistsInOption[_duelId][option][_user]) {
+            // Push user to the array
+            s.duelUsersForOption[_duelId][option].push(_user);
+            // Update participantIndices with a 1-based index
+            uint256 userIndex = s.duelUsersForOption[_duelId][option].length; // 1-based index
+            s.participantIndices[_duelId][option][_user] = userIndex;
+            // Mark user as added
+            s.userExistsInOption[_duelId][option][_user] = true;
+        }
+
         // @note - zokyo-audit-fix-2
         address optionToken = s.optionIndexToOptionToken[_duelId][_optionsIndex];
         if (optionToken == address(0)) {
@@ -283,15 +325,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         s.totalBetsOnOption[_duelId][_optionsIndex][_option] += amountTokenToMint;
 
         emit DuelJoined(
-            _duelId,
-            duel.topic,
-            _option,
-            _user,
-            optionToken,
-            _optionsIndex,
-            _amount,
-            amountTokenToMint,
-            block.timestamp
+            _duelId, duel.topic, _option, _user, optionToken, _optionsIndex, _amount, amountTokenToMint, block.timestamp
         );
     }
 
@@ -317,11 +351,22 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // Transfer the wager amount in USDC to the contract
         require(IERC20(s.usdc).transferFrom(_user, address(this), _amount), "Token transfer failed");
 
+        string memory option = s.duelIdToOptions[_duelId][_optionsIndex];
         // Increment wager for the selected topic
-        s.totalWagerForOption[_duelId][s.duelIdToOptions[_duelId][_optionsIndex]] += _amount;
-        s.duelUsersForOption[_duelId][s.duelIdToOptions[_duelId][_optionsIndex]].push(_user);
-        s.userWager[_user][_duelId][s.duelIdToOptions[_duelId][_optionsIndex]] += _amount;
+        s.totalWagerForOption[_duelId][option] += _amount;
+        s.userWager[_user][_duelId][option] += _amount;
+
         uint256 amountTokenToMint = (_amount * 1e18) / _optionPrice;
+
+        if (!s.userExistsInOption[_duelId][option][_user]) {
+            // Push user to the array
+            s.duelUsersForOption[_duelId][option].push(_user);
+            // Update participantIndices with a 1-based index
+            uint256 userIndex = s.duelUsersForOption[_duelId][option].length; // 1-based index
+            s.participantIndices[_duelId][option][_user] = userIndex;
+            // Mark user as added
+            s.userExistsInOption[_duelId][option][_user] = true;
+        }
         // @note - zokyo-audit-fix-2
         address optionToken = s.optionIndexToOptionToken[_duelId][_optionsIndex];
         if (optionToken == address(0)) {
@@ -367,9 +412,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // uint256 duelDuration = duel.expiryTime - (duel.createTime + bootstrapPeriod);
         uint256 duelDuration = duel.duelDuration == DuelDuration.ThreeHours
             ? 3 hours
-            : duel.duelDuration == DuelDuration.SixHours
-                ? 6 hours
-                : 12 hours;
+            : duel.duelDuration == DuelDuration.SixHours ? 6 hours : 12 hours;
         duel.expiryTime = block.timestamp + duelDuration;
         duel.duelStatus = DuelStatus.Live;
 
@@ -380,10 +423,12 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @param _duelId The ID of the duel to start.
     /// @param _startTokenPrice The start price of the token.
 
-    function startCryptoDuel(
-        string memory _duelId,
-        int256 _startTokenPrice
-    ) external nonReentrant whenNotPaused onlyBot {
+    function startCryptoDuel(string memory _duelId, int256 _startTokenPrice)
+        external
+        nonReentrant
+        whenNotPaused
+        onlyBot
+    {
         CryptoDuel storage cryptoDuel = s.cryptoDuels[_duelId];
         require(s.isValidDuelId[_duelId] && cryptoDuel.createTime != 0, "Duel doesn't exist");
         // Ensure the duel is not already live
@@ -397,9 +442,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // uint256 duelDuration = cryptoDuel.expiryTime - (cryptoDuel.createTime + bootstrapPeriod);
         uint256 duelDuration = cryptoDuel.duelDuration == DuelDuration.ThreeHours
             ? 3 hours
-            : cryptoDuel.duelDuration == DuelDuration.SixHours
-                ? 6 hours
-                : 12 hours;
+            : cryptoDuel.duelDuration == DuelDuration.SixHours ? 6 hours : 12 hours;
         cryptoDuel.expiryTime = block.timestamp + duelDuration;
         cryptoDuel.duelStatus = DuelStatus.Live;
 
@@ -486,11 +529,8 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         require(block.timestamp <= cryptoDuel.expiryTime + s.resolvingPeriod, "Resolving time expired");
 
         // Determine the winning option and total wager of the losing side
-        (string memory winningOption, uint256 totalWagerLooser, uint256 optionIndex) = _determineWinningOptionAndWager(
-            _duelId,
-            _endTokenPrice,
-            cryptoDuel
-        );
+        (string memory winningOption, uint256 totalWagerLooser, uint256 optionIndex) =
+            _determineWinningOptionAndWager(_duelId, _endTokenPrice, cryptoDuel);
         // Calculate fees and payout for distribution
         (uint256 protocolFee, uint256 creatorFee, uint256 payout) = _calculateFeesAndPayout(totalWagerLooser);
         // Update protocol and creator fee earnings
@@ -513,10 +553,11 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @dev This function can only be called by a bot and only after the bootstrap period ends
     /// @param _duelCategory The duel category
     /// @param _duelId The unique ID of the duel to be cancelled
-    function cancelDuelIfThresholdNotMet(
-        DuelCategory _duelCategory,
-        string calldata _duelId
-    ) external nonReentrant onlyBot {
+    function cancelDuelIfThresholdNotMet(DuelCategory _duelCategory, string calldata _duelId)
+        external
+        nonReentrant
+        onlyBot
+    {
         require(s.isValidDuelId[_duelId], "Duel doesn't exist");
 
         if (_duelCategory != DuelCategory.Crypto) {
@@ -693,7 +734,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         for (uint256 i = s.refundProgress[_duelId]; i < optionsLength && processedCount < s.refundChunkSize; i++) {
             string memory option = s.duelIdToOptions[_duelId][i];
             address[] memory participants = s.duelUsersForOption[_duelId][option];
-
             for (uint256 j = 0; j < participants.length && processedCount < s.refundChunkSize; j++) {
                 address participant = participants[j];
                 uint256 wager = s.userWager[participant][_duelId][option];
@@ -757,9 +797,11 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @return creatorFee The fee collected by the creator.
     /// @return payout The remaining amount after fees, which is distributed to the winning side.
     /// @dev This function is a helper to keep the main duel settlement function cleaner and modular.
-    function _calculateFeesAndPayout(
-        uint256 totalWagerLooser
-    ) internal view returns (uint256 protocolFee, uint256 creatorFee, uint256 payout) {
+    function _calculateFeesAndPayout(uint256 totalWagerLooser)
+        internal
+        view
+        returns (uint256 protocolFee, uint256 creatorFee, uint256 payout)
+    {
         protocolFee = (totalWagerLooser * s.protocolFeePercentage) / 10000;
         creatorFee = (totalWagerLooser * s.creatorFeePercentage) / 10000;
         payout = totalWagerLooser - protocolFee - creatorFee;

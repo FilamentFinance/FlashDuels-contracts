@@ -33,12 +33,11 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
 
     // You can add parameters to this function in order to pass in
     // data to set your own state variables
-    function init(
-        address _protocolTreasury,
-        address _flashDuels,
-        address _usdc,
-        address _bot
-    ) external onlyOwner initializer {
+    function init(address _protocolTreasury, address _flashDuels, address _usdc, address _bot)
+        external
+        onlyOwner
+        initializer
+    {
         // adding ERC165 data
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         ds.supportedInterfaces[type(IERC165).interfaceId] = true;
@@ -69,6 +68,6 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
         s.winnersChunkSize = 50;
         s.refundChunkSize = 50;
         s.marketPlaceFees = 10; // 0.1%
-        s.maxStrikes = 5;
+            // s.maxStrikes = 5;
     }
 }

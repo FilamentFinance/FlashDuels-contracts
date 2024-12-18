@@ -12,12 +12,7 @@ uint256 constant BPS = 10000;
 /// @param totalPrice The total price for the sale
 /// @param saleTime The sale created time
 event SaleCreated(
-    uint256 saleId,
-    address indexed seller,
-    address token,
-    uint256 quantity,
-    uint256 totalPrice,
-    uint256 saleTime
+    uint256 saleId, address indexed seller, address token, uint256 quantity, uint256 totalPrice, uint256 saleTime
 );
 
 /// @notice Emitted when a sale is cancelled
@@ -344,12 +339,14 @@ struct AppStorage {
     uint256 minThreshold;
     /// @notice Sale Counter
     uint256 saleCounter;
-    /// @notice Maximum time buy gets failed
-    uint256 maxStrikes;
     /// @notice Nonce used to generate unique duel IDs
     uint256 nonce;
+    /// @notice Mapping for duelId -> option-> user -> 1-based index in the participants array
+    mapping(string => mapping(string => mapping(address => uint256))) participantIndices;
     /// @notice Mapping to track total bets on duel option for a particular duel
     mapping(string => mapping(uint256 => mapping(string => uint256))) totalBetsOnOption;
+    /// @notice Maps for duelId -> option -> user -> existence (true/false)
+    mapping(string => mapping(string => mapping(address => bool))) userExistsInOption;
     /// @notice Mapping of user to the duelId to the option to the user wager amount
     mapping(address => mapping(string => mapping(string => uint256))) userWager;
     /// @notice Mapping of duelId to optionIndex to the option token address

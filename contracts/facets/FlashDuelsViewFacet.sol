@@ -52,10 +52,11 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @param _duelId The unique identifier of the duel.
     /// @param _option The option selected by users in the duel.
     /// @return An array of addresses representing users who chose the specified option.
-    function getDuelUsersForOption(
-        string memory _duelId,
-        string memory _option
-    ) public view returns (address[] memory) {
+    function getDuelUsersForOption(string memory _duelId, string memory _option)
+        public
+        view
+        returns (address[] memory)
+    {
         return s.duelUsersForOption[_duelId][_option];
     }
 
@@ -65,11 +66,11 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @param _optionIndex The index of the option within the duel.
     /// @param _user The address of the user whose share is being queried.
     /// @return optionShare The share of the user in the specified option, represented as a percentage.
-    function getUserDuelOptionShare(
-        string memory _duelId,
-        uint256 _optionIndex,
-        address _user
-    ) public view returns (uint256 optionShare) {
+    function getUserDuelOptionShare(string memory _duelId, uint256 _optionIndex, address _user)
+        public
+        view
+        returns (uint256 optionShare)
+    {
         address optionToken = s.optionIndexToOptionToken[_duelId][_optionIndex];
         uint256 optionTokenBalance = IERC20(optionToken).balanceOf(_user);
         uint256 totalOptionTokenSupply = IERC20(optionToken).totalSupply();
@@ -82,10 +83,11 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @return _optionsLength The number of options in the duel.
     /// @return _options An array of options available in the duel.
     /// @return _wagerAmountsForOptions An array of wager amounts corresponding to each option.
-    function getWagerAmountDeposited(
-        string memory _duelId,
-        address _user
-    ) public view returns (uint256 _optionsLength, string[] memory _options, uint256[] memory _wagerAmountsForOptions) {
+    function getWagerAmountDeposited(string memory _duelId, address _user)
+        public
+        view
+        returns (uint256 _optionsLength, string[] memory _options, uint256[] memory _wagerAmountsForOptions)
+    {
         _optionsLength = s.duelIdToOptions[_duelId].length;
         _options = s.duelIdToOptions[_duelId];
         _wagerAmountsForOptions = new uint256[](_optionsLength);
@@ -124,11 +126,11 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @return startPrice The starting price of the token recorded at the start of the duel.
     /// @return delta The difference between the end and start prices of the token.
     /// @return isEndPriceGreater True if the end price is greater than the start price.
-    function getPriceDelta(
-        string memory _duelId,
-        string memory _tokenSymbol,
-        int256 _currentOraclePrice
-    ) public view returns (int256 endPrice, int256 startPrice, int256 delta, bool isEndPriceGreater) {
+    function getPriceDelta(string memory _duelId, string memory _tokenSymbol, int256 _currentOraclePrice)
+        public
+        view
+        returns (int256 endPrice, int256 startPrice, int256 delta, bool isEndPriceGreater)
+    {
         endPrice = _currentOraclePrice;
         startPrice = s.startPriceToken[_duelId][_tokenSymbol];
         delta = endPrice - startPrice;
@@ -162,7 +164,11 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @param _optionsIndex The index of the option within the duel.
     /// @param _option The specific option to retrieve the total bets for.
     /// @return The total amount of bets placed on the specified option.
-    function getTotalBetsOnOption(string memory _duelId, uint256 _optionsIndex, string memory _option) public view returns (uint256) {
+    function getTotalBetsOnOption(string memory _duelId, uint256 _optionsIndex, string memory _option)
+        public
+        view
+        returns (uint256)
+    {
         return s.totalBetsOnOption[_duelId][_optionsIndex][_option];
     }
 

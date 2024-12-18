@@ -410,7 +410,8 @@ describe("Token Purchase", function () {
         await usdcToken.connect(owner).mint(buyer.address, amount)
         await usdcToken.connect(buyer).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         tx = await flashDuelsView.getDuel(duelIds[0])
-        await flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 0)
+        
+        await flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 1, 0)
         const sale = await flashDuelsView.getSales(sellerOptionToken, 0)
         expect(sale.seller).to.equal("0x0000000000000000000000000000000000000000") // Ensure the sale is deleted
     })
@@ -506,7 +507,7 @@ describe("Token Purchase", function () {
         let buyer = accounts[5]
 
         await expect(
-            flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 0)
+            flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 1, 0)
         ).to.be.revertedWithCustomError(flashDuelsMarketplace, "FlashDuelsMarketplace__DuelEnded")
     })
 })
