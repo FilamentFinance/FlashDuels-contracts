@@ -59,7 +59,9 @@ const config: HardhatUserConfig = {
             "FlashDuelsCoreFacet",
             "FlashDuelsMarketplaceFacet",
             "FlashDuelsViewFacet",
-            "OwnershipFacet"
+            "OwnershipFacet",
+            "DiamondLoupeFacet",
+            "DiamondCutFacet",
         ]
     },
     sourcify: {

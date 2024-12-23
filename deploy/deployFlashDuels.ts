@@ -156,6 +156,12 @@ const main = async () => {
     const cut = []
 
     cut.push({
+        facetAddress: diamondLoupeFacet.target,
+        action: FacetCutAction.Add,
+        functionSelectors: diamondLoupe
+    })
+
+    cut.push({
         facetAddress: flashDuelsCoreFacet.target,
         action: FacetCutAction.Add,
         functionSelectors: flashDuelsCoreFacetSelectors

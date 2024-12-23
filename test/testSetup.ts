@@ -128,7 +128,8 @@ export const setupContracts = async () => {
         "0xae650247", // refundDuel(uint8,string)
         "0x6e70096e", // withdrawEarnings(uint256)
         "0xf1675271", // withdrawCreatorFee()
-        "0x8795cccb" // withdrawProtocolFees()
+        "0x8795cccb", // withdrawProtocolFees()
+        "0xef82031a" // continueRefundsInChunks(string)
     ]
 
     const flashDuelsMarketplaceFacetSelectors = [

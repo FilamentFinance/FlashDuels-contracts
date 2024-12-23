@@ -33,10 +33,10 @@ async function main() {
     // await flashDuelsMarketplaceFacet.waitForDeployment()
     // console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
-    const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
-    const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
-    await flashDuelsViewFacet.waitForDeployment()
-    console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
+    // const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
+    // const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
+    // await flashDuelsViewFacet.waitForDeployment()
+    // console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
 
     // const OwnershipFacet = await ethers.getContractFactory("OwnershipFacet")
     // const ownershipFacet = await OwnershipFacet.deploy()
@@ -45,16 +45,16 @@ async function main() {
 
     // Prepare the cut transaction
     const cut: any = [
-        {
-            facetAddress: flashDuelsViewFacet.target,
-            action: FacetCutAction.Add, // 0 means Add ,  1Replace function
-            functionSelectors: ["0x2da76d29"]
-        }
         // {
-        //     facetAddress: "0x0000000000000000000000000000000000000000",
-        //     action: FacetCutAction.Remove, // 0 means Add ,  1 Replace function , 2 for Remove
-        //     functionSelectors: ["0x2abb9b2a"]
+        //     facetAddress: flashDuelsCoreFacet.target,
+        //     action: FacetCutAction.Add, // 0 means Add ,  1Replace function
+        //     functionSelectors: ["0xfb8f41b2"]
         // }
+        {
+            facetAddress: "0x0000000000000000000000000000000000000000",
+            action: FacetCutAction.Remove, // 0 means Add ,  1 Replace function , 2 for Remove
+            functionSelectors: ["0xfb8f41b2"]
+        }
         // {
         //     facetAddress: flashDuelsCoreFacet.target,
         //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function
