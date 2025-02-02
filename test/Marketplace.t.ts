@@ -39,7 +39,8 @@ describe("FlashDuels Marketplace Contract", function () {
         owner = accounts[0]
         const expiryTime = 1
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-        usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
@@ -140,7 +141,8 @@ describe("Cancel Sale", function () {
         owner = accounts[0]
         const expiryTime = 1
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-        usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
@@ -235,7 +237,8 @@ describe("Cancel Sale", function () {
         owner = accounts[0]
         const expiryTime = 1
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-        usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
@@ -320,13 +323,9 @@ describe("Token Purchase", function () {
             tx: any,
             txr: any,
             sellerOptionToken: any,
-            usdc: any,
-            flashDuels: any,
             owner: any,
             seller: any,
-            buyer: any,
-            protocolTreasury: any,
-            usdAddress: any
+            buyer: any
 
         let usdcToken: any, tokenA: any, tokenB: any, bot: any, addr1: any, addr2: any, addr3: any
         const { contracts, accounts } = await loadFixture(deploy)
@@ -338,7 +337,8 @@ describe("Token Purchase", function () {
         owner = accounts[0]
         const expiryTime = 1
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-        usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
@@ -405,15 +405,237 @@ describe("Token Purchase", function () {
             .sell(sellerOptionToken, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
         txr = await tx.wait(1)
 
-        amount = ethers.parseUnits("10", 6)
+        amount = ethers.parseUnits("70", 6)
 
         await usdcToken.connect(owner).mint(buyer.address, amount)
-        await usdcToken.connect(buyer).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+        await usdcToken.connect(buyer).approve(contracts.Diamond.diamond, ethers.parseUnits("70", 6))
         tx = await flashDuelsView.getDuel(duelIds[0])
         
-        await flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 1, 0)
+        await flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 1, [0], [ethers.parseUnits("5", 18)])
         const sale = await flashDuelsView.getSales(sellerOptionToken, 0)
         expect(sale.seller).to.equal("0x0000000000000000000000000000000000000000") // Ensure the sale is deleted
+    })
+
+    it("Should allow a buyer to partially purchase tokens from a sale", async function () {
+        let duel: any,
+            tx: any,
+            txr: any,
+            sellerOptionToken: any,
+            owner: any,
+            seller: any,
+            buyer: any
+
+        let usdcToken: any, tokenA: any, tokenB: any, bot: any, addr1: any, addr2: any, addr3: any
+        const { contracts, accounts } = await loadFixture(deploy)
+        addr1 = accounts[1]
+        addr2 = accounts[2]
+        addr3 = accounts[3]
+        seller = accounts[4]
+        buyer = accounts[5]
+        owner = accounts[0]
+        const expiryTime = 1
+        // const minWager = ethers.parseUnits("10", 6) // 10 USDC
+        // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
+        await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+        await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+        const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
+            contracts.Diamond.diamond
+        )
+        const flashDuelsMarketplace: any =
+            await contracts.FlashDuelsMarketplaceFacet.flashDuelsMarketplaceFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+        const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
+            contracts.Diamond.diamond
+        )
+
+        let receipt = await flashDuelsCore
+            .connect(accounts[1])
+            .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+
+        let amount = ethers.parseUnits("60", 6)
+        const optionPrice = ethers.parseUnits("10", 6)
+
+        await usdcToken.connect(owner).mint(addr2.address, amount)
+        await usdcToken.connect(owner).mint(addr3.address, amount)
+        await usdcToken.connect(owner).mint(seller.address, amount)
+
+        // Approve token transfer
+        await usdcToken.connect(addr2).approve(contracts.Diamond.diamond, amount)
+        await usdcToken.connect(addr3).approve(contracts.Diamond.diamond, amount)
+        await usdcToken.connect(seller).approve(contracts.Diamond.diamond, amount)
+
+        let duelIds = await flashDuelsView.getCreatorToDuelIds(addr1.address)
+        expect(duelIds.length).to.equal(1)
+        await flashDuelsCore.connect(contracts.Bot.bot).joinDuel(duelIds[0], "Yes", 0, optionPrice, amount, addr2)
+        await flashDuelsCore.connect(contracts.Bot.bot).joinDuel(duelIds[0], "No", 1, optionPrice, amount, addr3)
+        tx = await flashDuelsCore.connect(contracts.Bot.bot).joinDuel(duelIds[0], "No", 1, optionPrice, amount, seller)
+        txr = await tx.wait(1)
+        duel = await flashDuelsView.getDuel(duelIds[0])
+        expect(duel.duelStatus).to.equal(1) // 1 represents the "BootStrapped" status
+
+        await ethers.provider.send("evm_increaseTime", [30 * 60])
+        await ethers.provider.send("evm_mine", [])
+
+        // Start the duel with the bot account
+        await expect(flashDuelsCore.connect(contracts.Bot.bot).startDuel(duelIds[0])).to.emit(
+            flashDuelsCore,
+            "DuelStarted"
+        )
+
+        // // Verify that the duel status has changed to "Live"
+        duel = await flashDuelsView.getDuel(duelIds[0])
+        expect(duel.duelStatus).to.equal(2) // 2 represents the "Live" status
+
+        for (let i = 0; i < txr?.logs.length; i++) {
+            if (txr?.logs[i]["args"]) {
+                sellerOptionToken = txr?.logs[i]["args"][4]
+            }
+        }
+
+        // console.log("sellerOptionToken", sellerOptionToken);
+
+        let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        await optionToken.connect(seller).approve(contracts.Diamond.diamond, ethers.parseUnits("5", 18))
+        tx = await flashDuelsMarketplace
+            .connect(seller)
+            .sell(sellerOptionToken, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
+        txr = await tx.wait(1)
+
+        amount = ethers.parseUnits("54", 6)
+
+        await usdcToken.connect(owner).mint(buyer.address, amount)
+        await usdcToken.connect(buyer).approve(contracts.Diamond.diamond, ethers.parseUnits("54", 6))
+        tx = await flashDuelsView.getDuel(duelIds[0])
+        
+        await flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 1, [0], [ethers.parseUnits("3", 18)])
+        const sale = await flashDuelsView.getSales(sellerOptionToken, 0)
+        expect(sale.seller).to.equal(seller.address) // Ensure the sale is deleted
+        expect(sale.quantity).to.equal(ethers.parseUnits("2", 18)) // Ensure the sale is deleted
+    })
+
+
+    it("Should allow a buyer to purchase tokens from multiple sales (sellers)", async function () {
+        let duel: any,
+            tx: any,
+            txr: any,
+            sellerOptionToken1: any,
+            sellerOptionToken2: any,
+            owner: any,
+            seller1: any,
+            seller2: any,
+            buyer: any
+
+        let usdcToken: any, tokenA: any, tokenB: any, bot: any, addr1: any, addr2: any, addr3: any
+        const { contracts, accounts } = await loadFixture(deploy)
+        addr1 = accounts[1]
+        addr2 = accounts[2]
+        addr3 = accounts[3]
+        seller1 = accounts[4]
+        seller2 = accounts[6]
+        buyer = accounts[5]
+        owner = accounts[0]
+        const expiryTime = 1
+        // const minWager = ethers.parseUnits("10", 6) // 10 USDC
+        // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
+        await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+        await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+        const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
+            contracts.Diamond.diamond
+        )
+        const flashDuelsMarketplace: any =
+            await contracts.FlashDuelsMarketplaceFacet.flashDuelsMarketplaceFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+        const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
+            contracts.Diamond.diamond
+        )
+
+        let receipt = await flashDuelsCore
+            .connect(accounts[1])
+            .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+
+        let amount = ethers.parseUnits("60", 6)
+        const optionPrice = ethers.parseUnits("10", 6)
+
+        await usdcToken.connect(owner).mint(addr2.address, amount)
+        await usdcToken.connect(owner).mint(addr3.address, amount)
+        await usdcToken.connect(owner).mint(seller1.address, amount)
+        await usdcToken.connect(owner).mint(seller2.address, amount)
+
+        // Approve token transfer
+        await usdcToken.connect(addr2).approve(contracts.Diamond.diamond, amount)
+        await usdcToken.connect(addr3).approve(contracts.Diamond.diamond, amount)
+        await usdcToken.connect(seller1).approve(contracts.Diamond.diamond, amount)
+        await usdcToken.connect(seller2).approve(contracts.Diamond.diamond, amount)
+
+        let duelIds = await flashDuelsView.getCreatorToDuelIds(addr1.address)
+        expect(duelIds.length).to.equal(1)
+        await flashDuelsCore.connect(contracts.Bot.bot).joinDuel(duelIds[0], "Yes", 0, optionPrice, amount, addr2)
+        await flashDuelsCore.connect(contracts.Bot.bot).joinDuel(duelIds[0], "No", 1, optionPrice, amount, addr3)
+        tx = await flashDuelsCore.connect(contracts.Bot.bot).joinDuel(duelIds[0], "No", 1, optionPrice, amount, seller1)
+        txr = await tx.wait(1)
+        let tx2 = await flashDuelsCore.connect(contracts.Bot.bot).joinDuel(duelIds[0], "No", 1, optionPrice, amount, seller2)
+        let txr2 = await tx2.wait(1)
+        duel = await flashDuelsView.getDuel(duelIds[0])
+        expect(duel.duelStatus).to.equal(1) // 1 represents the "BootStrapped" status
+
+        await ethers.provider.send("evm_increaseTime", [30 * 60])
+        await ethers.provider.send("evm_mine", [])
+
+        // Start the duel with the bot account
+        await expect(flashDuelsCore.connect(contracts.Bot.bot).startDuel(duelIds[0])).to.emit(
+            flashDuelsCore,
+            "DuelStarted"
+        )
+
+        // // Verify that the duel status has changed to "Live"
+        duel = await flashDuelsView.getDuel(duelIds[0])
+        expect(duel.duelStatus).to.equal(2) // 2 represents the "Live" status
+
+        for (let i = 0; i < txr?.logs.length; i++) {
+            if (txr?.logs[i]["args"]) {
+                sellerOptionToken1 = txr?.logs[i]["args"][4]
+            }
+        }
+
+        for (let i = 0; i < txr2?.logs.length; i++) {
+            if (txr2?.logs[i]["args"]) {
+                sellerOptionToken2 = txr2?.logs[i]["args"][4]
+            }
+        }
+
+        // console.log("sellerOptionToken", sellerOptionToken);
+
+        let optionToken1: FLASHUSDC = new ethers.Contract(sellerOptionToken1, FLASHUSDCABI, owner)
+        await optionToken1.connect(seller1).approve(contracts.Diamond.diamond, ethers.parseUnits("5", 18))
+        tx = await flashDuelsMarketplace
+            .connect(seller1)
+            .sell(sellerOptionToken1, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
+        txr = await tx.wait(1)
+
+        let optionToken2: FLASHUSDC = new ethers.Contract(sellerOptionToken2, FLASHUSDCABI, owner)
+        await optionToken2.connect(seller2).approve(contracts.Diamond.diamond, ethers.parseUnits("5", 18))
+        tx = await flashDuelsMarketplace
+            .connect(seller2)
+            .sell(sellerOptionToken2, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
+
+        amount = ethers.parseUnits("140", 6)
+
+        await usdcToken.connect(owner).mint(buyer.address, amount)
+        await usdcToken.connect(buyer).approve(contracts.Diamond.diamond, ethers.parseUnits("140", 6))
+        tx = await flashDuelsView.getDuel(duelIds[0])
+        // @note - here sellerOptionToken1 == sellerOptionToken2
+        await flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken1, duelIds[0], 1, [0, 1], [ethers.parseUnits("5", 18), ethers.parseUnits("3", 18)])
+        let sale = await flashDuelsView.getSales(sellerOptionToken1, 0)
+        expect(sale.seller).to.equal("0x0000000000000000000000000000000000000000") // Ensure the sale is deleted
+        expect(sale.quantity).to.equal(ethers.parseUnits("0", 18)) // Ensure the sale is deleted
+
+        sale = await flashDuelsView.getSales(sellerOptionToken2, 1)
+        expect(sale.seller).to.equal(seller2.address) // Ensure the sale is deleted
+        expect(sale.quantity).to.equal(ethers.parseUnits("2", 18)) // Ensure the sale is deleted
     })
 
     it("Should revert if the duel has ended", async function () {
@@ -422,7 +644,7 @@ describe("Token Purchase", function () {
 
         const expiryTime = 1
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-        usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
@@ -507,7 +729,7 @@ describe("Token Purchase", function () {
         let buyer = accounts[5]
 
         await expect(
-            flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 1, 0)
+            flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 1, [0], [amount])
         ).to.be.revertedWithCustomError(flashDuelsMarketplace, "FlashDuelsMarketplace__DuelEnded")
     })
 })

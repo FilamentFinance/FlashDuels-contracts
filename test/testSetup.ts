@@ -137,7 +137,8 @@ export const setupContracts = async () => {
         "0x9012c4a8", // updateFee(uint256)
         "0x07b4c084", // sell(address,string,uint256,uint256,uint256)
         "0xaa6ecb55", // cancelSell(address,uint256)
-        "0x1c79558a", // buy(address,string,uint256,uint256)
+        // "0x1c79558a", // buy(address,string,uint256,uint256)
+        "0x3a51c924", // buy(address,string,uint256,uint256[],uint256[])
         "0x225c3131" // getSale(address,uint256)
     ]
 
