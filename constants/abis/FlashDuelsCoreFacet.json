@@ -74,6 +74,49 @@
             {
                 "indexed": true,
                 "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DuelCategory",
+                "name": "category",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DuelDuration",
+                "name": "duration",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "CreateDuelRequested",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
                 "name": "creator",
                 "type": "address"
             },
@@ -188,6 +231,49 @@
             }
         ],
         "name": "CryptoDuelJoined",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DuelCategory",
+                "name": "category",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DuelDuration",
+                "name": "duration",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "DuelApprovedAndCreated",
         "type": "event"
     },
     {
@@ -317,6 +403,31 @@
             }
         ],
         "name": "DuelJoined",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "refundAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "DuelRequestRevoked",
         "type": "event"
     },
     {
@@ -701,6 +812,35 @@
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
+            {
+                "internalType": "enum DuelCategory",
+                "name": "_category",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_index",
+                "type": "uint256"
+            }
+        ],
+        "name": "approveAndCreateDuel",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "enum DuelCategory",
                 "name": "_duelCategory",
                 "type": "uint8"
@@ -754,84 +894,6 @@
         ],
         "name": "continueWinningsDistribution",
         "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "string",
-                "name": "_tokenSymbol",
-                "type": "string"
-            },
-            {
-                "internalType": "string[]",
-                "name": "_options",
-                "type": "string[]"
-            },
-            {
-                "internalType": "int256",
-                "name": "_triggerValue",
-                "type": "int256"
-            },
-            {
-                "internalType": "enum TriggerType",
-                "name": "_triggerType",
-                "type": "uint8"
-            },
-            {
-                "internalType": "enum TriggerCondition",
-                "name": "_triggerCondition",
-                "type": "uint8"
-            },
-            {
-                "internalType": "enum DuelDuration",
-                "name": "_duelDuration",
-                "type": "uint8"
-            }
-        ],
-        "name": "createCryptoDuel",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
-            }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "enum DuelCategory",
-                "name": "_category",
-                "type": "uint8"
-            },
-            {
-                "internalType": "string",
-                "name": "_topic",
-                "type": "string"
-            },
-            {
-                "internalType": "string[]",
-                "name": "_options",
-                "type": "string[]"
-            },
-            {
-                "internalType": "enum DuelDuration",
-                "name": "_duelDuration",
-                "type": "uint8"
-            }
-        ],
-        "name": "createDuel",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
-            }
-        ],
         "stateMutability": "nonpayable",
         "type": "function"
     },
@@ -929,6 +991,113 @@
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_tokenSymbol",
+                "type": "string"
+            },
+            {
+                "internalType": "string[]",
+                "name": "_options",
+                "type": "string[]"
+            },
+            {
+                "internalType": "int256",
+                "name": "_triggerValue",
+                "type": "int256"
+            },
+            {
+                "internalType": "enum TriggerType",
+                "name": "_triggerType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "enum TriggerCondition",
+                "name": "_triggerCondition",
+                "type": "uint8"
+            },
+            {
+                "internalType": "enum DuelDuration",
+                "name": "_duelDuration",
+                "type": "uint8"
+            }
+        ],
+        "name": "requestCreateCryptoDuel",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "enum DuelCategory",
+                "name": "_category",
+                "type": "uint8"
+            },
+            {
+                "internalType": "string",
+                "name": "_topic",
+                "type": "string"
+            },
+            {
+                "internalType": "string[]",
+                "name": "_options",
+                "type": "string[]"
+            },
+            {
+                "internalType": "enum DuelDuration",
+                "name": "_duelDuration",
+                "type": "uint8"
+            }
+        ],
+        "name": "requestToCreateDuel",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
+            {
+                "internalType": "enum DuelCategory",
+                "name": "_category",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_index",
+                "type": "uint256"
+            }
+        ],
+        "name": "revokeCreateDuelRequest",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {

@@ -1,40 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {
-    AppStorage,
-    Duel,
-    CryptoDuel,
-    DuelCategory,
-    DuelDuration,
-    TriggerType,
-    TriggerCondition,
-    DuelStatus,
-    DuelCreated,
-    CryptoDuelCreated,
-    DuelJoined,
-    CryptoDuelJoined,
-    DuelStarted,
-    DuelSettled,
-    DuelCancelled,
-    RefundIssued,
-    WithdrawEarning,
-    WithdrawCreatorEarning,
-    WithdrawProtocolFee,
-    CreateDuelFeeUpdated,
-    MinimumWagerThresholdUpdated,
-    BotAddressUpdated,
-    ProtocolTreasuryUpdated,
-    BootstrapPeriodUpdated,
-    ResolvingPeriodUpdated,
-    PartialDuelSettled,
-    PartialWinningsDistributed,
-    WinningsDistributionCompleted,
-    WinnersChunkSizesUpdated,
-    RefundChunkSizesUpdated,
-    PartialRefundsDistributed,
-    RefundsDistributionCompleted
-} from "../AppStorage.sol";
+import {AppStorage, Duel, CryptoDuel, DuelCategory, DuelDuration, TriggerType, TriggerCondition, DuelStatus, CreateDuelRequested, PendingDuel, PendingCryptoDuel, DuelApprovedAndCreated, DuelRequestRevoked, DuelCreated, CryptoDuelCreated, DuelJoined, CryptoDuelJoined, DuelStarted, DuelSettled, DuelCancelled, RefundIssued, WithdrawEarning, WithdrawCreatorEarning, WithdrawProtocolFee, CreateDuelFeeUpdated, MinimumWagerThresholdUpdated, BotAddressUpdated, ProtocolTreasuryUpdated, BootstrapPeriodUpdated, ResolvingPeriodUpdated, PartialDuelSettled, PartialWinningsDistributed, WinningsDistributionCompleted, WinnersChunkSizesUpdated, RefundChunkSizesUpdated, PartialRefundsDistributed, RefundsDistributionCompleted, FlashDuels__InvalidBot} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -42,9 +9,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IFlashDuelsView} from "../interfaces/IFlashDuelsView.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
 import {OptionToken} from "../OptionToken.sol";
-
-/// @notice Thrown when the bot address is invalid
-error FlashDuels__InvalidBot();
 
 /// @title FlashDuels
 /// @notice This contract allows users to create and participate in duels by betting on the options.
@@ -172,98 +136,119 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         emit RefundChunkSizesUpdated(_refundChunkSize);
     }
 
-    /// @notice Creates a new duel with the specified parameters
-    /// @dev Allows any user to create a duel with a predefined duel duration.
-    ///       A USDC fee is required for duel creation, and the duel starts after the bootstrap period.
-    /// @param _category The category of the duel (e.g., Politics, or other categories).
-    /// @param _topic A string representing the topic or title or description or questions in the duel.
-    /// @param _options A string representing the first option for the duel.
-    /// @param _duelDuration The duration of the duel, chosen from predefined options (3 hours, 6 hours, or 12 hours).
-    /// @return _duelId A unique string representing the ID of the created duel.
-    function createDuel(
+    /// @notice Approves USDC and stores duel parameters for later creation
+    /// @param _category The category of the duel
+    /// @param _topic The topic or description of the duel
+    /// @param _options Array of options for the duel
+    /// @param _duelDuration The duration of the duel
+    /// @return success boolean indicating if the approval and parameter storage was successful
+    function requestToCreateDuel(
         DuelCategory _category,
         string memory _topic,
         string[] memory _options,
         DuelDuration _duelDuration
-    ) external nonReentrant whenNotPaused returns (string memory) {
+    ) external nonReentrant whenNotPaused returns (bool) {
         require(_category != DuelCategory.Crypto, "Should not crypto category duel");
-        // Transfer USDC fee for duel creation
-        require(IERC20(s.usdc).transferFrom(msg.sender, address(this), s.createDuelFee), "USDC transfer failed");
-        s.totalProtocolFeesGenerated = s.totalProtocolFeesGenerated + s.createDuelFee;
 
-        require(
-            _duelDuration == DuelDuration.ThreeHours || _duelDuration == DuelDuration.SixHours
-                || _duelDuration == DuelDuration.TwelveHours,
-            "Invalid duel duration"
+        // Transfer USDC fee upfront
+        require(IERC20(s.usdc).transferFrom(msg.sender, address(this), s.createDuelFee), "USDC transfer failed");
+
+        s.pendingDuels[msg.sender][_category].push(
+            PendingDuel({
+                creator: msg.sender,
+                category: _category,
+                topic: _topic,
+                options: _options,
+                duration: _duelDuration,
+                isApproved: false,
+                usdcAmount: s.createDuelFee
+            })
         );
 
-        string memory _duelId = _generateDuelId(msg.sender);
-        Duel storage duel = s.duels[_duelId];
-        duel.creator = msg.sender;
-        duel.topic = _topic;
-        duel.createTime = block.timestamp;
-        duel.duelDuration = _duelDuration;
-        duel.duelStatus = DuelStatus.BootStrapped;
-        duel.category = _category;
-        s.duelIdToOptions[_duelId] = _options;
-        s.creatorToDuelIds[msg.sender].push(_duelId);
-
-        emit DuelCreated(msg.sender, _duelId, _topic, block.timestamp, s.createDuelFee, _category);
-
-        return _duelId;
+        emit CreateDuelRequested(msg.sender, _category, _topic, _duelDuration, s.createDuelFee, block.timestamp);
+        return true;
     }
-    /// @notice Creates a new crypto duel.
-    /// @param _tokenSymbol Allowed token symbol for wagering.
-    /// @param _options Betting options for the duel.
-    /// @param _triggerValue Value that triggers the outcome.
-    /// @param _triggerType Type of trigger (e.g., absolute, percentage).
-    /// @param _triggerCondition Condition for triggering (e.g., above, below).
-    /// @param _duelDuration Duration of the duel.
-    /// @return Duel ID as a string.
 
-    function createCryptoDuel(
+    /// @notice Approves USDC and stores crypto duel parameters for later creation
+    /// @param _tokenSymbol Allowed token symbol for wagering
+    /// @param _options Betting options for the duel
+    /// @param _triggerValue Value that triggers the outcome
+    /// @param _triggerType Type of trigger (e.g., absolute, percentage)
+    /// @param _triggerCondition Condition for triggering (e.g., above, below)
+    /// @param _duelDuration Duration of the duel
+    /// @return success boolean indicating if the approval and parameter storage was successful
+    function requestCreateCryptoDuel(
         string memory _tokenSymbol,
         string[] memory _options,
         int256 _triggerValue,
         TriggerType _triggerType,
         TriggerCondition _triggerCondition,
         DuelDuration _duelDuration
-    ) external nonReentrant whenNotPaused returns (string memory) {
-        // Transfer USDC fee for duel creation
+    ) external nonReentrant whenNotPaused returns (bool) {
         require(IERC20(s.usdc).transferFrom(msg.sender, address(this), s.createDuelFee), "USDC transfer failed");
-        s.totalProtocolFeesGenerated = s.totalProtocolFeesGenerated + s.createDuelFee;
-        require(
-            _duelDuration == DuelDuration.ThreeHours || _duelDuration == DuelDuration.SixHours
-                || _duelDuration == DuelDuration.TwelveHours,
-            "Invalid duel duration"
+        s.pendingCryptoDuels[msg.sender].push(
+            PendingCryptoDuel({
+                creator: msg.sender,
+                category: DuelCategory.Crypto,
+                tokenSymbol: _tokenSymbol,
+                options: _options,
+                duration: _duelDuration,
+                isApproved: false,
+                usdcAmount: s.createDuelFee,
+                triggerValue: _triggerValue,
+                triggerType: _triggerType,
+                triggerCondition: _triggerCondition
+            })
         );
-
-        string memory _duelId = _generateDuelId(msg.sender);
-        CryptoDuel storage duel = s.cryptoDuels[_duelId];
-        duel.creator = msg.sender;
-        duel.tokenSymbol = _tokenSymbol;
-        duel.createTime = block.timestamp;
-        duel.duelDuration = _duelDuration;
-        duel.triggerValue = _triggerValue;
-        duel.triggerType = _triggerType;
-        duel.triggerCondition = _triggerCondition;
-        duel.duelStatus = DuelStatus.BootStrapped;
-        s.duelIdToOptions[_duelId] = _options;
-        s.creatorToDuelIds[msg.sender].push(_duelId);
-
-        emit CryptoDuelCreated(
+        emit CreateDuelRequested(
             msg.sender,
+            DuelCategory.Crypto,
             _tokenSymbol,
-            _duelId,
-            block.timestamp,
+            _duelDuration,
             s.createDuelFee,
-            _triggerValue,
-            _triggerType,
-            _triggerCondition,
-            DuelCategory.Crypto
+            block.timestamp
         );
+        return true;
+    }
 
-        return _duelId;
+    /// @notice Creates a duel for an approved user
+    /// @param _user Address of the user who approved the duel creation
+    /// @param _category The category of the duel to approve
+    /// @param _index The index of the pending duel in the array
+    /// @return _duelId A unique string representing the ID of the created duel
+    function approveAndCreateDuel(
+        address _user,
+        DuelCategory _category,
+        uint256 _index
+    ) external whenNotPaused onlyOwner returns (string memory) {
+        string memory duelId;
+        if (_category == DuelCategory.Crypto) {
+            duelId = _processPendingCryptoDuel(_user, _index);
+        } else {
+            duelId = _processPendingDuel(_user, _category, _index);
+        }
+        return duelId;
+    }
+
+    /// @notice Revokes duel approval and refunds USDC for a specific user
+    /// @param _user Address of the user whose duel request should be revoked
+    /// @param _category The category of the duel to revoke
+    /// @param _index The index of the pending duel in the array
+    /// @return success boolean indicating if the revocation and refund was successful
+    function revokeCreateDuelRequest(
+        address _user,
+        DuelCategory _category,
+        uint256 _index
+    ) external whenNotPaused onlyOwner returns (bool) {
+        uint256 refundAmount;
+        if (_category == DuelCategory.Crypto) {
+            refundAmount = _revokePendingCryptoDuel(_user, _index);
+        } else {
+            refundAmount = _revokePendingDuel(_user, _category, _index);
+        }
+        require(IERC20(s.usdc).transfer(_user, refundAmount), "USDC refund failed");
+        emit DuelRequestRevoked(_user, refundAmount, block.timestamp);
+        return true;
     }
 
     /// @notice Allows a user to join an existing duel by placing a wager on one of the options.
@@ -325,7 +310,15 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         s.totalBetsOnOption[_duelId][_optionsIndex][_option] += amountTokenToMint;
 
         emit DuelJoined(
-            _duelId, duel.topic, _option, _user, optionToken, _optionsIndex, _amount, amountTokenToMint, block.timestamp
+            _duelId,
+            duel.topic,
+            _option,
+            _user,
+            optionToken,
+            _optionsIndex,
+            _amount,
+            amountTokenToMint,
+            block.timestamp
         );
     }
 
@@ -412,7 +405,9 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // uint256 duelDuration = duel.expiryTime - (duel.createTime + bootstrapPeriod);
         uint256 duelDuration = duel.duelDuration == DuelDuration.ThreeHours
             ? 3 hours
-            : duel.duelDuration == DuelDuration.SixHours ? 6 hours : 12 hours;
+            : duel.duelDuration == DuelDuration.SixHours
+                ? 6 hours
+                : 12 hours;
         duel.expiryTime = block.timestamp + duelDuration;
         duel.duelStatus = DuelStatus.Live;
 
@@ -423,12 +418,10 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @param _duelId The ID of the duel to start.
     /// @param _startTokenPrice The start price of the token.
 
-    function startCryptoDuel(string memory _duelId, int256 _startTokenPrice)
-        external
-        nonReentrant
-        whenNotPaused
-        onlyBot
-    {
+    function startCryptoDuel(
+        string memory _duelId,
+        int256 _startTokenPrice
+    ) external nonReentrant whenNotPaused onlyBot {
         CryptoDuel storage cryptoDuel = s.cryptoDuels[_duelId];
         require(s.isValidDuelId[_duelId] && cryptoDuel.createTime != 0, "Duel doesn't exist");
         // Ensure the duel is not already live
@@ -442,7 +435,9 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // uint256 duelDuration = cryptoDuel.expiryTime - (cryptoDuel.createTime + bootstrapPeriod);
         uint256 duelDuration = cryptoDuel.duelDuration == DuelDuration.ThreeHours
             ? 3 hours
-            : cryptoDuel.duelDuration == DuelDuration.SixHours ? 6 hours : 12 hours;
+            : cryptoDuel.duelDuration == DuelDuration.SixHours
+                ? 6 hours
+                : 12 hours;
         cryptoDuel.expiryTime = block.timestamp + duelDuration;
         cryptoDuel.duelStatus = DuelStatus.Live;
 
@@ -529,8 +524,11 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         require(block.timestamp <= cryptoDuel.expiryTime + s.resolvingPeriod, "Resolving time expired");
 
         // Determine the winning option and total wager of the losing side
-        (string memory winningOption, uint256 totalWagerLooser, uint256 optionIndex) =
-            _determineWinningOptionAndWager(_duelId, _endTokenPrice, cryptoDuel);
+        (string memory winningOption, uint256 totalWagerLooser, uint256 optionIndex) = _determineWinningOptionAndWager(
+            _duelId,
+            _endTokenPrice,
+            cryptoDuel
+        );
         // Calculate fees and payout for distribution
         (uint256 protocolFee, uint256 creatorFee, uint256 payout) = _calculateFeesAndPayout(totalWagerLooser);
         // Update protocol and creator fee earnings
@@ -553,11 +551,10 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @dev This function can only be called by a bot and only after the bootstrap period ends
     /// @param _duelCategory The duel category
     /// @param _duelId The unique ID of the duel to be cancelled
-    function cancelDuelIfThresholdNotMet(DuelCategory _duelCategory, string calldata _duelId)
-        external
-        nonReentrant
-        onlyBot
-    {
+    function cancelDuelIfThresholdNotMet(
+        DuelCategory _duelCategory,
+        string calldata _duelId
+    ) external nonReentrant onlyBot {
         require(s.isValidDuelId[_duelId], "Duel doesn't exist");
 
         if (_duelCategory != DuelCategory.Crypto) {
@@ -643,6 +640,212 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     // receive() external payable {}
 
     // ========================== Internal Functions ========================== //
+
+    /// @notice Creates a new duel with the specified parameters
+    /// @dev Internal function that allows any user to create a duel with a predefined duel duration.
+    ///       A USDC fee is required for duel creation, and the duel starts after the bootstrap period.
+    /// @param _category The category of the duel (e.g., Politics, or other categories).
+    /// @param _topic A string representing the topic or title or description or questions in the duel.
+    /// @param _options An array of strings representing the options for the duel.
+    /// @param _duelDuration The duration of the duel, chosen from predefined options (3 hours, 6 hours, or 12 hours).
+    /// @return _duelId A unique string representing the ID of the created duel.
+    function _createDuel(
+        DuelCategory _category,
+        string memory _topic,
+        string[] memory _options,
+        DuelDuration _duelDuration
+    ) internal returns (string memory) {
+        require(_category != DuelCategory.Crypto, "Should not crypto category duel");
+        // Transfer USDC fee for duel creation
+        require(IERC20(s.usdc).transferFrom(msg.sender, address(this), s.createDuelFee), "USDC transfer failed");
+        s.totalProtocolFeesGenerated = s.totalProtocolFeesGenerated + s.createDuelFee;
+
+        require(
+            _duelDuration == DuelDuration.ThreeHours ||
+                _duelDuration == DuelDuration.SixHours ||
+                _duelDuration == DuelDuration.TwelveHours,
+            "Invalid duel duration"
+        );
+
+        string memory _duelId = _generateDuelId(msg.sender);
+        Duel storage duel = s.duels[_duelId];
+        duel.creator = msg.sender;
+        duel.topic = _topic;
+        duel.createTime = block.timestamp;
+        duel.duelDuration = _duelDuration;
+        duel.duelStatus = DuelStatus.BootStrapped;
+        duel.category = _category;
+        s.duelIdToOptions[_duelId] = _options;
+        s.creatorToDuelIds[msg.sender].push(_duelId);
+
+        emit DuelCreated(msg.sender, _duelId, _topic, block.timestamp, s.createDuelFee, _category);
+
+        return _duelId;
+    }
+
+    /// @notice Internal function to create a new crypto duel
+    /// @param _tokenSymbol Allowed token symbol for wagering
+    /// @param _options Betting options for the duel
+    /// @param _triggerValue Value that triggers the outcome
+    /// @param _triggerType Type of trigger (e.g., absolute, percentage)
+    /// @param _triggerCondition Condition for triggering (e.g., above, below)
+    /// @param _duelDuration Duration of the duel
+    /// @return Duel ID as a string
+    function _createCryptoDuel(
+        string memory _tokenSymbol,
+        string[] memory _options,
+        int256 _triggerValue,
+        TriggerType _triggerType,
+        TriggerCondition _triggerCondition,
+        DuelDuration _duelDuration
+    ) internal returns (string memory) {
+        s.totalProtocolFeesGenerated = s.totalProtocolFeesGenerated + s.createDuelFee;
+        require(
+            _duelDuration == DuelDuration.ThreeHours ||
+                _duelDuration == DuelDuration.SixHours ||
+                _duelDuration == DuelDuration.TwelveHours,
+            "Invalid duel duration"
+        );
+
+        string memory _duelId = _generateDuelId(msg.sender);
+        CryptoDuel storage duel = s.cryptoDuels[_duelId];
+        duel.creator = msg.sender;
+        duel.tokenSymbol = _tokenSymbol;
+        duel.createTime = block.timestamp;
+        duel.duelDuration = _duelDuration;
+        duel.triggerValue = _triggerValue;
+        duel.triggerType = _triggerType;
+        duel.triggerCondition = _triggerCondition;
+        duel.duelStatus = DuelStatus.BootStrapped;
+        s.duelIdToOptions[_duelId] = _options;
+        s.creatorToDuelIds[msg.sender].push(_duelId);
+
+        emit CryptoDuelCreated(
+            msg.sender,
+            _tokenSymbol,
+            _duelId,
+            block.timestamp,
+            s.createDuelFee,
+            _triggerValue,
+            _triggerType,
+            _triggerCondition,
+            DuelCategory.Crypto
+        );
+
+        return _duelId;
+    }
+
+    /// @notice Internal function to process and create a regular duel
+    /// @param _user Address of the user
+    /// @param _category The category of the duel
+    /// @param _index The index of the pending duel
+    /// @return duelId A unique string representing the ID of the created duel
+    function _processPendingDuel(
+        address _user,
+        DuelCategory _category,
+        uint256 _index
+    ) internal returns (string memory) {
+        PendingDuel[] storage userPendingDuels = s.pendingDuels[_user][_category];
+        require(_index < userPendingDuels.length, "Invalid pending duels index");
+        PendingDuel memory pendingDuel = userPendingDuels[_index];
+        require(!pendingDuel.isApproved, "Duel already approved");
+        require(pendingDuel.usdcAmount == s.createDuelFee, "Invalid USDC amount stored");
+        string memory duelId = _createDuel(
+            pendingDuel.category,
+            pendingDuel.topic,
+            pendingDuel.options,
+            pendingDuel.duration
+        );
+        uint256 lastIndex = userPendingDuels.length - 1;
+        if (_index != lastIndex) {
+            userPendingDuels[_index] = userPendingDuels[lastIndex];
+        }
+        userPendingDuels.pop();
+        emit DuelApprovedAndCreated(
+            _user,
+            duelId,
+            pendingDuel.category,
+            pendingDuel.topic,
+            pendingDuel.duration,
+            block.timestamp
+        );
+        return duelId;
+    }
+
+    /// @notice Internal function to process and create a crypto duel
+    /// @param _user Address of the user
+    /// @param _index The index of the pending duel
+    /// @return duelId A unique string representing the ID of the created duel
+    function _processPendingCryptoDuel(address _user, uint256 _index) internal returns (string memory) {
+        PendingCryptoDuel[] storage userPendingCryptoDuels = s.pendingCryptoDuels[_user];
+        require(_index < userPendingCryptoDuels.length, "Invalid pending crypto duels index");
+        PendingCryptoDuel memory pendingCryptoDuel = userPendingCryptoDuels[_index];
+        require(!pendingCryptoDuel.isApproved, "Duel already approved");
+        require(pendingCryptoDuel.usdcAmount == s.createDuelFee, "Invalid USDC amount stored");
+        string memory duelId = _createCryptoDuel(
+            pendingCryptoDuel.tokenSymbol,
+            pendingCryptoDuel.options,
+            pendingCryptoDuel.triggerValue,
+            pendingCryptoDuel.triggerType,
+            pendingCryptoDuel.triggerCondition,
+            pendingCryptoDuel.duration
+        );
+        uint256 lastIndex = userPendingCryptoDuels.length - 1;
+        if (_index != lastIndex) {
+            userPendingCryptoDuels[_index] = userPendingCryptoDuels[lastIndex];
+        }
+        userPendingCryptoDuels.pop();
+        emit DuelApprovedAndCreated(
+            _user,
+            duelId,
+            DuelCategory.Crypto,
+            pendingCryptoDuel.tokenSymbol,
+            pendingCryptoDuel.duration,
+            block.timestamp
+        );
+        return duelId;
+    }
+
+    /// @notice Processes a pending regular duel for a user and returns the refund amount.
+    /// @dev This function ensures the regular duel is not approved and has a valid USDC amount.
+    /// @param _user The address of the user whose pending regular duel is being processed.
+    /// @param _category The category of the duel.
+    /// @param _index The index of the pending duel in the user's pending duels array.
+    /// @return The amount of USDC to be refunded.
+    function _revokePendingDuel(address _user, DuelCategory _category, uint256 _index) internal returns (uint256) {
+        PendingDuel[] storage userPendingDuels = s.pendingDuels[_user][_category];
+        require(_index < userPendingDuels.length, "Invalid pending duels index");
+        PendingDuel memory pendingDuel = userPendingDuels[_index];
+        require(!pendingDuel.isApproved, "Duel already approved");
+        require(pendingDuel.usdcAmount > 0, "No USDC to refund");
+        uint256 refundAmount = pendingDuel.usdcAmount;
+        uint256 lastIndex = userPendingDuels.length - 1;
+        if (_index != lastIndex) {
+            userPendingDuels[_index] = userPendingDuels[lastIndex];
+        }
+        userPendingDuels.pop();
+        return refundAmount;
+    }
+
+    /// @notice Processes a pending crypto duel for a user and returns the refund amount.
+    /// @dev This function ensures the crypto duel is not approved and has a valid USDC amount.
+    /// @param _user The address of the user whose pending crypto duel is being processed.
+    /// @param _index The index of the pending crypto duel in the user's pending crypto duels array.
+    /// @return The amount of USDC to be refunded.
+    function _revokePendingCryptoDuel(address _user, uint256 _index) internal returns (uint256) {
+        PendingCryptoDuel[] storage userPendingCryptoDuels = s.pendingCryptoDuels[_user];
+        require(_index < userPendingCryptoDuels.length, "Invalid pending crypto duels index");
+        PendingCryptoDuel memory pendingCryptoDuel = userPendingCryptoDuels[_index];
+        require(!pendingCryptoDuel.isApproved, "Duel already approved");
+        require(pendingCryptoDuel.usdcAmount > 0, "No USDC to refund");
+        uint256 refundAmount = pendingCryptoDuel.usdcAmount;
+        uint256 lastIndex = userPendingCryptoDuels.length - 1;
+        if (_index != lastIndex) {
+            userPendingCryptoDuels[_index] = userPendingCryptoDuels[lastIndex];
+        }
+        userPendingCryptoDuels.pop();
+        return refundAmount;
+    }
 
     /// @notice Generates a unique duel ID based on user and block details
     /// @dev Uses the user address, block data, and a nonce to generate a unique ID via keccak256 hashing
@@ -797,11 +1000,9 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @return creatorFee The fee collected by the creator.
     /// @return payout The remaining amount after fees, which is distributed to the winning side.
     /// @dev This function is a helper to keep the main duel settlement function cleaner and modular.
-    function _calculateFeesAndPayout(uint256 totalWagerLooser)
-        internal
-        view
-        returns (uint256 protocolFee, uint256 creatorFee, uint256 payout)
-    {
+    function _calculateFeesAndPayout(
+        uint256 totalWagerLooser
+    ) internal view returns (uint256 protocolFee, uint256 creatorFee, uint256 payout) {
         protocolFee = (totalWagerLooser * s.protocolFeePercentage) / 10000;
         creatorFee = (totalWagerLooser * s.creatorFeePercentage) / 10000;
         payout = totalWagerLooser - protocolFee - creatorFee;

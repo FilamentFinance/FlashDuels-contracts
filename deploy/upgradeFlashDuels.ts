@@ -23,15 +23,15 @@ async function main() {
     const DiamondCutFacet = await ethers.getContractAt("IDiamondCut", diamondAddress, deployer)
 
     // Deploy new facet
-    // const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
-    // const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
-    // await flashDuelsCoreFacet.waitForDeployment()
-    // console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
+    const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
+    const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
+    await flashDuelsCoreFacet.waitForDeployment()
+    console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
 
-    const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
-    const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
-    await flashDuelsMarketplaceFacet.waitForDeployment()
-    console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
+    // const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
+    // const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
+    // await flashDuelsMarketplaceFacet.waitForDeployment()
+    // console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
     // const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
     // const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
@@ -45,16 +45,27 @@ async function main() {
 
     // Prepare the cut transaction
     const cut: any = [
-        {
-            facetAddress: flashDuelsMarketplaceFacet.target,
-            action: FacetCutAction.Add, // 0 means Add ,  1Replace function
-            functionSelectors: ["0x3a51c924"]
-        },
+        // {
+        //     facetAddress: flashDuelsMarketplaceFacet.target,
+        //     action: FacetCutAction.Add, // 0 means Add ,  1Replace function
+        //     functionSelectors: ["0x3a51c924"] // buy(address,string,uint256,uint256[],uint256[])
+        // },
         // {
         //     facetAddress: "0x0000000000000000000000000000000000000000",
         //     action: FacetCutAction.Remove, // 0 means Add ,  1 Replace function , 2 for Remove
-        //     functionSelectors: ["0x1c79558a"]
-        // }
+        //     functionSelectors: ["0x1c79558a"] // buy
+        // },
+        // @note - need to upgrade after PR review
+        {
+            facetAddress: flashDuelsCoreFacet.target,
+            action: FacetCutAction.Remove, // 0 means Add ,  1Replace function
+            functionSelectors: ["0x658c0973", "0xa7b84a0c"] // createDuel, createCryptoDuel
+        },
+        {
+            facetAddress: flashDuelsCoreFacet.target,
+            action: FacetCutAction.Add, // 0 means Add ,  1Replace function
+            functionSelectors: ["0x983feec9", "0x48fa0ebe", "0x8088a328", "0x3100694f"] // requestToCreateDuel, requestCreateCryptoDuel, approveAndCreateDuel, revokeCreateDuelRequest
+        },
         // {
         //     facetAddress: flashDuelsCoreFacet.target,
         //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function

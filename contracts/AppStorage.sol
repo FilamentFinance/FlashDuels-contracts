@@ -12,7 +12,12 @@ uint256 constant BPS = 10000;
 /// @param totalPrice The total price for the sale
 /// @param saleTime The sale created time
 event SaleCreated(
-    uint256 saleId, address indexed seller, address token, uint256 quantity, uint256 totalPrice, uint256 saleTime
+    uint256 saleId,
+    address indexed seller,
+    address token,
+    uint256 quantity,
+    uint256 totalPrice,
+    uint256 saleTime
 );
 
 /// @notice Emitted when a sale is cancelled
@@ -89,6 +94,48 @@ struct CryptoDuel {
     DuelDuration duelDuration;
     /// @notice Status of the duel
     DuelStatus duelStatus;
+}
+
+/// @notice Struct that stores details of each pending duel
+struct PendingDuel {
+    /// @notice Address of the duel creator
+    address creator;
+    /// @notice Category of the duel
+    DuelCategory category;
+    /// @notice Topic of the duel
+    string topic;
+    /// @notice Options available in the duel
+    string[] options;
+    /// @notice Duration of the duel
+    DuelDuration duration;
+    /// @notice Approval status of the duel
+    bool isApproved;
+    /// @notice Amount of USDC for the duel
+    uint256 usdcAmount;
+}
+
+/// @notice Struct that stores details of each pending crypto duel
+struct PendingCryptoDuel {
+    /// @notice Address of the duel creator
+    address creator;
+    /// @notice Category of the duel
+    DuelCategory category;
+    /// @notice Symbol of the token
+    string tokenSymbol;
+    /// @notice Options available in the duel
+    string[] options;
+    /// @notice Duration of the duel
+    DuelDuration duration;
+    /// @notice Approval status of the duel
+    bool isApproved;
+    /// @notice Amount of USDC for the duel
+    uint256 usdcAmount;
+    /// @notice Trigger value of the token
+    int256 triggerValue;
+    /// @notice Trigger type
+    TriggerType triggerType;
+    /// @notice Trigger condition
+    TriggerCondition triggerCondition;
 }
 
 /// @notice Enum representing different possible duel durations
@@ -309,6 +356,44 @@ event ProtocolTreasuryUpdated(address newProtocolTreasury);
 /// @param newBootstrapPeriod The updated duration for the bootstrap period.
 event BootstrapPeriodUpdated(uint256 newBootstrapPeriod);
 
+/// @notice Emitted when a duel is requested
+/// @param user The address of the user who requested the duel
+/// @param category The category of the duel
+/// @param topic The topic of the duel
+/// @param duration The duration of the duel
+/// @param amount The amount of USDC requested
+/// @param timestamp The timestamp of the duel request
+event CreateDuelRequested(
+    address indexed user,
+    DuelCategory category,
+    string topic,
+    DuelDuration duration,
+    uint256 amount,
+    uint256 timestamp
+);
+
+/// @notice Emitted when a duel is approved and created
+/// @param user The address of the user who approved and created the duel
+/// @param duelId The ID of the duel
+/// @param category The category of the duel
+/// @param topic The topic of the duel
+/// @param duration The duration of the duel
+/// @param timestamp The timestamp of the duel approval and creation
+event DuelApprovedAndCreated(
+    address indexed user,
+    string duelId,
+    DuelCategory category,
+    string topic,
+    DuelDuration duration,
+    uint256 timestamp
+);
+
+/// @notice Emitted when a duel request is revoked
+/// @param user The address of the user who revoked the duel request
+/// @param refundAmount The amount of USDC refunded
+/// @param timestamp The timestamp of the duel request revocation
+event DuelRequestRevoked(address indexed user, uint256 refundAmount, uint256 timestamp);
+
 /// @notice Emitted when the resolving period is updated.
 /// @param newResolvingPeriod The resolving period.
 event ResolvingPeriodUpdated(uint256 newResolvingPeriod);
@@ -393,4 +478,8 @@ struct AppStorage {
     address usdc;
     /// @notice Address of the bot
     address bot;
+    /// @notice Mapping to store pending duels by user address
+    mapping(address => mapping(DuelCategory => PendingDuel[])) pendingDuels; // @note - during mainnent deployment can be shifted up
+    /// @notice Mapping to store pending crypto duels by user address
+    mapping(address => PendingCryptoDuel[]) pendingCryptoDuels; // @note - during mainnent deployment can be shifted up
 }
