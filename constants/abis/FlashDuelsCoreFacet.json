@@ -1060,7 +1060,7 @@
                 "type": "uint8"
             }
         ],
-        "name": "requestToCreateDuel",
+        "name": "requestCreateDuel",
         "outputs": [
             {
                 "internalType": "bool",

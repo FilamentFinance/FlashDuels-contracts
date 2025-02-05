@@ -99,7 +99,7 @@ const main = async () => {
         "0xe94e40cd", // setWinnersChunkSizes(uint256)
         // "0x658c0973", // createDuel(uint8,string,string[],uint8)
         // "0xa7b84a0c", // createCryptoDuel(string,string[],int256,uint8,uint8,uint8)
-        "0x983feec9", // requestToCreateDuel(uint8,string,string[],uint8)
+        "0x59a9e4f6", // requestCreateDuel(uint8,string,string[],uint8)
         "0x48fa0ebe", // requestCreateCryptoDuel(string,string[],int256,uint8,uint8,uint8)
         "0x8088a328", // approveAndCreateDuel(address,uint8,uint256)
         "0x3100694f", // revokeCreateDuelRequest(address,uint8,uint256)
@@ -148,7 +148,11 @@ const main = async () => {
         "0x9611f3d9", // getProtocolTreasury()
         "0x74e5ed59", // getTotalProtocolFeesGenerated()
         "0x9448cb58", // getCreatorFeesEarned(address)
-        "0xa7745713" // getSales(address,uint256)
+        "0xa7745713", // getSales(address,uint256)
+        "0x72e14c5f", // getPendingDuels(address,uint8)
+        "0x1cb85b1f", // getPendingDuelByIndex(address,uint8,uint256)
+        "0x335b96ff", // getPendingCryptoDuels(address)
+        "0x57710916" // getPendingCryptoDuelByIndex(address,uint256)
     ]
 
     const ownershipFacetSelectors = [

@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {AppStorage, Duel, CryptoDuel, Sale} from "../AppStorage.sol";
+import {AppStorage, Duel, CryptoDuel, Sale, PendingDuel, PendingCryptoDuel, DuelCategory} from "../AppStorage.sol";
 
 /// @title FlashDuelsViewFacet
 /// @notice Provides view functions to access and retrieve FlashDuels data.
@@ -52,11 +52,10 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @param _duelId The unique identifier of the duel.
     /// @param _option The option selected by users in the duel.
     /// @return An array of addresses representing users who chose the specified option.
-    function getDuelUsersForOption(string memory _duelId, string memory _option)
-        public
-        view
-        returns (address[] memory)
-    {
+    function getDuelUsersForOption(
+        string memory _duelId,
+        string memory _option
+    ) public view returns (address[] memory) {
         return s.duelUsersForOption[_duelId][_option];
     }
 
@@ -66,11 +65,11 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @param _optionIndex The index of the option within the duel.
     /// @param _user The address of the user whose share is being queried.
     /// @return optionShare The share of the user in the specified option, represented as a percentage.
-    function getUserDuelOptionShare(string memory _duelId, uint256 _optionIndex, address _user)
-        public
-        view
-        returns (uint256 optionShare)
-    {
+    function getUserDuelOptionShare(
+        string memory _duelId,
+        uint256 _optionIndex,
+        address _user
+    ) public view returns (uint256 optionShare) {
         address optionToken = s.optionIndexToOptionToken[_duelId][_optionIndex];
         uint256 optionTokenBalance = IERC20(optionToken).balanceOf(_user);
         uint256 totalOptionTokenSupply = IERC20(optionToken).totalSupply();
@@ -83,11 +82,10 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @return _optionsLength The number of options in the duel.
     /// @return _options An array of options available in the duel.
     /// @return _wagerAmountsForOptions An array of wager amounts corresponding to each option.
-    function getWagerAmountDeposited(string memory _duelId, address _user)
-        public
-        view
-        returns (uint256 _optionsLength, string[] memory _options, uint256[] memory _wagerAmountsForOptions)
-    {
+    function getWagerAmountDeposited(
+        string memory _duelId,
+        address _user
+    ) public view returns (uint256 _optionsLength, string[] memory _options, uint256[] memory _wagerAmountsForOptions) {
         _optionsLength = s.duelIdToOptions[_duelId].length;
         _options = s.duelIdToOptions[_duelId];
         _wagerAmountsForOptions = new uint256[](_optionsLength);
@@ -126,11 +124,11 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @return startPrice The starting price of the token recorded at the start of the duel.
     /// @return delta The difference between the end and start prices of the token.
     /// @return isEndPriceGreater True if the end price is greater than the start price.
-    function getPriceDelta(string memory _duelId, string memory _tokenSymbol, int256 _currentOraclePrice)
-        public
-        view
-        returns (int256 endPrice, int256 startPrice, int256 delta, bool isEndPriceGreater)
-    {
+    function getPriceDelta(
+        string memory _duelId,
+        string memory _tokenSymbol,
+        int256 _currentOraclePrice
+    ) public view returns (int256 endPrice, int256 startPrice, int256 delta, bool isEndPriceGreater) {
         endPrice = _currentOraclePrice;
         startPrice = s.startPriceToken[_duelId][_tokenSymbol];
         delta = endPrice - startPrice;
@@ -164,11 +162,11 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @param _optionsIndex The index of the option within the duel.
     /// @param _option The specific option to retrieve the total bets for.
     /// @return The total amount of bets placed on the specified option.
-    function getTotalBetsOnOption(string memory _duelId, uint256 _optionsIndex, string memory _option)
-        public
-        view
-        returns (uint256)
-    {
+    function getTotalBetsOnOption(
+        string memory _duelId,
+        uint256 _optionsIndex,
+        string memory _option
+    ) public view returns (uint256) {
         return s.totalBetsOnOption[_duelId][_optionsIndex][_option];
     }
 
@@ -203,5 +201,45 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @return The total fees earned by the creator across all duels.
     function getCreatorFeesEarned(address _creator) public view returns (uint256) {
         return s.totalCreatorFeeEarned[_creator];
+    }
+
+    /// @notice Retrieves the pending duels for a specific user and category.
+    /// @param _user The address of the user whose pending duels are requested.
+    /// @param _category The category of duels to retrieve.
+    /// @return pendingDuels An array of pending duels.
+    /// @return pendingDuelsLength The number of pending duels.
+    function getPendingDuels(address _user, DuelCategory _category) public view returns (PendingDuel[] memory, uint256 pendingDuelsLength) {
+        PendingDuel[] memory pendingDuels = s.pendingDuels[_user][_category];
+        pendingDuelsLength = pendingDuels.length;
+        return (pendingDuels, pendingDuelsLength);
+    }
+
+    /// @notice Retrieves a pending duel by index for a specific user and category.
+    /// @param _user The address of the user whose pending duel is requested.
+    /// @param _category The category of duels to retrieve.
+    /// @param _index The index of the pending duel to retrieve.
+    /// @return pendingDuel The pending duel at the specified index.
+    function getPendingDuelByIndex(address _user, DuelCategory _category, uint256 _index) public view returns (PendingDuel memory) {
+        return s.pendingDuels[_user][_category][_index];
+    }
+
+    /// @notice Retrieves the pending crypto duels for a specific user.
+    /// @param _user The address of the user whose pending crypto duels are requested.
+    /// @return pendingCryptoDuels An array of pending crypto duels.
+    /// @return pendingCryptoDuelsLength The number of pending crypto duels.
+    function getPendingCryptoDuels(
+        address _user
+    ) public view returns (PendingCryptoDuel[] memory, uint256 pendingCryptoDuelsLength) {
+        PendingCryptoDuel[] memory pendingCryptoDuels = s.pendingCryptoDuels[_user];
+        pendingCryptoDuelsLength = pendingCryptoDuels.length;
+        return (pendingCryptoDuels, pendingCryptoDuelsLength);
+    }
+
+    /// @notice Retrieves a pending crypto duel by index for a specific user.
+    /// @param _user The address of the user whose pending crypto duel is requested.
+    /// @param _index The index of the pending crypto duel to retrieve.
+    /// @return pendingCryptoDuel The pending crypto duel at the specified index.
+    function getPendingCryptoDuelByIndex(address _user, uint256 _index) public view returns (PendingCryptoDuel memory) {
+        return s.pendingCryptoDuels[_user][_index];
     }
 }

@@ -142,7 +142,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @param _options Array of options for the duel
     /// @param _duelDuration The duration of the duel
     /// @return success boolean indicating if the approval and parameter storage was successful
-    function requestToCreateDuel(
+    function requestCreateDuel(
         DuelCategory _category,
         string memory _topic,
         string[] memory _options,

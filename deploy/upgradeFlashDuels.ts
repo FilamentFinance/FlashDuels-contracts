@@ -64,7 +64,7 @@ async function main() {
         {
             facetAddress: flashDuelsCoreFacet.target,
             action: FacetCutAction.Add, // 0 means Add ,  1Replace function
-            functionSelectors: ["0x983feec9", "0x48fa0ebe", "0x8088a328", "0x3100694f"] // requestToCreateDuel, requestCreateCryptoDuel, approveAndCreateDuel, revokeCreateDuelRequest
+            functionSelectors: ["0x59a9e4f6", "0x48fa0ebe", "0x8088a328", "0x3100694f"] // requestCreateDuel, requestCreateCryptoDuel, approveAndCreateDuel, revokeCreateDuelRequest
         },
         // {
         //     facetAddress: flashDuelsCoreFacet.target,

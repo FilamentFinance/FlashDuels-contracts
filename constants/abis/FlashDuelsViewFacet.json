@@ -416,6 +416,290 @@
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_index",
+                "type": "uint256"
+            }
+        ],
+        "name": "getPendingCryptoDuelByIndex",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "enum DuelCategory",
+                        "name": "category",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "tokenSymbol",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string[]",
+                        "name": "options",
+                        "type": "string[]"
+                    },
+                    {
+                        "internalType": "enum DuelDuration",
+                        "name": "duration",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isApproved",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "usdcAmount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "int256",
+                        "name": "triggerValue",
+                        "type": "int256"
+                    },
+                    {
+                        "internalType": "enum TriggerType",
+                        "name": "triggerType",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "enum TriggerCondition",
+                        "name": "triggerCondition",
+                        "type": "uint8"
+                    }
+                ],
+                "internalType": "struct PendingCryptoDuel",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getPendingCryptoDuels",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "enum DuelCategory",
+                        "name": "category",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "tokenSymbol",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string[]",
+                        "name": "options",
+                        "type": "string[]"
+                    },
+                    {
+                        "internalType": "enum DuelDuration",
+                        "name": "duration",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isApproved",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "usdcAmount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "int256",
+                        "name": "triggerValue",
+                        "type": "int256"
+                    },
+                    {
+                        "internalType": "enum TriggerType",
+                        "name": "triggerType",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "enum TriggerCondition",
+                        "name": "triggerCondition",
+                        "type": "uint8"
+                    }
+                ],
+                "internalType": "struct PendingCryptoDuel[]",
+                "name": "",
+                "type": "tuple[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "pendingCryptoDuelsLength",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
+            {
+                "internalType": "enum DuelCategory",
+                "name": "_category",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_index",
+                "type": "uint256"
+            }
+        ],
+        "name": "getPendingDuelByIndex",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "enum DuelCategory",
+                        "name": "category",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "topic",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string[]",
+                        "name": "options",
+                        "type": "string[]"
+                    },
+                    {
+                        "internalType": "enum DuelDuration",
+                        "name": "duration",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isApproved",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "usdcAmount",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct PendingDuel",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
+            {
+                "internalType": "enum DuelCategory",
+                "name": "_category",
+                "type": "uint8"
+            }
+        ],
+        "name": "getPendingDuels",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "enum DuelCategory",
+                        "name": "category",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "topic",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string[]",
+                        "name": "options",
+                        "type": "string[]"
+                    },
+                    {
+                        "internalType": "enum DuelDuration",
+                        "name": "duration",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isApproved",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "usdcAmount",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct PendingDuel[]",
+                "name": "",
+                "type": "tuple[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "pendingDuelsLength",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "string",
                 "name": "_duelId",
                 "type": "string"
