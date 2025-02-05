@@ -33,10 +33,10 @@ async function main() {
     // await flashDuelsMarketplaceFacet.waitForDeployment()
     // console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
-    // const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
-    // const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
-    // await flashDuelsViewFacet.waitForDeployment()
-    // console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
+    const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
+    const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
+    await flashDuelsViewFacet.waitForDeployment()
+    console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
 
     // const OwnershipFacet = await ethers.getContractFactory("OwnershipFacet")
     // const ownershipFacet = await OwnershipFacet.deploy()
@@ -58,14 +58,19 @@ async function main() {
         // @note - need to upgrade after PR review
         {
             facetAddress: flashDuelsCoreFacet.target,
-            action: FacetCutAction.Remove, // 0 means Add ,  1Replace function
+            action: FacetCutAction.Remove, // 0 means Add ,  1 Replace function, 2 for Remove
             functionSelectors: ["0x658c0973", "0xa7b84a0c"] // createDuel, createCryptoDuel
         },
         {
             facetAddress: flashDuelsCoreFacet.target,
-            action: FacetCutAction.Add, // 0 means Add ,  1Replace function
+            action: FacetCutAction.Add, // 0 means Add ,  1 Replace function, 2 for Remove
             functionSelectors: ["0x59a9e4f6", "0x48fa0ebe", "0x8088a328", "0x3100694f"] // requestCreateDuel, requestCreateCryptoDuel, approveAndCreateDuel, revokeCreateDuelRequest
         },
+        {
+            facetAddress: flashDuelsViewFacet.target,
+            action: FacetCutAction.Add, // 0 means Add ,  1 Replace function, 2 for Remove
+            functionSelectors: ["0x72e14c5f", "0x1cb85b1f", "0x335b96ff", "0x57710916"] // getPendingDuels, getPendingDuelByIndex, getPendingCryptoDuels, getPendingCryptoDuelByIndex
+        }
         // {
         //     facetAddress: flashDuelsCoreFacet.target,
         //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function
