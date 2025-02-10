@@ -183,12 +183,14 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// @notice Creates a new duel with the specified parameters
     /// @dev Internal function that allows any user to create a duel with a predefined duel duration.
     ///       A USDC fee is required for duel creation, and the duel starts after the bootstrap period.
+    /// @param _user Address of the user
     /// @param _category The category of the duel (e.g., Politics, or other categories).
     /// @param _topic A string representing the topic or title or description or questions in the duel.
     /// @param _options An array of strings representing the options for the duel.
     /// @param _duelDuration The duration of the duel, chosen from predefined options (3 hours, 6 hours, or 12 hours).
     /// @return _duelId A unique string representing the ID of the created duel.
     function _createDuel(
+        address _user,
         DuelCategory _category,
         string memory _topic,
         string[] memory _options,
@@ -196,7 +198,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     ) internal returns (string memory) {
         require(_category != DuelCategory.Crypto, "Should not crypto category duel");
         // Transfer USDC fee for duel creation
-        require(IERC20(s.usdc).transferFrom(msg.sender, address(this), s.createDuelFee), "USDC transfer failed");
+        // require(IERC20(s.usdc).transferFrom(_user, address(this), s.createDuelFee), "USDC transfer failed");
         s.totalProtocolFeesGenerated = s.totalProtocolFeesGenerated + s.createDuelFee;
 
         require(
@@ -206,23 +208,24 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
             "Invalid duel duration"
         );
 
-        string memory _duelId = _generateDuelId(msg.sender);
+        string memory _duelId = _generateDuelId(_user);
         Duel storage duel = s.duels[_duelId];
-        duel.creator = msg.sender;
+        duel.creator = _user;
         duel.topic = _topic;
         duel.createTime = block.timestamp;
         duel.duelDuration = _duelDuration;
         duel.duelStatus = DuelStatus.BootStrapped;
         duel.category = _category;
         s.duelIdToOptions[_duelId] = _options;
-        s.creatorToDuelIds[msg.sender].push(_duelId);
+        s.creatorToDuelIds[_user].push(_duelId);
 
-        emit DuelCreated(msg.sender, _duelId, _topic, block.timestamp, s.createDuelFee, _category);
+        emit DuelCreated(_user, _duelId, _topic, block.timestamp, s.createDuelFee, _category);
 
         return _duelId;
     }
 
     /// @notice Internal function to create a new crypto duel
+    /// @param _user Address of the user
     /// @param _tokenSymbol Allowed token symbol for wagering
     /// @param _options Betting options for the duel
     /// @param _triggerValue Value that triggers the outcome
@@ -231,6 +234,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// @param _duelDuration Duration of the duel
     /// @return Duel ID as a string
     function _createCryptoDuel(
+        address _user,
         string memory _tokenSymbol,
         string[] memory _options,
         int256 _triggerValue,
@@ -246,9 +250,9 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
             "Invalid duel duration"
         );
 
-        string memory _duelId = _generateDuelId(msg.sender);
+        string memory _duelId = _generateDuelId(_user);
         CryptoDuel storage duel = s.cryptoDuels[_duelId];
-        duel.creator = msg.sender;
+        duel.creator = _user;
         duel.tokenSymbol = _tokenSymbol;
         duel.createTime = block.timestamp;
         duel.duelDuration = _duelDuration;
@@ -257,10 +261,10 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         duel.triggerCondition = _triggerCondition;
         duel.duelStatus = DuelStatus.BootStrapped;
         s.duelIdToOptions[_duelId] = _options;
-        s.creatorToDuelIds[msg.sender].push(_duelId);
+        s.creatorToDuelIds[_user].push(_duelId);
 
         emit CryptoDuelCreated(
-            msg.sender,
+            _user,
             _tokenSymbol,
             _duelId,
             block.timestamp,
@@ -290,6 +294,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         require(!pendingDuel.isApproved, "Duel already approved");
         require(pendingDuel.usdcAmount == s.createDuelFee, "Invalid USDC amount stored");
         string memory duelId = _createDuel(
+            _user,
             pendingDuel.category,
             pendingDuel.topic,
             pendingDuel.options,
@@ -327,6 +332,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         require(!pendingCryptoDuel.isApproved, "Duel already approved");
         require(pendingCryptoDuel.usdcAmount == s.createDuelFee, "Invalid USDC amount stored");
         string memory duelId = _createCryptoDuel(
+            _user,
             pendingCryptoDuel.tokenSymbol,
             pendingCryptoDuel.options,
             pendingCryptoDuel.triggerValue,

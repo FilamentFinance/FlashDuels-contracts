@@ -19,21 +19,31 @@ describe("FlashDuels Contract", function () {
     describe("Duel Creation", function () {
         it("should create a duel successfully", async function () {
             const { contracts, accounts } = await loadFixture(deploy)
-
-            const expiryTime = 1
-            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+
+            const expiryTime = 1
+            const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
             await flashDuelsCore.connect(accounts[1]).requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
             let pendingDuels = await flashDuelsView.getAllPendingDuelsAndCount()
-            console.log("pendingDuels: ", pendingDuels)
+            // console.log("pendingDuels: ", pendingDuels)
+            expect(pendingDuels[0][0][2]).to.equal("Donald Trump will win the US election ?")
+            expect(pendingDuels[1]).to.equal(1)
+
+            await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+            // pendingDuels = await flashDuelsView.getAllPendingDuelsAndCount()
+            // expect(pendingDuels[0][0][2]).to.equal("")
+            // expect(pendingDuels[1]).to.equal(0)
+
             
             // let receipt = await flashDuelsCore
             //     .connect(accounts[1])

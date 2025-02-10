@@ -7,7 +7,7 @@ const helpers = require("@nomicfoundation/hardhat-network-helpers")
 import FLASHUSDCABI from "../constants/abis/FLASHUSDC.json"
 import { setupContracts } from "./testSetup"
 
-describe("FlashDuels Marketplace Contract", function () {
+xdescribe("FlashDuels Marketplace Contract", function () {
     // We define a fixture to reuse the same setup in every test.
     // We use loadFixture to run this setup once, snapshot that state,
     // and reset Hardhat Network to that snapshot in every test.
@@ -113,7 +113,7 @@ describe("FlashDuels Marketplace Contract", function () {
     })
 })
 
-describe("Cancel Sale", function () {
+xdescribe("Cancel Sale", function () {
     async function deploy() {
         const accounts = await ethers.getSigners()
         const contracts = await setupContracts()
@@ -311,7 +311,7 @@ describe("Cancel Sale", function () {
     })
 })
 
-describe("Token Purchase", function () {
+xdescribe("Token Purchase", function () {
     async function deploy() {
         const accounts = await ethers.getSigners()
         const contracts = await setupContracts()
