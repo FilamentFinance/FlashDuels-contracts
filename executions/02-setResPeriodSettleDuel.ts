@@ -1,7 +1,7 @@
 import { ethers, network } from "hardhat"
 import * as helpers from "@nomicfoundation/hardhat-network-helpers"
-import { FlashDuels, FlashDuelsCoreFacet, FLASHUSDC } from "../typechain-types"
-import FlashDuelsABI from "../constants/abis/FlashDuels.json"
+import { FlashDuelsAdminFacet, FlashDuelsCoreFacet, FLASHUSDC } from "../typechain-types"
+import FlashDuelsAdminFacetABI from "../constants/abis/FlashDuelsAdminFacet.json"
 import FLASHUSDCABI from "../constants/abis/FLASHUSDC.json"
 import netMap from "../constants/networkMapping.json"
 import { forkedChain, networkConfig } from "../helper-hardhat-config"
@@ -22,12 +22,15 @@ const main = async () => {
         ;[deployer, bot, , sequencer, liquidator] = await ethers.getSigners()
     }
 
-    const flashDuels: FlashDuelsCoreFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsCoreFacetABI, deployer)
+    const flashDuels: FlashDuelsAdminFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsAdminFacetABI, deployer)
+    
+    const flashDuelsCore: FlashDuelsCoreFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsCoreFacetABI, deployer)
+    
     tx = await flashDuels.setResolvingPeriod("360000000");
     txr = await tx.wait(1);
     console.log("resolving time set")
     // Execute settlement
-    tx = await flashDuels.connect(bot).settleDuel("ac8d66bf34704865981781ee84082de788514b4308fecb42458dd9518bf49f94", 0);
+    tx = await flashDuelsCore.connect(bot).settleDuel("ac8d66bf34704865981781ee84082de788514b4308fecb42458dd9518bf49f94", 0);
     txr = await tx.wait(1)
   
     console.log(`Transaction sent: ${tx.hash}`);

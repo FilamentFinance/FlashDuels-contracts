@@ -1,7 +1,8 @@
 import { ethers, network } from "hardhat"
 import * as helpers from "@nomicfoundation/hardhat-network-helpers"
-import { FlashDuels, FLASHUSDC } from "../typechain-types"
-import FlashDuelsABI from "../constants/abis/FlashDuels.json"
+import { FlashDuelsAdminFacet, FlashDuelsCoreFacet, FLASHUSDC } from "../typechain-types"
+import FlashDuelsAdminFacetABI from "../constants/abis/FlashDuelsAdminFacet.json"
+import FlashDuelsCoreFacetABI from "../constants/abis/FlashDuelsCoreFacet.json"
 import FLASHUSDCABI from "../constants/abis/FLASHUSDC.json"
 import netMap from "../constants/networkMapping.json"
 import { forkedChain, networkConfig } from "../helper-hardhat-config"
@@ -19,16 +20,18 @@ const main = async () => {
         ;[deployer, , sequencer, liquidator, addr1] = await ethers.getSigners()
     }
 
-    const flashDuels: FlashDuels = new ethers.Contract(netMap[networkName].FlashDuels, FlashDuelsABI, deployer)
+    const flashDuels: FlashDuelsCoreFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsCoreFacetABI, deployer)
+    const flashDuelsAdmin: FlashDuelsAdminFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsAdminFacetABI, deployer)
     const flashUSDC: FLASHUSDC = new ethers.Contract(netMap[networkName].FLASHUSDC, FLASHUSDCABI, deployer)
 
     const expiryTime = 1
-    const minWager = ethers.parseUnits("10", 6) // 10 USDC
     // await flashUSDC.connect(deployer).mint(addr1.address, ethers.parseUnits("10", 6))
     await flashUSDC.connect(deployer).approve(flashDuels.target, ethers.parseUnits("10", 6))
     let receipt = await flashDuels
         .connect(deployer)
-        .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], minWager, expiryTime)
+        .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+    txr = await receipt.wait(1)
+    receipt = await flashDuelsAdmin.connect(deployer).approveAndCreateDuel(deployer.address, 2, 0);
     txr = await receipt.wait(1)
     console.log(txr?.logs)
     // // console.log("Total logs length: ", txr?.logs.length)
