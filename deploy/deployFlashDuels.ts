@@ -32,6 +32,7 @@ const main = async () => {
     if (networkName === "seiMainnet") {
         usdAddress = { target: networkConfig[networkName].usdc }
     } else {
+        console.log("Deploying USDC")
         let USDC = await ethers.getContractFactory("FLASHUSDC")
         const usdcNew = await upgrades.deployProxy(USDC, [
             "FLASHUSDC",
@@ -102,26 +103,14 @@ const main = async () => {
         "0x67eb8097", // updateBootstrapPeriod(uint256)
         "0xbb849878", // setResolvingPeriod(uint256)
         "0xe94e40cd", // setWinnersChunkSizes(uint256)
+        "0x93d11d38", // setRefundChunkSizes(uint256)
         "0x8088a328", // approveAndCreateDuel(address,uint8,uint256)
         "0x3100694f", // revokeCreateDuelRequest(address,uint8,uint256)
         "0x8795cccb", // withdrawProtocolFees()
     ]
     const flashDuelsCoreFacetSelectors = [
-        // "0x8456cb59", // pause()
-        // "0x3f4ba83a", // unpause()
-        // "0x096d0721", // setCreateDuelFee(uint256)
-        // "0x2d4f40c6", // setBotAddress(address)
-        // "0x58e47004", // setProtocolAddress(address)
-        // "0x78a0003e", // setMinimumWagerThreshold(uint256)
-        // "0x67eb8097", // updateBootstrapPeriod(uint256)
-        // "0xbb849878", // setResolvingPeriod(uint256)
-        // "0xe94e40cd", // setWinnersChunkSizes(uint256)
-        // "0x658c0973", // createDuel(uint8,string,string[],uint8)
-        // "0xa7b84a0c", // createCryptoDuel(string,string[],int256,uint8,uint8,uint8)
         "0x59a9e4f6", // requestCreateDuel(uint8,string,string[],uint8)
         "0x48fa0ebe", // requestCreateCryptoDuel(string,string[],int256,uint8,uint8,uint8)
-        // "0x8088a328", // approveAndCreateDuel(address,uint8,uint256)
-        // "0x3100694f", // revokeCreateDuelRequest(address,uint8,uint256)
         "0x1852d000", // joinDuel(string,string,uint256,uint256,uint256,address)
         "0xdd20ca2a", // joinCryptoDuel(string,string,uint256,uint256,uint256,address)
         "0xf78283bd", // startDuel(string)
@@ -130,19 +119,15 @@ const main = async () => {
         "0x55718670", // continueWinningsDistribution(string,uint256,string,uint256)
         "0x2afa99d9", // settleCryptoDuel(string,int256)
         "0x3f3a631b", // cancelDuelIfThresholdNotMet(uint8,string)
-        // "0xae650247", // refundDuel(uint8,string)
         "0x6e70096e", // withdrawEarnings(uint256)
         "0xf1675271", // withdrawCreatorFee()
-        // "0x8795cccb", // withdrawProtocolFees()
         "0xef82031a" // continueRefundsInChunks(string)
     ]
 
     const flashDuelsMarketplaceFacetSelectors = [
-        // "0xe182acbb", // updateMaxStrikes(uint256)
         "0x9012c4a8", // updateFee(uint256)
         "0x07b4c084", // sell(address,string,uint256,uint256,uint256)
         "0xaa6ecb55", // cancelSell(address,uint256)
-        // "0x1c79558a", // buy(address,string,uint256,uint256)
         "0x3a51c924",  // buy(address,string,uint256,uint256[],uint256[])
         "0x225c3131" // getSale(address,uint256)
     ]
@@ -236,12 +221,13 @@ const main = async () => {
     console.log("Completed diamond cut")
 
     console.log("Setting Protocol Address");
-    const flashDuels: FlashDuelsCoreFacet = await FlashDuelsCoreFacet.attach(diamond.target)
+    const flashDuels: FlashDuelsAdminFacet = await FlashDuelsAdminFacet.attach(diamond.target)
     tx = await flashDuels.setProtocolAddress(networkConfig[networkName].protocolTreasury)
     await tx.wait(1)
 
     let contracts = [
         { name: "FLASHUSDC", address: usdAddress },
+        { name: "FlashDuelsAdminFacet", address: flashDuelsAdminFacet.target },
         { name: "FlashDuelsCoreFacet", address: flashDuelsCoreFacet.target },
         {
             name: "FlashDuelsMarketplaceFacet",
