@@ -351,7 +351,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @param _optionIndex The index of the option that won the duel.
     /// @param _winningOption The option that was chosen as the winning option.
     /// @param _payout The total amount of winnings to be distributed.
-    // @note - zokyo-audit-fix-8
     function continueWinningsDistribution(
         string memory _duelId,
         uint256 _optionIndex,
@@ -418,12 +417,10 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
 
         if (_duelCategory != DuelCategory.Crypto) {
             Duel storage duel = s.duels[_duelId];
-            // @note - zokyo-audit-fix-20
             require(duel.duelStatus == DuelStatus.BootStrapped, "Duel already started");
             require(block.timestamp >= duel.createTime + s.bootstrapPeriod, "Bootstrap period not ended");
         } else {
             CryptoDuel storage cryptoDuel = s.cryptoDuels[_duelId];
-            // @note - zokyo-audit-fix-20
             require(cryptoDuel.duelStatus == DuelStatus.BootStrapped, "Duel already started");
             require(block.timestamp >= cryptoDuel.createTime + s.bootstrapPeriod, "Bootstrap period not ended");
         }
@@ -457,11 +454,9 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
 
     /// @notice Withdraws earnings for the caller.
     /// @param _amount The amount to withdraw.
-    // @note - zokyo-audit-fix-19 (added nonReentrant modifier)
     function withdrawEarnings(uint256 _amount) external nonReentrant {
         uint256 _allTimeEarnings = s.allTimeEarnings[msg.sender];
         require(_amount <= _allTimeEarnings, "Amount should be less than equal earnings");
-        // @note - zokyo-audit-fix-7
         require(IERC20(s.usdc).transfer(msg.sender, _amount), "Transfer failed");
         s.allTimeEarnings[msg.sender] -= _amount;
         emit WithdrawEarning(msg.sender, _amount, block.timestamp);
@@ -471,22 +466,10 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     function withdrawCreatorFee() external nonReentrant {
         uint256 creatorFee = s.totalCreatorFeeEarned[msg.sender];
         require(creatorFee > 0, "No funds available");
-        // @note - zokyo-audit-fix-7
         require(IERC20(s.usdc).transfer(msg.sender, creatorFee), "Transfer failed");
         s.totalCreatorFeeEarned[msg.sender] = 0;
         emit WithdrawCreatorEarning(msg.sender, creatorFee, block.timestamp);
     }
-
-    // @note - zokyo-audit-fix-12
-    // /**
-    //  * @notice Fallback function that receives Ether.
-    //  */
-    // fallback() external payable {}
-
-    // /**
-    //  * @notice Receive function that receives Ether.
-    //  */
-    // receive() external payable {}
 
     // ========================== Internal Functions ========================== //
 
@@ -496,7 +479,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @param _winningOption The option that won the duel.
     /// @param _optionIndex The index of the winning option.
     /// @param _payout The total payout amount to be distributed to the winners.
-    // @note - zokyo-audit-fix-8
     function _distributeWinningsInChunks(
         string memory _duelId,
         string memory _winningOption,
@@ -547,7 +529,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
 
                 if (wager > 0) {
                     s.userWager[participant][_duelId][option] = 0;
-                    // @note - zokyo-audit-fix-7
                     require(IERC20(s.usdc).transfer(participant, wager), "Transfer failed");
 
                     emit RefundIssued(_duelId, option, participant, wager, block.timestamp);

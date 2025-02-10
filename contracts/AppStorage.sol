@@ -48,7 +48,6 @@ event TokensPurchased(
 struct Sale {
     address seller;
     uint256 quantity;
-    uint256 strike;
     uint256 totalPrice;
 }
 
@@ -398,6 +397,10 @@ event DuelRequestRevoked(address indexed user, uint256 refundAmount, uint256 tim
 /// @param newResolvingPeriod The resolving period.
 event ResolvingPeriodUpdated(uint256 newResolvingPeriod);
 
+/// @notice Thrown when the duel has been already ended
+error FlashDuelsMarketplace__DuelEnded(string duelId);
+
+
 /// @notice Thrown when the owner or bot address is invalid
 error FlashDuels__InvalidOwnerOrBot();
 
@@ -429,6 +432,18 @@ struct AppStorage {
     uint256 saleCounter;
     /// @notice Nonce used to generate unique duel IDs
     uint256 nonce;
+    /// @notice address of flashDuels diamond contract
+    address flashDuelsContract;
+    /// @notice Protocol address to receive fees
+    address protocolTreasury;
+    /// @notice USDC token contract address used for payments and fees
+    address usdc;
+    /// @notice Address of the bot
+    address bot;
+    /// @notice  Storage for all pending duels
+    PendingDuel[] allPendingDuels;
+    /// @notice  Storage for all pending crypto duels
+    PendingCryptoDuel[] allPendingCryptoDuels;
     /// @notice Mapping for duelId -> option-> user -> 1-based index in the participants array
     mapping(string => mapping(string => mapping(address => uint256))) participantIndices;
     /// @notice Mapping to track total bets on duel option for a particular duel
@@ -437,6 +452,10 @@ struct AppStorage {
     mapping(string => mapping(string => mapping(address => bool))) userExistsInOption;
     /// @notice Mapping of user to the duelId to the option to the user wager amount
     mapping(address => mapping(string => mapping(string => uint256))) userWager;
+    /// @notice Mapping to store pending duels by user address
+    mapping(address => mapping(DuelCategory => PendingDuel[])) pendingDuels;
+    /// @notice Mapping to store pending crypto duels by user address
+    mapping(address => PendingCryptoDuel[]) pendingCryptoDuels;
     /// @notice Mapping of duelId to optionIndex to the option token address
     mapping(string => mapping(uint256 => address)) optionIndexToOptionToken;
     /// @notice Mapping of duelId to the option to the total wager for option
@@ -473,20 +492,4 @@ struct AppStorage {
     mapping(string => bool) isValidDuelId;
     /// @notice Mapping of duel IDs to duel information
     mapping(string => Duel) duels;
-    /// @notice address of flashDuels diamond contract
-    address flashDuelsContract;
-    /// @notice Protocol address to receive fees
-    address protocolTreasury;
-    /// @notice USDC token contract address used for payments and fees
-    address usdc;
-    /// @notice Address of the bot
-    address bot;
-    /// @notice Mapping to store pending duels by user address
-    mapping(address => mapping(DuelCategory => PendingDuel[])) pendingDuels; // @note - during mainnent deployment can be shifted up
-    /// @notice Mapping to store pending crypto duels by user address
-    mapping(address => PendingCryptoDuel[]) pendingCryptoDuels; // @note - during mainnent deployment can be shifted up
-    /// @notice  Storage for all pending duels
-    PendingDuel[] allPendingDuels;
-    /// @notice  Storage for all pending crypto duels
-    PendingCryptoDuel[] allPendingCryptoDuels;
 }

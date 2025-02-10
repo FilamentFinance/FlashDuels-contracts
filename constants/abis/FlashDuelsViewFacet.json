@@ -908,11 +908,6 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "strike",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
                         "name": "totalPrice",
                         "type": "uint256"
                     }

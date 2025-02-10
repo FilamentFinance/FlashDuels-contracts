@@ -48,10 +48,8 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// It updates the createDuelFee variable with the new fee value.
     /// @param _fee The new fee amount to set for creating a duel.
     function setCreateDuelFee(uint256 _fee) external onlyOwner {
-        // @note - zokyo-audit-fix-13
         require(_fee <= 10 * 1e6, "Duel fees cannot be more than 10 dollars");
         s.createDuelFee = _fee;
-        // @note - zokyo-audit-fix-14
         emit CreateDuelFeeUpdated(_fee);
     }
 
@@ -62,7 +60,6 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     function setBotAddress(address _bot) external onlyOwner {
         require(_bot != address(0), "Invalid bot address");
         s.bot = _bot;
-        // @note - zokyo-audit-fix-14
         emit BotAddressUpdated(_bot);
     }
 
@@ -101,11 +98,10 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         s.bootstrapPeriod = _bootstrapPeriod;
         emit BootstrapPeriodUpdated(_bootstrapPeriod);
     }
-    // @note - zokyo-audit-fix-5
+
     /// @notice Updates the resolving period for duels.
     /// @dev Allows only the owner to set a new resolving period for duels.
     /// @param _newResolvingPeriod The new duration (in seconds) for the resolving period.
-
     function setResolvingPeriod(uint256 _newResolvingPeriod) external onlyOwner {
         require(_newResolvingPeriod >= 48 hours, "Resolving period should be atleast 48 hours");
         s.resolvingPeriod = _newResolvingPeriod;
@@ -177,7 +173,6 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     function withdrawProtocolFees() external nonReentrant onlyOwner {
         uint256 protocolBalance = s.totalProtocolFeesGenerated;
         require(protocolBalance > 0, "No funds available");
-        // @note - zokyo-audit-fix-7
         require(IERC20(s.usdc).transfer(msg.sender, protocolBalance), "Transfer failed");
         s.totalProtocolFeesGenerated = 0;
         emit WithdrawProtocolFee(msg.sender, protocolBalance, block.timestamp);

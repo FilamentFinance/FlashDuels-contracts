@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {AppStorage, Duel, DuelStatus, Sale, SaleCreated, TokensPurchased, SaleCancelled, BPS} from "../AppStorage.sol";
+import {BPS, AppStorage, Duel, DuelStatus, Sale, SaleCreated, TokensPurchased, SaleCancelled, FlashDuelsMarketplace__DuelEnded} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IFlashDuels} from "../interfaces/IFlashDuels.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
 
-/// @notice Thrown when the duel has been already ended
-error FlashDuelsMarketplace__DuelEnded(string duelId);
 
 /// @title FlashDuelsMarketplaceFacet
 /// @notice This contract manages the marketplace functionalities for FlashDuels, including token transfers and transaction processing.
@@ -24,12 +22,6 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         LibDiamond.enforceIsContractOwner();
         _;
     }
-
-    // /// @notice Updates the maximum allowed strikes for failed buy attempts
-    // /// @param _newMaxStrikes The new maximum number of strikes
-    // function updateMaxStrikes(uint256 _newMaxStrikes) external onlyOwner {
-    //     s.maxStrikes = _newMaxStrikes;
-    // }
 
     /// @notice Updates the platform fee for transactions
     /// @param _newFee The new fee in basis points
@@ -63,8 +55,7 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         s.sales[token][s.saleCounter] = Sale({
             seller: msg.sender,
             quantity: quantity,
-            totalPrice: totalPrice,
-            strike: 0
+            totalPrice: totalPrice
         });
         emit SaleCreated(s.saleCounter, msg.sender, token, quantity, totalPrice, block.timestamp);
         ++s.saleCounter;

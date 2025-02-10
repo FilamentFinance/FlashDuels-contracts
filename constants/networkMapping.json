@@ -15,17 +15,17 @@
         "Goldsky_Subgraph": ""
     },
     "seiTestnet": {
-        "FLASHUSDC": "0xdffd44785e56267E004C80249bF7c1DcAD4ac7d4",
-        "FlashDuelsAdminFacet": "0x7386fCdAc3550f652E1e0F673A1b07C6F3f462c8",
-        "FlashDuelsCoreFacet": "0xb898e2A4cf50329a5Caf728bfD211741739Fc073",
-        "FlashDuelsMarketplaceFacet": "0xe7F9E05b8C5A8d469D1071C4d8B26b5aeb66ad49",
-        "FlashDuelsViewFacet": "0xa73E1de57c81E1bbF265F9a871D1373375165e70",
-        "OwnershipFacet": "0xDa8e1b8A0229400eb43f920bdF8535485b848932",
-        "DiamondCutFacet": "0x0Ca5dF009Ea78b549aBEAAb7C0AE9Dcbc2d0E5Dc",
-        "DiamondLoupeFacet": "0xaa82ED4CA37c1cf38e331977C971dD286C5C0B3f",
-        "DiamondInit": "0x16e599FE9825fc4570F5F9C86A0B45cD590B7FAc",
-        "Diamond": "0x17b6d4B4a8397a24952652A788aa413D3C31e5A6",
-        "StartBlock": 150952904,
+        "FLASHUSDC": "0x542938B5c37d082159C0933EC982E3585c94BD62",
+        "FlashDuelsAdminFacet": "0x88498614Af73Ba8643C8190DBeDE42eff14EF102",
+        "FlashDuelsCoreFacet": "0x9c34E4e6c6075A35a23d13BF2d50ed5b1Af787a3",
+        "FlashDuelsMarketplaceFacet": "0x9faA711B06597BD3a757cFD716c52E72f035E11D",
+        "FlashDuelsViewFacet": "0xc4A1AE1234e39987c79aE14E00f2A98306C35236",
+        "OwnershipFacet": "0x65c36658c81EAed25f207C91a8A3F1e82E36ABd1",
+        "DiamondCutFacet": "0x54eB40902D7cb919EF28AbE286050Ecee2cB9b2B",
+        "DiamondLoupeFacet": "0x86AE9F81809D3cC09e80433c6E41F7fd98eD09AF",
+        "DiamondInit": "0x639FebBc3b0DF17e10b65E7B69138265A3e4648A",
+        "Diamond": "0x82f8b57891C7EC3c93ABE194dB80e4d8FC931F09",
+        "StartBlock": 150967382,
         "Goldsky_Subgraph": ""
     },
     "localhost": {
