@@ -208,7 +208,10 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @param _category The category of duels to retrieve.
     /// @return pendingDuels An array of pending duels.
     /// @return pendingDuelsLength The number of pending duels.
-    function getPendingDuels(address _user, DuelCategory _category) public view returns (PendingDuel[] memory, uint256 pendingDuelsLength) {
+    function getPendingDuels(
+        address _user,
+        DuelCategory _category
+    ) public view returns (PendingDuel[] memory, uint256 pendingDuelsLength) {
         PendingDuel[] memory pendingDuels = s.pendingDuels[_user][_category];
         pendingDuelsLength = pendingDuels.length;
         return (pendingDuels, pendingDuelsLength);
@@ -219,7 +222,11 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @param _category The category of duels to retrieve.
     /// @param _index The index of the pending duel to retrieve.
     /// @return pendingDuel The pending duel at the specified index.
-    function getPendingDuelByIndex(address _user, DuelCategory _category, uint256 _index) public view returns (PendingDuel memory) {
+    function getPendingDuelByIndex(
+        address _user,
+        DuelCategory _category,
+        uint256 _index
+    ) public view returns (PendingDuel memory) {
         return s.pendingDuels[_user][_category][_index];
     }
 
@@ -241,5 +248,23 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @return pendingCryptoDuel The pending crypto duel at the specified index.
     function getPendingCryptoDuelByIndex(address _user, uint256 _index) public view returns (PendingCryptoDuel memory) {
         return s.pendingCryptoDuels[_user][_index];
+    }
+
+    /// @notice Retrieves all pending duels and their count.
+    /// @return allPendingDuels An array of all pending duels.
+    /// @return allPendingDuelsLength The number of all pending duels.
+    function getAllPendingDuelsAndCount() public view returns (PendingDuel[] memory, uint256 allPendingDuelsLength) {
+        return (s.allPendingDuels, s.allPendingDuels.length);
+    }
+
+    /// @notice Retrieves all pending crypto duels and their count.
+    /// @return allPendingCryptoDuels An array of all pending crypto duels.
+    /// @return allPendingCryptoDuelsLength The number of all pending crypto duels.
+    function getAllPendingCryptoDuelsAndCount()
+        public
+        view
+        returns (PendingCryptoDuel[] memory, uint256 allPendingCryptoDuelsLength)
+    {
+        return (s.allPendingCryptoDuels, s.allPendingCryptoDuels.length);
     }
 }

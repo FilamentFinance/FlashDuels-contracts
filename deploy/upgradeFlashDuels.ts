@@ -69,7 +69,7 @@ async function main() {
         {
             facetAddress: flashDuelsViewFacet.target,
             action: FacetCutAction.Add, // 0 means Add ,  1 Replace function, 2 for Remove
-            functionSelectors: ["0x72e14c5f", "0x1cb85b1f", "0x335b96ff", "0x57710916"] // getPendingDuels, getPendingDuelByIndex, getPendingCryptoDuels, getPendingCryptoDuelByIndex
+            functionSelectors: ["0x72e14c5f", "0x1cb85b1f", "0x335b96ff", "0x57710916", "0x583f105b", "0xee45b057"] // getPendingDuels, getPendingDuelByIndex, getPendingCryptoDuels, getPendingCryptoDuelByIndex, getAllPendingDuelsAndCount, getAllPendingCryptoDuelsAndCount
         }
         // {
         //     facetAddress: flashDuelsCoreFacet.target,

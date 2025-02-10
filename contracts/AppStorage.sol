@@ -398,6 +398,9 @@ event DuelRequestRevoked(address indexed user, uint256 refundAmount, uint256 tim
 /// @param newResolvingPeriod The resolving period.
 event ResolvingPeriodUpdated(uint256 newResolvingPeriod);
 
+/// @notice Thrown when the owner or bot address is invalid
+error FlashDuels__InvalidOwnerOrBot();
+
 /// @notice Thrown when the bot address is invalid
 error FlashDuels__InvalidBot();
 
@@ -482,4 +485,8 @@ struct AppStorage {
     mapping(address => mapping(DuelCategory => PendingDuel[])) pendingDuels; // @note - during mainnent deployment can be shifted up
     /// @notice Mapping to store pending crypto duels by user address
     mapping(address => PendingCryptoDuel[]) pendingCryptoDuels; // @note - during mainnent deployment can be shifted up
+    /// @notice  Storage for all pending duels
+    PendingDuel[] allPendingDuels;
+    /// @notice  Storage for all pending crypto duels
+    PendingCryptoDuel[] allPendingCryptoDuels;
 }
