@@ -56,7 +56,7 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
         __ReentrancyGuard_init();
 
         s.protocolTreasury = _protocolTreasury;
-        s.flashDuelsContract = _flashDuels;
+        s.flashDuelsContract = _flashDuels; // @note mainnet - can be removed for mainnet deployment
         s.usdc = _usdc;
         s.bot = _bot;
         s.bootstrapPeriod = 30 minutes;

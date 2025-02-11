@@ -158,7 +158,20 @@ const main = async () => {
         "0x335b96ff", // getPendingCryptoDuels(address)
         "0x57710916", // getPendingCryptoDuelByIndex(address,uint256)
         "0x583f105b", // getAllPendingDuelsAndCount()
-        "0xee45b057" // getAllPendingCryptoDuelsAndCount()
+        "0xee45b057", // getAllPendingCryptoDuelsAndCount()
+        "0x66ca21a8", // getCreateDuelFee()
+        "0x706d9f78", // getProtocolFeePercentage()
+        "0xd722ab26", // getCreatorFeePercentage()
+        "0x7765ff33", // getWinnersChunkSize()
+        "0xecbf647b", // getRefundChunkSize()
+        "0xab1a778a", // getResolvingPeriod()
+        "0xb734a264", // getBootstrapPeriod()
+        "0x8edf8f0f", // getMarketPlaceFees()
+        "0xe6bbe9dd", // getMinThreshold()
+        "0x2f06c7d5", // getSaleCounter()
+        "0xd087d288", // getNonce()
+        "0xdbe0b5b2", // getUsdcAddress()
+        "0xc2fdda7d" // getBotAddress()
     ]
 
     const ownershipFacetSelectors = [

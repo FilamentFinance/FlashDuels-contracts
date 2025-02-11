@@ -267,4 +267,82 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     {
         return (s.allPendingCryptoDuels, s.allPendingCryptoDuels.length);
     }
+
+    /// @notice Retrieves the create duel fee.
+    /// @return The create duel fee.
+    function getCreateDuelFee() public view returns (uint256) {
+        return s.createDuelFee;
+    }
+
+    /// @notice Returns the protocol fee percentage.
+    /// @return The protocol fee percentage.
+    function getProtocolFeePercentage() public view returns (uint256) {
+        return s.protocolFeePercentage;
+    }
+
+    /// @notice Returns the creator fee percentage.
+    /// @return The creator fee percentage.
+    function getCreatorFeePercentage() public view returns (uint256) {
+        return s.creatorFeePercentage;
+    }
+
+    /// @notice Returns the winners chunk size.
+    /// @return The winners chunk size.
+    function getWinnersChunkSize() public view returns (uint256) {
+        return s.winnersChunkSize;
+    }
+
+    /// @notice Returns the refund chunk size.
+    /// @return The refund chunk size.
+    function getRefundChunkSize() public view returns (uint256) {
+        return s.refundChunkSize;
+    }
+
+    /// @notice Returns the resolving period.
+    /// @return The resolving period.
+    function getResolvingPeriod() public view returns (uint256) {
+        return s.resolvingPeriod;
+    }
+
+    /// @notice Returns the bootstrap period.
+    /// @return The bootstrap period.
+    function getBootstrapPeriod() public view returns (uint256) {
+        return s.bootstrapPeriod;
+    }
+
+    /// @notice Returns the marketplace fees.
+    /// @return The marketplace fees.
+    function getMarketPlaceFees() public view returns (uint256) {
+        return s.marketPlaceFees;
+    }
+
+    /// @notice Returns the minimum threshold for wagering.
+    /// @return The minimum threshold.
+    function getMinThreshold() public view returns (uint256) {
+        return s.minThreshold;
+    }
+
+    /// @notice Returns the sale counter.
+    /// @return The sale counter.
+    function getSaleCounter() public view returns (uint256) {
+        return s.saleCounter;
+    }
+
+    /// @notice Returns the nonce used to generate unique duel IDs.
+    /// @return The nonce.
+    function getNonce() public view returns (uint256) {
+        return s.nonce;
+    }
+
+    /// @notice Returns the USDC token contract address.
+    /// @return The USDC token contract address.
+    function getUsdcAddress() public view returns (address) {
+        return s.usdc;
+    }
+
+    /// @notice Returns the bot address.
+    /// @return The bot address.
+    function getBotAddress() public view returns (address) {
+        return s.bot;
+    }
 }

@@ -41,9 +41,9 @@ describe("FlashDuels Contract", function () {
 
             let receipt = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
             let txr = await receipt.wait(1)
-            console.log("txr: ", txr)
+            // console.log("txr: ", txr)
             pendingDuels = await flashDuelsView.getAllPendingDuelsAndCount()
-            console.log("pendingDuels: ", pendingDuels)
+            // console.log("pendingDuels: ", pendingDuels)
             expect(pendingDuels[1]).to.equal(0)
             // let receipt = await flashDuelsCore
             //     .connect(accounts[1])
@@ -753,7 +753,7 @@ describe("FlashDuels Contract", function () {
             await tx.wait(1)
 
             const pendingCryptoDuels = await flashDuelsView.getPendingCryptoDuels(accounts[1].address)
-            console.log("pendingCryptoDuels: ", pendingCryptoDuels)
+            // console.log("pendingCryptoDuels: ", pendingCryptoDuels)
             tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
             txr = await tx.wait(1)
 
