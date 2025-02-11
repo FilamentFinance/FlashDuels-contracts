@@ -87,15 +87,15 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         require(IERC20(s.usdc).transferFrom(msg.sender, address(this), s.createDuelFee), "USDC transfer failed");
         PendingCryptoDuel memory pendingCryptoDuel = PendingCryptoDuel({
             creator: msg.sender,
-                category: DuelCategory.Crypto,
-                tokenSymbol: _tokenSymbol,
-                options: _options,
-                duration: _duelDuration,
-                isApproved: false,
-                usdcAmount: s.createDuelFee,
-                triggerValue: _triggerValue,
-                triggerType: _triggerType,
-                triggerCondition: _triggerCondition
+            category: DuelCategory.Crypto,
+            tokenSymbol: _tokenSymbol,
+            options: _options,
+            duration: _duelDuration,
+            isApproved: false,
+            usdcAmount: s.createDuelFee,
+            triggerValue: _triggerValue,
+            triggerType: _triggerType,
+            triggerCondition: _triggerCondition
         });
         s.pendingCryptoDuels[msg.sender].push(pendingCryptoDuel);
         s.allPendingCryptoDuels.push(pendingCryptoDuel);

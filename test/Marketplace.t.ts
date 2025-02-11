@@ -7,7 +7,7 @@ const helpers = require("@nomicfoundation/hardhat-network-helpers")
 import FLASHUSDCABI from "../constants/abis/FLASHUSDC.json"
 import { setupContracts } from "./testSetup"
 
-xdescribe("FlashDuels Marketplace Contract", function () {
+describe("FlashDuels Marketplace Contract", function () {
     // We define a fixture to reuse the same setup in every test.
     // We use loadFixture to run this setup once, snapshot that state,
     // and reset Hardhat Network to that snapshot in every test.
@@ -43,6 +43,9 @@ xdescribe("FlashDuels Marketplace Contract", function () {
         usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+        const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+            contracts.Diamond.diamond
+        )
         const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
             contracts.Diamond.diamond
         )
@@ -54,10 +57,15 @@ xdescribe("FlashDuels Marketplace Contract", function () {
             contracts.Diamond.diamond
         )
 
-        let receipt = await flashDuelsCore
+        // let receipt = await flashDuelsCore
+        //     .connect(accounts[1])
+        //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        tx = await flashDuelsCore
             .connect(accounts[1])
-            .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-
+            .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+        await tx.wait(1)
         const amount = ethers.parseUnits("60", 6)
         const optionPrice = ethers.parseUnits("10", 6)
 
@@ -113,7 +121,7 @@ xdescribe("FlashDuels Marketplace Contract", function () {
     })
 })
 
-xdescribe("Cancel Sale", function () {
+describe("Cancel Sale", function () {
     async function deploy() {
         const accounts = await ethers.getSigners()
         const contracts = await setupContracts()
@@ -145,6 +153,9 @@ xdescribe("Cancel Sale", function () {
         usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+        const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+            contracts.Diamond.diamond
+        )
         const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
             contracts.Diamond.diamond
         )
@@ -156,10 +167,15 @@ xdescribe("Cancel Sale", function () {
             contracts.Diamond.diamond
         )
 
-        let receipt = await flashDuelsCore
+        // let receipt = await flashDuelsCore
+        //     .connect(accounts[1])
+        //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        tx = await flashDuelsCore
             .connect(accounts[1])
-            .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-
+            .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+        await tx.wait(1)
         const amount = ethers.parseUnits("60", 6)
         const optionPrice = ethers.parseUnits("10", 6)
 
@@ -241,6 +257,9 @@ xdescribe("Cancel Sale", function () {
         usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+        const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+            contracts.Diamond.diamond
+        )
         const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
             contracts.Diamond.diamond
         )
@@ -252,10 +271,15 @@ xdescribe("Cancel Sale", function () {
             contracts.Diamond.diamond
         )
 
-        let receipt = await flashDuelsCore
+        // let receipt = await flashDuelsCore
+        //     .connect(accounts[1])
+        //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        tx = await flashDuelsCore
             .connect(accounts[1])
-            .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-
+            .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+        await tx.wait(1)    
         const amount = ethers.parseUnits("60", 6)
         const optionPrice = ethers.parseUnits("10", 6)
 
@@ -311,7 +335,7 @@ xdescribe("Cancel Sale", function () {
     })
 })
 
-xdescribe("Token Purchase", function () {
+describe("Token Purchase", function () {
     async function deploy() {
         const accounts = await ethers.getSigners()
         const contracts = await setupContracts()
@@ -351,10 +375,19 @@ xdescribe("Token Purchase", function () {
         const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
             contracts.Diamond.diamond
         )
+        const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+            contracts.Diamond.diamond
+        )
 
-        let receipt = await flashDuelsCore
+        // let receipt = await flashDuelsCore
+        //     .connect(accounts[1])
+        //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        tx = await flashDuelsCore
             .connect(accounts[1])
-            .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+        await tx.wait(1)
 
         let amount = ethers.parseUnits("60", 6)
         const optionPrice = ethers.parseUnits("10", 6)
@@ -449,10 +482,19 @@ xdescribe("Token Purchase", function () {
         const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
             contracts.Diamond.diamond
         )
+        const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+            contracts.Diamond.diamond
+        )
 
-        let receipt = await flashDuelsCore
+        // let receipt = await flashDuelsCore
+        //     .connect(accounts[1])
+        //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        tx = await flashDuelsCore
             .connect(accounts[1])
-            .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+        await tx.wait(1)
 
         let amount = ethers.parseUnits("60", 6)
         const optionPrice = ethers.parseUnits("10", 6)
@@ -552,10 +594,19 @@ xdescribe("Token Purchase", function () {
         const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
             contracts.Diamond.diamond
         )
+        const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+            contracts.Diamond.diamond
+        )
 
-        let receipt = await flashDuelsCore
+        // let receipt = await flashDuelsCore
+        //     .connect(accounts[1])
+        //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        tx = await flashDuelsCore
             .connect(accounts[1])
-            .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+        await tx.wait(1)
 
         let amount = ethers.parseUnits("60", 6)
         const optionPrice = ethers.parseUnits("10", 6)
@@ -657,14 +708,19 @@ xdescribe("Token Purchase", function () {
         const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
             contracts.Diamond.diamond
         )
+        const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+            contracts.Diamond.diamond
+        )
 
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
         tx = await flashDuelsCore
             .connect(accounts[1])
-            .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-        txr = await tx.wait(1)
+            .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+        await tx.wait(1)
 
         let amount = ethers.parseUnits("60", 6) // 60 USDC
         let optionPrice = ethers.parseUnits("10", 6) // 10 USDC

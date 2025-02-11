@@ -39,33 +39,34 @@ describe("FlashDuels Contract", function () {
             expect(pendingDuels[0][0][2]).to.equal("Donald Trump will win the US election ?")
             expect(pendingDuels[1]).to.equal(1)
 
-            await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
-            // pendingDuels = await flashDuelsView.getAllPendingDuelsAndCount()
-            // expect(pendingDuels[0][0][2]).to.equal("")
-            // expect(pendingDuels[1]).to.equal(0)
-
-            
+            let receipt = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+            let txr = await receipt.wait(1)
+            console.log("txr: ", txr)
+            pendingDuels = await flashDuelsView.getAllPendingDuelsAndCount()
+            console.log("pendingDuels: ", pendingDuels)
+            expect(pendingDuels[1]).to.equal(0)
             // let receipt = await flashDuelsCore
             //     .connect(accounts[1])
             //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
             // let txr = await receipt.wait(1)
-            // // console.log(txr?.logs)
+            // console.log(txr?.logs)
             // // console.log("Total logs length: ", txr?.logs.length)
-            // let duelId
-            // for (let i = 0; i < txr?.logs.length; i++) {
-            //     if (txr?.logs[i]["args"]) {
-            //         // console.log("duelId: ", txr?.logs[i]["args"][1]);
-            //         duelId = txr?.logs[i]["args"][1]
-            //     }
-            // }
-            // const duel = await flashDuelsView.getDuels(duelId.toString())
-            // expect(duel.creator).to.equal(accounts[1].address)
-            // // expect(duel.minWager).to.equal(minWager)
-            // expect(duel.category).to.equal(2) // DuelCategory.Politics
+            let duelId
+            for (let i = 0; i < txr?.logs.length; i++) {
+                if (txr?.logs[i]["args"]) {
+                    // console.log("duelId: ", txr?.logs[i]["args"][1]);
+                    duelId = txr?.logs[i]["args"][1]
+                }
+            }
+            const duel = await flashDuelsView.getDuels(duelId.toString())
+            expect(duel.creator).to.equal(accounts[1].address)
+            // expect(duel.minWager).to.equal(minWager)
+            expect(duel.category).to.equal(2) // DuelCategory.Politics
+            expect(duel.topic).to.equal("Donald Trump will win the US election ?")
         })
     })
 
-    xdescribe("Duel Joining", function () {
+    describe("Duel Joining", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
@@ -81,6 +82,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -93,8 +97,11 @@ describe("FlashDuels Contract", function () {
             await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
             tx = await flashDuelsCore
                 .connect(accounts[1])
-                .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+                .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
             txr = await tx.wait(1)
+            await flashDuelsAdmin
+                .connect(accounts[0])
+                .approveAndCreateDuel(accounts[1].address, 2, 0)
             const amount = ethers.parseUnits("60", 6)
             const optionPrice = ethers.parseUnits("10", 6)
 
@@ -150,6 +157,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -160,10 +170,13 @@ describe("FlashDuels Contract", function () {
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
-            tx = await flashDuelsCore
-                .connect(accounts[1])
-                .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-            txr = await tx.wait(1)
+            // tx = await flashDuelsCore
+            //     .connect(accounts[1])
+            //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            tx = await flashDuelsCore.connect(accounts[1]).requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+            await tx.wait(1)
 
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
@@ -179,7 +192,7 @@ describe("FlashDuels Contract", function () {
         })
     })
 
-    xdescribe("Duel Settlement", function () {
+    describe("Duel Settlement", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
@@ -195,6 +208,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -207,8 +223,10 @@ describe("FlashDuels Contract", function () {
             await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
             tx = await flashDuelsCore
                 .connect(accounts[1])
-                .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-            txr = await tx.wait(1)
+                .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+            await tx.wait(1)
 
             const amount = ethers.parseUnits("60", 6) // 60 USDC
             const optionPrice = ethers.parseUnits("10", 6) // 10 USDC
@@ -256,7 +274,7 @@ describe("FlashDuels Contract", function () {
         })
     })
 
-    xdescribe("Duel Settlement with Reward Distribution", function () {
+    describe("Duel Settlement with Reward Distribution", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
@@ -272,6 +290,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -284,8 +305,10 @@ describe("FlashDuels Contract", function () {
             await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
             tx = await flashDuelsCore
                 .connect(accounts[1])
-                .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-            txr = await tx.wait(1)
+                .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+            await tx.wait(1)
             const amount = ethers.parseUnits("60", 6)
             const optionPrice = ethers.parseUnits("10", 6)
 
@@ -355,6 +378,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -367,8 +393,10 @@ describe("FlashDuels Contract", function () {
             await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
             tx = await flashDuelsCore
                 .connect(accounts[1])
-                .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-            txr = await tx.wait(1)
+                .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+            await tx.wait(1)
             const amount = ethers.parseUnits("60", 6)
             const optionPrice = ethers.parseUnits("10", 6)
 
@@ -415,7 +443,7 @@ describe("FlashDuels Contract", function () {
         })
     })
 
-    xdescribe("Duel Cancel and Refund Logic", function () {
+    describe("Duel Cancel and Refund Logic", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
@@ -431,6 +459,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -443,8 +474,10 @@ describe("FlashDuels Contract", function () {
             await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
             tx = await flashDuelsCore
                 .connect(accounts[1])
-                .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-            txr = await tx.wait(1)
+                .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+            await tx.wait(1)
 
             let duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
@@ -474,6 +507,9 @@ describe("FlashDuels Contract", function () {
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -486,8 +522,10 @@ describe("FlashDuels Contract", function () {
             await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
             tx = await flashDuelsCore
                 .connect(accounts[1])
-                .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-            txr = await tx.wait(1)
+                .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+            await tx.wait(1)
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
 
             // Simulate meeting the threshold
@@ -523,6 +561,9 @@ describe("FlashDuels Contract", function () {
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -535,8 +576,10 @@ describe("FlashDuels Contract", function () {
             await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
             tx = await flashDuelsCore
                 .connect(accounts[1])
-                .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-            txr = await tx.wait(1)
+                .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
+            await tx.wait(1)
             let bootstrapPeriod = 1800
             await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1])
             await ethers.provider.send("evm_mine", [])
@@ -548,7 +591,7 @@ describe("FlashDuels Contract", function () {
         })
     })
 
-    xdescribe("Refund Duel", function () {
+    describe("Refund Duel", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
@@ -564,6 +607,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -576,14 +622,21 @@ describe("FlashDuels Contract", function () {
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
 
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                tokenA,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     tokenA,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(tokenA, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
 
             let duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             const cryptoDuel = await flashDuelsView.getDuels(duelIds[0])
@@ -655,7 +708,7 @@ describe("FlashDuels Contract", function () {
         })
     })
 
-    xdescribe("Crypto Duel Creation", function () {
+    describe("Crypto Duel Creation", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
@@ -671,6 +724,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -683,26 +739,35 @@ describe("FlashDuels Contract", function () {
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
 
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                tokenA,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     tokenA,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(tokenA, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
 
-            txr = await receipt.wait()
+            const pendingCryptoDuels = await flashDuelsView.getPendingCryptoDuels(accounts[1].address)
+            console.log("pendingCryptoDuels: ", pendingCryptoDuels)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            txr = await tx.wait(1)
+
             // console.log(txr?.logs)
             // console.log("Total logs length: ", txr?.logs.length)
             let duelId
             for (let i = 0; i < txr?.logs.length; i++) {
                 if (txr?.logs[i]["args"]) {
-                    // console.log("duelId: ", txr?.logs[i]["args"][0]);
-                    duelId = txr?.logs[i]["args"][2]
+                    // console.log("duelId: ", txr?.logs[i]["args"][1]);
+                    duelId = txr?.logs[i]["args"][1]
                 }
             }
             duel = await flashDuelsView.getCryptoDuel(duelId.toString())
+            // console.log("duel: ", duel)
             expect(duel.creator).to.equal(accounts[1].address)
         })
 
@@ -716,6 +781,10 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -737,14 +806,20 @@ describe("FlashDuels Contract", function () {
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let BTC = "tokenA"
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                BTC,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     BTC,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(BTC, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
             // Join Duel with tokenA
@@ -787,6 +862,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -796,14 +874,20 @@ describe("FlashDuels Contract", function () {
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let BTC = "tokenA"
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                BTC,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     BTC,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(BTC, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
 
@@ -826,6 +910,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -835,14 +922,20 @@ describe("FlashDuels Contract", function () {
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let BTC = "tokenA"
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                BTC,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     BTC,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(BTC, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
 
@@ -860,7 +953,7 @@ describe("FlashDuels Contract", function () {
         })
     })
 
-    xdescribe("Crypto Duel Settlement", function () {
+    describe("Crypto Duel Settlement", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
@@ -877,6 +970,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -898,14 +994,20 @@ describe("FlashDuels Contract", function () {
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let BTC = "tokenA"
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                BTC,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     BTC,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(BTC, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
             // Join Duel with tokenA
@@ -945,7 +1047,7 @@ describe("FlashDuels Contract", function () {
         })
     })
 
-    xdescribe("Crypto Duel Settlement with Reward Distribution", function () {
+    describe("Crypto Duel Settlement with Reward Distribution", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
@@ -962,6 +1064,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -987,14 +1092,20 @@ describe("FlashDuels Contract", function () {
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let BTC = "tokenA"
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                BTC,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     BTC,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(BTC, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             const cryptoDuel = await flashDuelsView.getDuels(duelIds[0])
 
@@ -1063,7 +1174,7 @@ describe("FlashDuels Contract", function () {
         })
     })
 
-    xdescribe("Crypto Duel Cancel and Refund Logic", function () {
+    describe("Crypto Duel Cancel and Refund Logic", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
@@ -1079,6 +1190,9 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -1091,14 +1205,20 @@ describe("FlashDuels Contract", function () {
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
 
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                tokenA,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     tokenA,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(tokenA, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
 
             let duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             const cryptoDuel = await flashDuelsView.getDuels(duelIds[0])
@@ -1134,6 +1254,9 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
@@ -1142,14 +1265,20 @@ describe("FlashDuels Contract", function () {
             let tokenA = "tokenA"
             let duelDuration = 0
 
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                tokenA,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     tokenA,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(tokenA, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
 
             // Simulate meeting the threshold
@@ -1193,6 +1322,9 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
@@ -1201,14 +1333,20 @@ describe("FlashDuels Contract", function () {
             let tokenA = "tokenA"
             let duelDuration = 0
 
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                tokenA,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     tokenA,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(tokenA, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
 
             // Simulate meeting the threshold
@@ -1245,6 +1383,10 @@ describe("FlashDuels Contract", function () {
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -1254,14 +1396,20 @@ describe("FlashDuels Contract", function () {
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
 
-            let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
-                tokenA,
-                ["Yes", "No"],
-                6500000000000, // triggerValue
-                0, // triggerType: aboslute
-                0, // triggerCondition: Above
-                duelDuration
-            )
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     tokenA,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(tokenA, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
 
             let duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             const cryptoDuel = await flashDuelsView.getDuels(duelIds[0])
