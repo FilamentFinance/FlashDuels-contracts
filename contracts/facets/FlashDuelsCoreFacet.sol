@@ -197,7 +197,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         address _user
     ) external nonReentrant whenNotPaused onlyBot {
         CryptoDuel storage duel = s.cryptoDuels[_duelId];
-        require(s.isValidDuelId[_duelId] && duel.createTime != 0, "Duel ddrawoesn't exist");
+        require(s.isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
         require(_amount >= _optionPrice, "Less than minimum wager");
         // Transfer the wager amount in USDC to the contract
@@ -335,13 +335,16 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         s.totalCreatorFeeEarned[duel.creator] += creatorFee;
 
         // Distribute winnings in chunks to prevent out-of-gas errors
+        s.totalWinningOptionPayout[_duelId][_optionIndex][winningOption] = payout;
         _distributeWinningsInChunks(_duelId, winningOption, _optionIndex, payout);
 
         // Finalize or signal ongoing distribution
         if (s.distributionCompleted[_duelId]) {
             duel.duelStatus = DuelStatus.Settled;
+            emit WinningsDistributionCompleted(_duelId, block.timestamp);
             emit DuelSettled(_duelId, winningOption, _optionIndex, block.timestamp);
         } else {
+            emit PartialWinningsDistributed(_duelId, block.timestamp);
             emit PartialDuelSettled(_duelId, winningOption, _optionIndex, block.timestamp);
         }
     }
@@ -350,23 +353,24 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @param _duelId The unique identifier of the duel.
     /// @param _optionIndex The index of the option that won the duel.
     /// @param _winningOption The option that was chosen as the winning option.
-    /// @param _payout The total amount of winnings to be distributed.
     function continueWinningsDistribution(
         string memory _duelId,
         uint256 _optionIndex,
-        string memory _winningOption,
-        uint256 _payout
+        string memory _winningOption
     ) external {
         require(!s.distributionCompleted[_duelId], "Distribution already completed");
-
+        uint256 _payout = s.totalWinningOptionPayout[_duelId][_optionIndex][_winningOption];
+        require(_payout > 0, "No payout to distribute");
         // Continue distribution using the preset winnersChunkSize
         _distributeWinningsInChunks(_duelId, _winningOption, _optionIndex, _payout);
 
         // Emit event when fully completed
         if (s.distributionCompleted[_duelId]) {
             emit WinningsDistributionCompleted(_duelId, block.timestamp);
+            emit DuelSettled(_duelId, _winningOption, _optionIndex, block.timestamp);
         } else {
             emit PartialWinningsDistributed(_duelId, block.timestamp);
+            emit PartialDuelSettled(_duelId, _winningOption, _optionIndex, block.timestamp);
         }
     }
 
@@ -394,13 +398,16 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         s.totalCreatorFeeEarned[cryptoDuel.creator] += creatorFee;
 
         // Distribute winnings in chunks
+        s.totalWinningOptionPayout[_duelId][optionIndex][winningOption] = payout;
         _distributeWinningsInChunks(_duelId, winningOption, optionIndex, payout);
 
         // Update duel status based on completion of distribution
         if (s.distributionCompleted[_duelId]) {
             s.cryptoDuels[_duelId].duelStatus = DuelStatus.Settled;
+            emit WinningsDistributionCompleted(_duelId, block.timestamp);
             emit DuelSettled(_duelId, winningOption, optionIndex, block.timestamp);
         } else {
+            emit PartialWinningsDistributed(_duelId, block.timestamp);
             emit PartialDuelSettled(_duelId, winningOption, optionIndex, block.timestamp);
         }
     }
@@ -511,6 +518,9 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         s.distributionProgress[_duelId] = endIndex;
         if (endIndex == winners.length) {
             s.distributionCompleted[_duelId] = true;
+            s.totalWinningOptionPayout[_duelId][_optionIndex][_winningOption] = 0;
+            s.totalWagerForOption[_duelId][_winningOption] = 0;
+            delete s.duelUsersForOption[_duelId][_winningOption];
         }
     }
     /// @notice Internal function to process refund distribution in chunks for a cancelled duel.

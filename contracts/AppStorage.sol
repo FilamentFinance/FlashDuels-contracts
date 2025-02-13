@@ -492,4 +492,6 @@ struct AppStorage {
     mapping(string => bool) isValidDuelId;
     /// @notice Mapping of duel IDs to duel information
     mapping(string => Duel) duels;
+    /// @notice Mapping of duelId to the optionIndex to the winning option to the total winning option payout
+    mapping(string => mapping(uint256 => mapping(string => uint256))) totalWinningOptionPayout; // @note - can be shited up during mainnet deployment
 }
