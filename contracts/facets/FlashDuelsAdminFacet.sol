@@ -202,7 +202,11 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         s.totalProtocolFeesGenerated = s.totalProtocolFeesGenerated + s.createDuelFee;
 
         require(
-            _duelDuration == DuelDuration.ThreeHours ||
+            _duelDuration == DuelDuration.FiveMinutes ||
+                _duelDuration == DuelDuration.FifteenMinutes ||
+                _duelDuration == DuelDuration.ThirtyMinutes ||
+                _duelDuration == DuelDuration.OneHour ||
+                _duelDuration == DuelDuration.ThreeHours ||
                 _duelDuration == DuelDuration.SixHours ||
                 _duelDuration == DuelDuration.TwelveHours,
             "Invalid duel duration"
@@ -244,7 +248,11 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     ) internal returns (string memory) {
         s.totalProtocolFeesGenerated = s.totalProtocolFeesGenerated + s.createDuelFee;
         require(
-            _duelDuration == DuelDuration.ThreeHours ||
+            _duelDuration == DuelDuration.FiveMinutes ||
+                _duelDuration == DuelDuration.FifteenMinutes ||
+                _duelDuration == DuelDuration.ThirtyMinutes ||
+                _duelDuration == DuelDuration.OneHour ||
+                _duelDuration == DuelDuration.ThreeHours ||
                 _duelDuration == DuelDuration.SixHours ||
                 _duelDuration == DuelDuration.TwelveHours,
             "Invalid duel duration"

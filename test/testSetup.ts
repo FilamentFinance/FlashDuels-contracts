@@ -133,7 +133,7 @@ export const setupContracts = async () => {
         "0xf78283bd", // startDuel(string)
         "0xb117a1dc", // startCryptoDuel(string,int256)
         "0xc0dbdcab", // settleDuel(string,uint256)
-        "0x55718670", // continueWinningsDistribution(string,uint256,string,uint256)
+        "0x0f9f3b7c", // continueWinningsDistribution(string,uint256,string)
         "0x2afa99d9", // settleCryptoDuel(string,int256)
         "0x3f3a631b", // cancelDuelIfThresholdNotMet(uint8,string)
         "0x6e70096e", // withdrawEarnings(uint256)
@@ -197,7 +197,7 @@ export const setupContracts = async () => {
         "0xe30c3978", // pendingOwner()
         "0x79ba5097" // acceptOwnership()
     ]
-
+    
     const cut = []
 
     cut.push({

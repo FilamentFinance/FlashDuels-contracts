@@ -139,6 +139,10 @@ struct PendingCryptoDuel {
 
 /// @notice Enum representing different possible duel durations
 enum DuelDuration {
+    FiveMinutes,
+    FifteenMinutes,
+    ThirtyMinutes,
+    OneHour,
     ThreeHours,
     SixHours,
     TwelveHours

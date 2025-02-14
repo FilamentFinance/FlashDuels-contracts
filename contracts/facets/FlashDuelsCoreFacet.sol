@@ -262,11 +262,19 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // Record the start time and mark the duel as live
         duel.startTime = block.timestamp;
         // uint256 duelDuration = duel.expiryTime - (duel.createTime + bootstrapPeriod);
-        uint256 duelDuration = duel.duelDuration == DuelDuration.ThreeHours
-            ? 3 hours
-            : duel.duelDuration == DuelDuration.SixHours
-                ? 6 hours
-                : 12 hours;
+        uint256 duelDuration = duel.duelDuration == DuelDuration.FiveMinutes
+            ? 5 minutes
+            : duel.duelDuration == DuelDuration.FifteenMinutes
+                ? 15 minutes
+                : duel.duelDuration == DuelDuration.ThirtyMinutes
+                    ? 30 minutes
+                    : duel.duelDuration == DuelDuration.OneHour
+                        ? 1 hours
+                        : duel.duelDuration == DuelDuration.ThreeHours
+                            ? 3 hours
+                            : duel.duelDuration == DuelDuration.SixHours
+                                ? 6 hours
+                                : 12 hours;
         duel.expiryTime = block.timestamp + duelDuration;
         duel.duelStatus = DuelStatus.Live;
 
@@ -292,11 +300,19 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // Record the start time and mark the duel as live
         cryptoDuel.startTime = block.timestamp;
         // uint256 duelDuration = cryptoDuel.expiryTime - (cryptoDuel.createTime + bootstrapPeriod);
-        uint256 duelDuration = cryptoDuel.duelDuration == DuelDuration.ThreeHours
-            ? 3 hours
-            : cryptoDuel.duelDuration == DuelDuration.SixHours
-                ? 6 hours
-                : 12 hours;
+        uint256 duelDuration = cryptoDuel.duelDuration == DuelDuration.FiveMinutes
+            ? 5 minutes
+            : cryptoDuel.duelDuration == DuelDuration.FifteenMinutes
+                ? 15 minutes
+                : cryptoDuel.duelDuration == DuelDuration.ThirtyMinutes
+                    ? 30 minutes
+                    : cryptoDuel.duelDuration == DuelDuration.OneHour
+                        ? 1 hours
+                        : cryptoDuel.duelDuration == DuelDuration.ThreeHours
+                            ? 3 hours
+                            : cryptoDuel.duelDuration == DuelDuration.SixHours
+                                ? 6 hours
+                                : 12 hours;
         cryptoDuel.expiryTime = block.timestamp + duelDuration;
         cryptoDuel.duelStatus = DuelStatus.Live;
 
