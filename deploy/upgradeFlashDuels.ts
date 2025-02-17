@@ -28,14 +28,14 @@ async function main() {
     // await flashDuelsAdminFacet.waitForDeployment()
     // console.log("FlashDuelsAdminFacet deployed:", flashDuelsAdminFacet.target)
 
-    const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
-    const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
-    await flashDuelsCoreFacet.waitForDeployment()
-    console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
+    // const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
+    // const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
+    // await flashDuelsCoreFacet.waitForDeployment()
+    // console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
 
-    // const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
-    // const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
-    // await flashDuelsMarketplaceFacet.waitForDeployment()
+    const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
+    const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
+    await flashDuelsMarketplaceFacet.waitForDeployment()
     // console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
     // const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
@@ -59,10 +59,14 @@ async function main() {
         //     ]
         // },
         {
-            facetAddress: flashDuelsCoreFacet.target,
+            facetAddress: flashDuelsMarketplaceFacet.target,
             action: FacetCutAction.Replace, // 0 means Add ,  1Replace function
             functionSelectors: [
-                "0x0f9f3b7c", // continueWinningsDistribution(string,uint256,string)
+                "0x9012c4a8", // updateFee(uint256)
+                "0x07b4c084", // sell(address,string,uint256,uint256,uint256)
+                "0xaa6ecb55", // cancelSell(address,uint256)
+                "0x3a51c924",  // buy(address,string,uint256,uint256[],uint256[])
+                "0x225c3131" // getSale(address,uint256)
             ]
         },
         // {

@@ -104,6 +104,7 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
             uint256 buyAmount = amounts[i];
 
             Sale memory sale = s.sales[token][saleId];
+            require(sale.seller != msg.sender, "Seller cannot buy their own tokens");
 
             require(sale.quantity >= buyAmount, "Not enough tokens available");
 
