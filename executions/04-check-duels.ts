@@ -20,7 +20,6 @@ const main = async () => {
     }
 
     const flashDuelsView: FlashDuels = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsViewABI, deployer)
-    // const flashUSDC: FLASHUSDC = new ethers.Contract(netMap[networkName].FLASHUSDC, FLASHUSDCABI, deployer)
 
     tx = await flashDuelsView.checkIfThresholdMet("7fe60b106113aa3c8b95b22462b1fd0089c91f367fcbec58e105d19e907946e1")
     console.log("IsThresholdMet", tx)
@@ -29,6 +28,8 @@ const main = async () => {
     tx = await flashDuelsView.getCryptoDuel("9b512e34fdbf3950665edfbe6e689158b41bdaa3dcdd0b419d11ea4c474fd2fc")
     console.log("Get CryptoDuel", tx)
 
+    const optionTokenAddressData = await flashDuelsView.getOptionIndexToOptionToken("bc148ee076e91da6a427c75eb5c9bf4caf99b14b0b07b9cf91dddb2a2701c88c", 0);
+    console.log("Option Token Address", optionTokenAddressData)
 
 }
 

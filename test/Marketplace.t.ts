@@ -444,7 +444,7 @@ describe("Token Purchase", function () {
         await usdcToken.connect(buyer).approve(contracts.Diamond.diamond, ethers.parseUnits("70", 6))
         tx = await flashDuelsView.getDuel(duelIds[0])
         
-        await flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 1, [0], [ethers.parseUnits("5", 18)])
+        await flashDuelsMarketplace.connect(contracts.Bot.bot).buy(buyer.address, sellerOptionToken, duelIds[0], 1, [0], [ethers.parseUnits("5", 18)])
         const sale = await flashDuelsView.getSales(sellerOptionToken, 0)
         expect(sale.seller).to.equal("0x0000000000000000000000000000000000000000") // Ensure the sale is deleted
     })
@@ -551,7 +551,7 @@ describe("Token Purchase", function () {
         await usdcToken.connect(buyer).approve(contracts.Diamond.diamond, ethers.parseUnits("54", 6))
         tx = await flashDuelsView.getDuel(duelIds[0])
         
-        await flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 1, [0], [ethers.parseUnits("3", 18)])
+        await flashDuelsMarketplace.connect(contracts.Bot.bot).buy(buyer.address, sellerOptionToken, duelIds[0], 1, [0], [ethers.parseUnits("3", 18)])
         const sale = await flashDuelsView.getSales(sellerOptionToken, 0)
         expect(sale.seller).to.equal(seller.address) // Ensure the sale is deleted
         expect(sale.quantity).to.equal(ethers.parseUnits("2", 18)) // Ensure the sale is deleted
@@ -679,7 +679,7 @@ describe("Token Purchase", function () {
         await usdcToken.connect(buyer).approve(contracts.Diamond.diamond, ethers.parseUnits("140", 6))
         tx = await flashDuelsView.getDuel(duelIds[0])
         // @note - here sellerOptionToken1 == sellerOptionToken2
-        await flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken1, duelIds[0], 1, [0, 1], [ethers.parseUnits("5", 18), ethers.parseUnits("3", 18)])
+        await flashDuelsMarketplace.connect(contracts.Bot.bot).buy(buyer.address, sellerOptionToken1, duelIds[0], 1, [0, 1], [ethers.parseUnits("5", 18), ethers.parseUnits("3", 18)])
         let sale = await flashDuelsView.getSales(sellerOptionToken1, 0)
         expect(sale.seller).to.equal("0x0000000000000000000000000000000000000000") // Ensure the sale is deleted
         expect(sale.quantity).to.equal(ethers.parseUnits("0", 18)) // Ensure the sale is deleted
@@ -783,9 +783,10 @@ describe("Token Purchase", function () {
         expect(duel.duelStatus).to.equal(3) // 3 represents the "Settled" status
 
         let buyer = accounts[5]
+        let bot = accounts[3]
 
         await expect(
-            flashDuelsMarketplace.connect(buyer).buy(sellerOptionToken, duelIds[0], 1, [0], [amount])
+            flashDuelsMarketplace.connect(contracts.Bot.bot).buy(buyer.address, sellerOptionToken, duelIds[0], 1, [0], [amount])
         ).to.be.revertedWithCustomError(flashDuelsMarketplace, "FlashDuelsMarketplace__DuelEnded")
     })
 })

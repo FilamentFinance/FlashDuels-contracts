@@ -23,6 +23,12 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         _;
     }
 
+    /// @notice Modifier to restrict function access to only the bot.
+    modifier onlyBot() {
+        require(msg.sender == s.bot, "Only the bot can call this function");
+        _;
+    }
+
     /// @notice Updates the platform fee for transactions
     /// @param _newFee The new fee in basis points
     function updateFee(uint256 _newFee) external onlyOwner {
@@ -79,12 +85,13 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
     /// @param saleIds Array of sale IDs to buy from
     /// @param amounts Array of amounts to buy from each seller (must be <= seller's available quantity)
     function buy(
+        address buyer,
         address token,
         string memory duelId,
         uint256 optionIndex,
         uint256[] memory saleIds,
         uint256[] memory amounts
-    ) external nonReentrant {
+    ) external onlyBot nonReentrant {
         require(saleIds.length == amounts.length, "Mismatched array lengths");
 
         Duel memory duel = IFlashDuels(s.flashDuelsContract).getDuel(duelId);
@@ -104,7 +111,8 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
             uint256 buyAmount = amounts[i];
 
             Sale memory sale = s.sales[token][saleId];
-            require(sale.seller != msg.sender, "Seller cannot buy their own tokens");
+            require(sale.seller != buyer, "Seller cannot buy own tokens");
+            require(sale.seller != s.bot, "Buyer cannot be the bot");
 
             require(sale.quantity >= buyAmount, "Not enough tokens available");
 
@@ -114,11 +122,11 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
             uint256 receivables = cost - fee;
 
             // Transfer funds and tokens
-            IERC20(s.usdc).safeTransferFrom(msg.sender, sale.seller, receivables);
-            IERC20(s.usdc).safeTransferFrom(msg.sender, s.protocolTreasury, fee);
-            erc20.safeTransferFrom(sale.seller, msg.sender, buyAmount);
+            IERC20(s.usdc).safeTransferFrom(buyer, sale.seller, receivables);
+            IERC20(s.usdc).safeTransferFrom(buyer, s.protocolTreasury, fee);
+            erc20.safeTransferFrom(sale.seller, buyer, buyAmount);
 
-            _updateDuelInfoForSellerBuyer(token, sale.seller, msg.sender, duelId, optionIndex);
+            _updateDuelInfoForSellerBuyer(token, sale.seller, buyer, duelId, optionIndex);
             // Update sale details
             if (buyAmount == sale.quantity) {
                 delete s.sales[token][saleId]; // Sale fully matched, remove
@@ -129,7 +137,7 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
 
             totalCost += cost;
             platformFee += fee;
-            emit TokensPurchased(msg.sender, sale.seller, token, buyAmount, cost, block.timestamp);
+            emit TokensPurchased(buyer, sale.seller, token, buyAmount, cost, block.timestamp);
         }
     }
 
