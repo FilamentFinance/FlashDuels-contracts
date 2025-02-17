@@ -79,6 +79,7 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
     }
 
     /// @notice Allows a user to buy tokens from a sale
+    /// @param buyer The address of the buyer
     /// @param token The address of the token being sold
     /// @param duelId The duel ID
     /// @param optionIndex The option index in the duel

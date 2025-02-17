@@ -43,11 +43,6 @@ async function main() {
     await flashDuelsViewFacet.waitForDeployment()
     console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
 
-    const OwnershipFacet = await ethers.getContractFactory("OwnershipFacet")
-    const ownershipFacet = await OwnershipFacet.deploy()
-    await ownershipFacet.waitForDeployment()
-    console.log("OwnershipFacet deployed:", ownershipFacet.target)
-
     // Prepare the cut transaction
     const cut: any = [
         {
