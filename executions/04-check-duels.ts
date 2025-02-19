@@ -1,7 +1,8 @@
 import { ethers, network } from "hardhat"
 import * as helpers from "@nomicfoundation/hardhat-network-helpers"
-import { FlashDuels, FLASHUSDC } from "../typechain-types"
+import { FlashDuelsViewFacet, FlashDuelsMarketplaceFacet, FLASHUSDC } from "../typechain-types"
 import FlashDuelsViewABI from "../constants/abis/FlashDuelsViewFacet.json"
+import FlashDuelsMarketplaceABI from "../constants/abis/FlashDuelsMarketplaceFacet.json"
 import FLASHUSDCABI from "../constants/abis/FLASHUSDC.json"
 import netMap from "../constants/networkMapping.json"
 import { forkedChain, networkConfig } from "../helper-hardhat-config"
@@ -19,17 +20,21 @@ const main = async () => {
         ;[deployer, , sequencer, liquidator] = await ethers.getSigners()
     }
 
-    const flashDuelsView: FlashDuels = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsViewABI, deployer)
+    const flashDuelsView: FlashDuelsViewFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsViewABI, deployer)
+    const flashDuelsMarketplace: FlashDuelsMarketplaceFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsMarketplaceABI, deployer)
 
-    tx = await flashDuelsView.checkIfThresholdMet("7fe60b106113aa3c8b95b22462b1fd0089c91f367fcbec58e105d19e907946e1")
-    console.log("IsThresholdMet", tx)
-    tx = await flashDuelsView.checkIfThresholdMet("7fe60b106113aa3c8b95b22462b1fd0089c91f367fcbec58e105d19e907946e1")
-    console.log("IsThresholdMet", tx)
-    tx = await flashDuelsView.getCryptoDuel("9b512e34fdbf3950665edfbe6e689158b41bdaa3dcdd0b419d11ea4c474fd2fc")
-    console.log("Get CryptoDuel", tx)
+    // tx = await flashDuelsView.checkIfThresholdMet("7fe60b106113aa3c8b95b22462b1fd0089c91f367fcbec58e105d19e907946e1")
+    // console.log("IsThresholdMet", tx)
+    // tx = await flashDuelsView.checkIfThresholdMet("7fe60b106113aa3c8b95b22462b1fd0089c91f367fcbec58e105d19e907946e1")
+    // console.log("IsThresholdMet", tx)
+    // tx = await flashDuelsView.getCryptoDuel("9b512e34fdbf3950665edfbe6e689158b41bdaa3dcdd0b419d11ea4c474fd2fc")
+    // console.log("Get CryptoDuel", tx)
 
-    const optionTokenAddressData = await flashDuelsView.getOptionIndexToOptionToken("bc148ee076e91da6a427c75eb5c9bf4caf99b14b0b07b9cf91dddb2a2701c88c", 0);
-    console.log("Option Token Address", optionTokenAddressData)
+    // const optionTokenAddressData = await flashDuelsView.getOptionIndexToOptionToken("bc148ee076e91da6a427c75eb5c9bf4caf99b14b0b07b9cf91dddb2a2701c88c", 0);
+    // console.log("Option Token Address", optionTokenAddressData)
+
+    const salesData = await flashDuelsMarketplace.getSale("0x2Eb671E6e0cd965A79A80caF35c5123b7a5D8ebb", "21")
+    console.log("Sales Data", salesData)
 
 }
 

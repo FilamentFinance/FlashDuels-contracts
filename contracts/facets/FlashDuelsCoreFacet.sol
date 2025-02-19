@@ -545,11 +545,26 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     function _processRefundsInChunks(string memory _duelId) internal {
         uint256 optionsLength = s.duelIdToOptions[_duelId].length;
         uint256 processedCount = 0;
+        uint256 totalParticipants = 0;
 
-        for (uint256 i = s.refundProgress[_duelId]; i < optionsLength && processedCount < s.refundChunkSize; i++) {
+        // Calculate the total number of participants across all options
+        for (uint256 i = 0; i < optionsLength; i++) {
+            string memory option = s.duelIdToOptions[_duelId][i];
+            totalParticipants += s.duelUsersForOption[_duelId][option].length;
+        }
+
+        // Track the total number of participants processed
+        uint256 totalProcessed = s.refundProgress[_duelId];
+
+        for (uint256 i = 0; i < optionsLength && processedCount < s.refundChunkSize; i++) {
             string memory option = s.duelIdToOptions[_duelId][i];
             address[] memory participants = s.duelUsersForOption[_duelId][option];
             for (uint256 j = 0; j < participants.length && processedCount < s.refundChunkSize; j++) {
+                if (totalProcessed > 0) {
+                    totalProcessed--;
+                    continue;
+                }
+
                 address participant = participants[j];
                 uint256 wager = s.userWager[participant][_duelId][option];
 
@@ -567,7 +582,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         s.refundProgress[_duelId] += processedCount;
 
         // Check if all refunds are completed
-        if (s.refundProgress[_duelId] >= optionsLength) {
+        if (s.refundProgress[_duelId] >= totalParticipants) {
             s.refundInProgress[_duelId] = false;
             emit RefundsDistributionCompleted(_duelId, block.timestamp);
         } else {

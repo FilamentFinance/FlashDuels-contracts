@@ -17,8 +17,8 @@
     "seiTestnet": {
         "FLASHUSDC": "0x498e65B2Eca3f726D51fb216eA0fDAbC9E937270",
         "FlashDuelsAdminFacet": "0x7cA74Bbb0aD177a7e0aF8fd0EE03477c6549e100",
-        "FlashDuelsCoreFacet": "0xF1c53d1AE974842D48E76133Fc9FA2D896a472Ee",
-        "FlashDuelsMarketplaceFacet": "0x9cB5c45baC5B213EB21029cC01b76c7156DFC7e4",
+        "FlashDuelsCoreFacet": "0x8dAc8A9255738BB9c9b80d18276F9aCFdCE9A7Ab",
+        "FlashDuelsMarketplaceFacet": "0xAa55e5827a6a9e71332fcD339Cd24c90db925839",
         "FlashDuelsViewFacet": "0x8B38248ec9293Bb574f7035cB844945795B4E8Eb",
         "OwnershipFacet": "0x585E7e6397FD0935469b9Bb813aC4d1980E0b325",
         "DiamondCutFacet": "0x9f470A6dEd2fAa0d4b69345662dEc7A196C0c311",

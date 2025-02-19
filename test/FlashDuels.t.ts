@@ -500,7 +500,7 @@ describe("FlashDuels Contract", function () {
             expect(cancelledDuel.duelStatus).to.equal(4) // Cancelled status
         })
 
-        it("should not cancel duel if the threshold is met", async function () {
+        it("should not cancel duel if the threshold is met even before the bootstrap period", async function () {
             let duel: any, usdcToken: any, tx: any, txr: any
             let { contracts, accounts } = await loadFixture(deploy)
 
@@ -543,10 +543,10 @@ describe("FlashDuels Contract", function () {
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
                 .joinDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[3].address)
-            let bootstrapPeriod = 1800
-            // Increase time to after the bootstrap period
-            await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1])
-            await ethers.provider.send("evm_mine", [])
+            // let bootstrapPeriod = 1800
+            // // Increase time to after the bootstrap period
+            // await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1])
+            // await ethers.provider.send("evm_mine", [])
 
             // Attempt to cancel the duel
             await expect(
