@@ -543,10 +543,10 @@ describe("FlashDuels Contract", function () {
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
                 .joinDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[3].address)
-            // let bootstrapPeriod = 1800
-            // // Increase time to after the bootstrap period
-            // await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1])
-            // await ethers.provider.send("evm_mine", [])
+            let bootstrapPeriod = 1800
+            // Increase time to after the bootstrap period
+            await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1])
+            await ethers.provider.send("evm_mine", [])
 
             // Attempt to cancel the duel
             await expect(
@@ -1447,6 +1447,14 @@ describe("FlashDuels Contract", function () {
             let wager = await flashDuelsView.getWagerAmountDeposited(duelIds[0], accounts[2].address)
             expect(wager[2][0]).to.equal(20000000)
             expect(wager[2][1]).to.equal(0)
+            let finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            expect(finalBalanceAccounts_2).to.equal(0)
+
+            wager = await flashDuelsView.getWagerAmountDeposited(duelIds[0], accounts[3].address)
+            expect(wager[2][0]).to.equal(0)
+            expect(wager[2][1]).to.equal(20000000)
+            let finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+            expect(finalBalanceAccounts_3).to.equal(0)
 
             // Call cancelDuelIfThresholdNotMet by the bot
             await flashDuelsCore.connect(contracts.Bot.bot).cancelDuelIfThresholdNotMet(1, duelIds[0])
@@ -1456,7 +1464,7 @@ describe("FlashDuels Contract", function () {
             expect(cancelledDuel.duelStatus).to.equal(4) // Cancelled status
 
             // Check that the wager was refunded
-            let finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
             expect(finalBalanceAccounts_2).to.equal(20000000)
 
             tx = await flashDuelsView.getAllTimeEarnings(accounts[2].address)
@@ -1468,7 +1476,7 @@ describe("FlashDuels Contract", function () {
             expect(wager[2][1]).to.equal(0)
 
             // Check that the wager was refunded
-            let finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+            finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
             expect(finalBalanceAccounts_3).to.equal(20000000)
 
             tx = await flashDuelsView.getAllTimeEarnings(accounts[3].address)
@@ -1478,6 +1486,127 @@ describe("FlashDuels Contract", function () {
             wager = await flashDuelsView.getWagerAmountDeposited(duelIds[0], accounts[3].address)
             expect(wager[2][0]).to.equal(0)
             expect(wager[2][1]).to.equal(0)
+        })
+
+        // Test that the refund is processed in chunks
+        // Tested with chunk size 2 (with commenting out the chunk size check in the contract)
+        xit("should process refund in chunks", async function () {
+            let duel: any, usdcToken: any, tx: any, txr: any
+            let { contracts, accounts } = await loadFixture(deploy)
+            const duelDuration = 0 // 3 hours   
+
+            const expiryTime = 1
+            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
+            usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            
+            const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )   
+            const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+
+            await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
+
+            let tokenA = "tokenA"
+
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     tokenA,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(tokenA, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
+
+            let duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
+            const cryptoDuel = await flashDuelsView.getDuels(duelIds[0])
+
+            expect(await flashDuelsView.isValidDuelId(duelIds[0])).to.be.equal(true)
+
+            let bootstrapPeriod = 1800
+            // Increase time to after the bootstrap period
+            await ethers.provider.send("evm_increaseTime", [bootstrapPeriod + 1])
+            await ethers.provider.send("evm_mine", [])
+
+            // Simulate meeting the threshold
+            await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("2", 6))
+            await usdcToken.connect(accounts[0]).mint(accounts[3].address, ethers.parseUnits("2", 6))
+            await usdcToken.connect(accounts[0]).mint(accounts[4].address, ethers.parseUnits("2", 6))
+            await usdcToken.connect(accounts[0]).mint(accounts[5].address, ethers.parseUnits("2", 6))
+
+            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("2", 6))
+            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("2", 6))
+            await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, ethers.parseUnits("2", 6))
+            await usdcToken.connect(accounts[5]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 6))
+
+            let amount = ethers.parseUnits("2", 6)
+            let optionPrice = "1000000"
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[2].address)
+
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[3].address)
+
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[4].address)
+
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[5].address)  
+
+            tx = await flashDuelsAdmin.setRefundChunkSizes(2)
+            await tx.wait(1)
+            // Call cancelDuelIfThresholdNotMet by the bot
+            await flashDuelsCore.connect(contracts.Bot.bot).cancelDuelIfThresholdNotMet(1, duelIds[0])
+
+            // Validate the duel status is updated to Cancelled
+            const cancelledDuel = await flashDuelsView.getCryptoDuel(duelIds[0])
+            expect(cancelledDuel.duelStatus).to.equal(4) // Cancelled status
+
+            // Check that the wager was refunded
+            let finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            expect(finalBalanceAccounts_2).to.equal(2000000)
+
+            let finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+            expect(finalBalanceAccounts_3).to.equal(0)   
+
+            let finalBalanceAccounts_4 = await usdcToken.balanceOf(accounts[4].address)
+            expect(finalBalanceAccounts_4).to.equal(2000000)
+
+            let finalBalanceAccounts_5 = await usdcToken.balanceOf(accounts[5].address)
+            expect(finalBalanceAccounts_5).to.equal(0)
+            
+            // Call refundDuelByBot by the bot
+            await flashDuelsCore.connect(contracts.Bot.bot).continueRefundsInChunks(duelIds[0])
+            await tx.wait(1)
+            // Validate the wager was refunded
+            finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            expect(finalBalanceAccounts_2).to.equal(2000000)
+
+            finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+            expect(finalBalanceAccounts_3).to.equal(2000000)  
+
+            // Check that the wager was refunded
+            finalBalanceAccounts_4 = await usdcToken.balanceOf(accounts[4].address)
+            expect(finalBalanceAccounts_4).to.equal(2000000)
+
+            finalBalanceAccounts_5 = await usdcToken.balanceOf(accounts[5].address)
+            expect(finalBalanceAccounts_5).to.equal(2000000)
         })
     })
 })
