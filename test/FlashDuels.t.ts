@@ -1172,6 +1172,187 @@ describe("FlashDuels Contract", function () {
             // Check if accounts[3] (loser) lost their wager amount
             expect(finalBalanceaccounts_3).to.be.lte(initialBalanceaccounts_3) // accounts[3]'s balance should decrease or remain the same
         })
+        // Test that the winners are processed in chunks
+        // Tested with chunk size 2 (with commenting out the chunk size check in the contract)
+        xit("should settle the duel and distribute rewards correctly to winner in chunks", async function () {
+            let duel: any, usdcToken: any, tx: any, txr: any
+            let { contracts, accounts } = await loadFixture(deploy)
+            const duelDuration = 0 // 3 hours
+
+            const expiryTime = 1
+            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
+            usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+
+            const amount = ethers.parseUnits("60", 6)
+            const optionPrice = ethers.parseUnits("10", 6)
+
+            await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+            await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+            await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+            await usdcToken.connect(accounts[0]).mint(accounts[5].address, amount)
+            await usdcToken.connect(accounts[0]).mint(accounts[6].address, amount)
+            await usdcToken.connect(accounts[0]).mint(accounts[7].address, amount)
+            await usdcToken.connect(accounts[0]).mint(accounts[8].address, amount)
+            await usdcToken.connect(accounts[0]).mint(accounts[9].address, amount)
+
+            // Approve token transfer
+            await usdcToken.connect(accounts[2]).approve(flashDuelsCore.target, amount)
+            await usdcToken.connect(accounts[3]).approve(flashDuelsCore.target, amount)
+            await usdcToken.connect(accounts[4]).approve(flashDuelsCore.target, amount)
+            await usdcToken.connect(accounts[5]).approve(flashDuelsCore.target, amount)
+            await usdcToken.connect(accounts[6]).approve(flashDuelsCore.target, amount)
+            await usdcToken.connect(accounts[7]).approve(flashDuelsCore.target, amount)
+            await usdcToken.connect(accounts[8]).approve(flashDuelsCore.target, amount)
+            await usdcToken.connect(accounts[9]).approve(flashDuelsCore.target, amount)
+            const getTotalProtocolFeesGeneratedBefore = await flashDuelsView.getTotalProtocolFeesGenerated()
+            // console.log("getTotalProtocolFeesGeneratedBefore", getTotalProtocolFeesGeneratedBefore)
+            expect(getTotalProtocolFeesGeneratedBefore).to.be.equal("0") // $1.2
+
+            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
+            let BTC = "tokenA"
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     BTC,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(BTC, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            await tx.wait(1)
+            const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
+            const cryptoDuel = await flashDuelsView.getDuels(duelIds[0])
+
+            const getTotalProtocolFeesGeneratedAfter = await flashDuelsView.getTotalProtocolFeesGenerated()
+            // console.log("getTotalProtocolFeesGeneratedAfter", getTotalProtocolFeesGeneratedAfter)
+            expect(getTotalProtocolFeesGeneratedAfter).to.be.equal("5000000") // $1.2
+
+            expect(duelIds.length).to.equal(1)
+            // Join Duel with tokenA
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[2].address)
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[3].address)
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[4].address)
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[5].address)
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[6].address)
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[7].address)
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[8].address)
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[9].address)
+
+            // Simulate time passage for the bootstrap period to end
+            await ethers.provider.send("evm_increaseTime", [30 * 60])
+            await ethers.provider.send("evm_mine", [])
+
+            // Check balances before settlement
+            const initialBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address) // 0
+            const initialBalanceaccounts_3 = await usdcToken.balanceOf(accounts[3].address) // 0
+            const initialBalanceaccounts_4 = await usdcToken.balanceOf(accounts[4].address) // 0
+            const initialBalanceaccounts_5 = await usdcToken.balanceOf(accounts[5].address) // 0
+            await network.provider.send("evm_mine")
+
+            const startTokenPrice = "6500000000000"
+            await flashDuelsCore.connect(contracts.Bot.bot).startCryptoDuel(duelIds[0], startTokenPrice)
+
+            tx = await flashDuelsAdmin.setWinnersChunkSizes(2)
+            await tx.wait(1)
+
+            let time = 3600 * 6
+            await network.provider.request({
+                method: "evm_increaseTime",
+                params: [time]
+            })
+            // await helpers.time.increase(time)
+            const endTokenPrice = "6600000000000"
+            // Settle the duel
+            await flashDuelsCore.connect(contracts.Bot.bot).settleCryptoDuel(duelIds[0], endTokenPrice)
+
+            // Check balances after settlement
+            let finalBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            let finalBalanceaccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+            let finalBalanceaccounts_4 = await usdcToken.balanceOf(accounts[4].address)
+            let finalBalanceaccounts_5 = await usdcToken.balanceOf(accounts[5].address)
+            let finalBalanceaccounts_6 = await usdcToken.balanceOf(accounts[6].address)
+            let finalBalanceaccounts_7 = await usdcToken.balanceOf(accounts[7].address)
+            let finalBalanceaccounts_8 = await usdcToken.balanceOf(accounts[8].address)
+            let finalBalanceaccounts_9 = await usdcToken.balanceOf(accounts[9].address)
+            expect(finalBalanceaccounts_2).to.be.equal("0")
+            expect(finalBalanceaccounts_3).to.be.equal("0")
+            expect(finalBalanceaccounts_4).to.be.equal("0")
+            expect(finalBalanceaccounts_5).to.be.equal("0")
+            let allTImeEarningsaccounts_2 = await flashDuelsView.getAllTimeEarnings(accounts[2].address)
+            let allTImeEarningsaccounts_3 = await flashDuelsView.getAllTimeEarnings(accounts[3].address)
+            let allTImeEarningsaccounts_4 = await flashDuelsView.getAllTimeEarnings(accounts[4].address)
+            let allTImeEarningsaccounts_5 = await flashDuelsView.getAllTimeEarnings(accounts[5].address)
+            let allTImeEarningsaccounts_6 = await flashDuelsView.getAllTimeEarnings(accounts[6].address)
+            let allTImeEarningsaccounts_7 = await flashDuelsView.getAllTimeEarnings(accounts[7].address)
+            let allTImeEarningsaccounts_8 = await flashDuelsView.getAllTimeEarnings(accounts[8].address)
+            let allTImeEarningsaccounts_9 = await flashDuelsView.getAllTimeEarnings(accounts[9].address)
+            expect(allTImeEarningsaccounts_3).to.be.equal("0")
+            expect(allTImeEarningsaccounts_5).to.be.equal("0")
+            expect(allTImeEarningsaccounts_7).to.be.equal("0")
+            expect(allTImeEarningsaccounts_9).to.be.equal("0")
+            // console.log("allTImeEarningsaccounts_2", allTImeEarningsaccounts_2)
+            // console.log("allTImeEarningsaccounts_4", allTImeEarningsaccounts_4)
+            expect(allTImeEarningsaccounts_2).to.be.equal("117600000") // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+            expect(allTImeEarningsaccounts_4).to.be.equal("117600000") // before continueWiningDistributionInChunks
+            expect(allTImeEarningsaccounts_6).to.be.equal("0")
+            expect(allTImeEarningsaccounts_8).to.be.equal("0")
+            await flashDuelsCore.connect(contracts.Bot.bot).continueWinningsDistribution(duelIds[0], 0, "Yes")
+            allTImeEarningsaccounts_6 = await flashDuelsView.getAllTimeEarnings(accounts[6].address)
+            expect(allTImeEarningsaccounts_6).to.be.equal("117600000") // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+            allTImeEarningsaccounts_8 = await flashDuelsView.getAllTimeEarnings(accounts[8].address)
+            expect(allTImeEarningsaccounts_8).to.be.equal("117600000") // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+            const getTotalProtocolFeesGenerated = await flashDuelsView.getTotalProtocolFeesGenerated()
+            // console.log("getTotalProtocolFeesGenerated", getTotalProtocolFeesGenerated)
+            const getCreatorFeesEarned = await flashDuelsView.getCreatorFeesEarned(accounts[1].address)
+            console.log("getCreatorFeesEarned", getCreatorFeesEarned)
+
+            expect(getTotalProtocolFeesGenerated).to.be.equal("9800000") // $5 + $4.8 (2% of 240)
+            expect(getCreatorFeesEarned).to.be.equal("4800000") // $4.8 (2% of 240)
+
+            await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)
+            await flashDuelsCore.connect(accounts[4]).withdrawEarnings(allTImeEarningsaccounts_4)
+            // Check if accounts[2] (winner) received the rewards
+            finalBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            finalBalanceaccounts_4 = await usdcToken.balanceOf(accounts[4].address)
+            expect(finalBalanceaccounts_2).to.be.gt(initialBalanceaccounts_2) // accounts[2]'s balance should increase
+            // Check if accounts[3] (loser) lost their wager amount
+            expect(finalBalanceaccounts_3).to.be.lte(initialBalanceaccounts_3) // accounts[3]'s balance should decrease or remain the same
+            expect(finalBalanceaccounts_4).to.be.gt(initialBalanceaccounts_4) // accounts[4]'s balance should decrease or remain the same
+            expect(finalBalanceaccounts_5).to.be.lte(initialBalanceaccounts_5) // accounts[5]'s balance should decrease or remain the same
+        })
+
+
     })
 
     describe("Crypto Duel Cancel and Refund Logic", function () {
@@ -1500,13 +1681,13 @@ describe("FlashDuels Contract", function () {
             usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
-            
+
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
             const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
-            )   
+            )
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -1567,7 +1748,7 @@ describe("FlashDuels Contract", function () {
 
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
-                .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[5].address)  
+                .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[5].address)
 
             tx = await flashDuelsAdmin.setRefundChunkSizes(2)
             await tx.wait(1)
@@ -1583,14 +1764,14 @@ describe("FlashDuels Contract", function () {
             expect(finalBalanceAccounts_2).to.equal(2000000)
 
             let finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
-            expect(finalBalanceAccounts_3).to.equal(0)   
+            expect(finalBalanceAccounts_3).to.equal(0)
 
             let finalBalanceAccounts_4 = await usdcToken.balanceOf(accounts[4].address)
             expect(finalBalanceAccounts_4).to.equal(2000000)
 
             let finalBalanceAccounts_5 = await usdcToken.balanceOf(accounts[5].address)
             expect(finalBalanceAccounts_5).to.equal(0)
-            
+
             // Call refundDuelByBot by the bot
             await flashDuelsCore.connect(contracts.Bot.bot).continueRefundsInChunks(duelIds[0])
             await tx.wait(1)
@@ -1599,7 +1780,7 @@ describe("FlashDuels Contract", function () {
             expect(finalBalanceAccounts_2).to.equal(2000000)
 
             finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
-            expect(finalBalanceAccounts_3).to.equal(2000000)  
+            expect(finalBalanceAccounts_3).to.equal(2000000)
 
             // Check that the wager was refunded
             finalBalanceAccounts_4 = await usdcToken.balanceOf(accounts[4].address)
