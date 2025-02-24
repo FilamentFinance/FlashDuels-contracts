@@ -1,0 +1,477 @@
+apiVersion: 3
+name: flashduels-sei-testnet
+status: ACTIVE
+sources:
+  sei_testnet_bootstrap_period_updated:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: bootstrap_period_updated
+  sei_testnet_bot_address_updated:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: bot_address_updated
+  sei_testnet_create_duel_fee_updated:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: create_duel_fee_updated
+  sei_testnet_create_duel_requested:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: create_duel_requested
+  sei_testnet_crypto_duel_created:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: crypto_duel_created
+  sei_testnet_crypto_duel_joined:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: crypto_duel_joined
+  sei_testnet_duel_approved_and_created:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: duel_approved_and_created
+  sei_testnet_duel_cancelled:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: duel_cancelled
+  sei_testnet_duel_created:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: duel_created
+  sei_testnet_duel_joined:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: duel_joined
+  sei_testnet_duel_request_revoked:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: duel_request_revoked
+  sei_testnet_duel_settled:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: duel_settled
+  sei_testnet_duel_started:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: duel_started
+  sei_testnet_initialized:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: initialized
+  sei_testnet_minimum_wager_threshold_updated:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: minimum_wager_threshold_updated
+  sei_testnet_ownership_transfer_started:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: ownership_transfer_started
+  sei_testnet_ownership_transferred:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: ownership_transferred
+  sei_testnet_partial_duel_settled:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: partial_duel_settled
+  sei_testnet_partial_refunds_distributed:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: partial_refunds_distributed
+  sei_testnet_partial_winnings_distributed:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: partial_winnings_distributed
+  sei_testnet_paused:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: paused
+  sei_testnet_protocol_treasury_updated:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: protocol_treasury_updated
+  sei_testnet_refund_chunk_sizes_updated:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: refund_chunk_sizes_updated
+  sei_testnet_refund_issued:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: refund_issued
+  sei_testnet_refunds_distribution_completed:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: refunds_distribution_completed
+  sei_testnet_resolving_period_updated:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: resolving_period_updated
+  sei_testnet_sale_cancelled:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: sale_cancelled
+  sei_testnet_sale_created:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: sale_created
+  sei_testnet_tokens_purchased:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: tokens_purchased
+  sei_testnet_unpaused:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: unpaused
+  sei_testnet_winners_chunk_sizes_updated:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: winners_chunk_sizes_updated
+  sei_testnet_winnings_distribution_completed:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: winnings_distribution_completed
+  sei_testnet_withdraw_creator_earning:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: withdraw_creator_earning
+  sei_testnet_withdraw_earning:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: withdraw_earning
+  sei_testnet_withdraw_protocol_fee:
+    type: subgraph_entity
+    subgraphs:
+      - name: flashduels-sei-testnet
+        version: v1
+    name: withdraw_protocol_fee
+transforms: {}
+sinks:
+  postgres_sei_testnet_bootstrap_period_updated:
+    type: postgres
+    table: sei_testnet_bootstrap_period_updated
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_bootstrap_period_updated'
+    from: sei_testnet_bootstrap_period_updated
+  postgres_sei_testnet_bot_address_updated:
+    type: postgres
+    table: sei_testnet_bot_address_updated
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_bot_address_updated'
+    from: sei_testnet_bot_address_updated
+  postgres_sei_testnet_create_duel_fee_updated:
+    type: postgres
+    table: sei_testnet_create_duel_fee_updated
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_create_duel_fee_updated'
+    from: sei_testnet_create_duel_fee_updated
+  postgres_sei_testnet_create_duel_requested:
+    type: postgres
+    table: sei_testnet_create_duel_requested
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_create_duel_requested'
+    from: sei_testnet_create_duel_requested
+  postgres_sei_testnet_crypto_duel_created:
+    type: postgres
+    table: sei_testnet_crypto_duel_created
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_crypto_duel_created'
+    from: sei_testnet_crypto_duel_created
+  postgres_sei_testnet_crypto_duel_joined:
+    type: postgres
+    table: sei_testnet_crypto_duel_joined
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_crypto_duel_joined'
+    from: sei_testnet_crypto_duel_joined
+  postgres_sei_testnet_duel_approved_and_created:
+    type: postgres
+    table: sei_testnet_duel_approved_and_created
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_duel_approved_and_created'
+    from: sei_testnet_duel_approved_and_created
+  postgres_sei_testnet_duel_cancelled:
+    type: postgres
+    table: sei_testnet_duel_cancelled
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_duel_cancelled'
+    from: sei_testnet_duel_cancelled
+  postgres_sei_testnet_duel_created:
+    type: postgres
+    table: sei_testnet_duel_created
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_duel_created'
+    from: sei_testnet_duel_created
+  postgres_sei_testnet_duel_joined:
+    type: postgres
+    table: sei_testnet_duel_joined
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_duel_joined'
+    from: sei_testnet_duel_joined
+  postgres_sei_testnet_duel_request_revoked:
+    type: postgres
+    table: sei_testnet_duel_request_revoked
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_duel_request_revoked'
+    from: sei_testnet_duel_request_revoked
+  postgres_sei_testnet_duel_settled:
+    type: postgres
+    table: sei_testnet_duel_settled
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_duel_settled'
+    from: sei_testnet_duel_settled
+  postgres_sei_testnet_duel_started:
+    type: postgres
+    table: sei_testnet_duel_started
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_duel_started'
+    from: sei_testnet_duel_started
+  postgres_sei_testnet_initialized:
+    type: postgres
+    table: sei_testnet_initialized
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_initialized'
+    from: sei_testnet_initialized
+  postgres_sei_testnet_minimum_wager_threshold_updated:
+    type: postgres
+    table: sei_testnet_minimum_wager_threshold_updated
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: >-
+      Postgres sink for:
+      sei_testnet_minimum_wager_threshold_updated
+    from: sei_testnet_minimum_wager_threshold_updated
+  postgres_sei_testnet_ownership_transfer_started:
+    type: postgres
+    table: sei_testnet_ownership_transfer_started
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: >-
+      Postgres sink for:
+      sei_testnet_ownership_transfer_started
+    from: sei_testnet_ownership_transfer_started
+  postgres_sei_testnet_ownership_transferred:
+    type: postgres
+    table: sei_testnet_ownership_transferred
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_ownership_transferred'
+    from: sei_testnet_ownership_transferred
+  postgres_sei_testnet_partial_duel_settled:
+    type: postgres
+    table: sei_testnet_partial_duel_settled
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_partial_duel_settled'
+    from: sei_testnet_partial_duel_settled
+  postgres_sei_testnet_partial_refunds_distributed:
+    type: postgres
+    table: sei_testnet_partial_refunds_distributed
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: >-
+      Postgres sink for:
+      sei_testnet_partial_refunds_distributed
+    from: sei_testnet_partial_refunds_distributed
+  postgres_sei_testnet_partial_winnings_distributed:
+    type: postgres
+    table: sei_testnet_partial_winnings_distributed
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: >-
+      Postgres sink for:
+      sei_testnet_partial_winnings_distributed
+    from: sei_testnet_partial_winnings_distributed
+  postgres_sei_testnet_paused:
+    type: postgres
+    table: sei_testnet_paused
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_paused'
+    from: sei_testnet_paused
+  postgres_sei_testnet_protocol_treasury_updated:
+    type: postgres
+    table: sei_testnet_protocol_treasury_updated
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_protocol_treasury_updated'
+    from: sei_testnet_protocol_treasury_updated
+  postgres_sei_testnet_refund_chunk_sizes_updated:
+    type: postgres
+    table: sei_testnet_refund_chunk_sizes_updated
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: >-
+      Postgres sink for:
+      sei_testnet_refund_chunk_sizes_updated
+    from: sei_testnet_refund_chunk_sizes_updated
+  postgres_sei_testnet_refund_issued:
+    type: postgres
+    table: sei_testnet_refund_issued
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_refund_issued'
+    from: sei_testnet_refund_issued
+  postgres_sei_testnet_refunds_distribution_completed:
+    type: postgres
+    table: sei_testnet_refunds_distribution_completed
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: >-
+      Postgres sink for:
+      sei_testnet_refunds_distribution_completed
+    from: sei_testnet_refunds_distribution_completed
+  postgres_sei_testnet_resolving_period_updated:
+    type: postgres
+    table: sei_testnet_resolving_period_updated
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_resolving_period_updated'
+    from: sei_testnet_resolving_period_updated
+  postgres_sei_testnet_sale_cancelled:
+    type: postgres
+    table: sei_testnet_sale_cancelled
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_sale_cancelled'
+    from: sei_testnet_sale_cancelled
+  postgres_sei_testnet_sale_created:
+    type: postgres
+    table: sei_testnet_sale_created
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_sale_created'
+    from: sei_testnet_sale_created
+  postgres_sei_testnet_tokens_purchased:
+    type: postgres
+    table: sei_testnet_tokens_purchased
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_tokens_purchased'
+    from: sei_testnet_tokens_purchased
+  postgres_sei_testnet_unpaused:
+    type: postgres
+    table: sei_testnet_unpaused
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_unpaused'
+    from: sei_testnet_unpaused
+  postgres_sei_testnet_winners_chunk_sizes_updated:
+    type: postgres
+    table: sei_testnet_winners_chunk_sizes_updated
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: >-
+      Postgres sink for:
+      sei_testnet_winners_chunk_sizes_updated
+    from: sei_testnet_winners_chunk_sizes_updated
+  postgres_sei_testnet_winnings_distribution_completed:
+    type: postgres
+    table: sei_testnet_winnings_distribution_completed
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: >-
+      Postgres sink for:
+      sei_testnet_winnings_distribution_completed
+    from: sei_testnet_winnings_distribution_completed
+  postgres_sei_testnet_withdraw_creator_earning:
+    type: postgres
+    table: sei_testnet_withdraw_creator_earning
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_withdraw_creator_earning'
+    from: sei_testnet_withdraw_creator_earning
+  postgres_sei_testnet_withdraw_earning:
+    type: postgres
+    table: sei_testnet_withdraw_earning
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_withdraw_earning'
+    from: sei_testnet_withdraw_earning
+  postgres_sei_testnet_withdraw_protocol_fee:
+    type: postgres
+    table: sei_testnet_withdraw_protocol_fee
+    schema: flashduels-sei-testnet
+    secret_name: POSTGRES_SECRET_CM7G1J2FN0
+    description: 'Postgres sink for: sei_testnet_withdraw_protocol_fee'
+    from: sei_testnet_withdraw_protocol_fee
