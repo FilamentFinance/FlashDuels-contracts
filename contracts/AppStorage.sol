@@ -297,9 +297,9 @@ event RefundIssued(string duelId, string option, address indexed recipient, uint
 
 /// @notice Emitted when a duel is cancelled
 /// @param duelId The ID of the cancelled duel
-/// @param duelStartTime The duel start time
+/// @param duelCreateTime The duel create time
 /// @param duelCancelTime The duel cancel time
-event DuelCancelled(string duelId, uint256 duelStartTime, uint256 duelCancelTime);
+event DuelCancelled(string duelId, uint256 duelCreateTime, uint256 duelCancelTime);
 
 /// @notice Emitted when a duel is partially settled with a winning option.
 /// @dev This event is triggered when a duel has been settled partially, indicating the winning option and the corresponding option index.

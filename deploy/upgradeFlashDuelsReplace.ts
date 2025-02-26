@@ -33,10 +33,10 @@ async function main() {
     await flashDuelsCoreFacet.waitForDeployment()
     console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
 
-    const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
-    const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
-    await flashDuelsMarketplaceFacet.waitForDeployment()
-    console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
+    // const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
+    // const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
+    // await flashDuelsMarketplaceFacet.waitForDeployment()
+    // console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
     // const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
     // const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
@@ -84,17 +84,17 @@ async function main() {
                 "0xef82031a" // continueRefundsInChunks(string)
             ]
         },
-        {
-            facetAddress: flashDuelsMarketplaceFacet.target,
-            action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
-            functionSelectors: [
-                "0x9012c4a8", // updateFee(uint256)
-                "0x07b4c084", // sell(address,string,uint256,uint256,uint256)
-                "0xaa6ecb55", // cancelSell(address,uint256)
-                "0x374b2fde", // buy(address,address,string,uint256,uint256[],uint256[])
-                "0x225c3131" // getSale(address,uint256)
-            ]
-        },
+        // {
+        //     facetAddress: flashDuelsMarketplaceFacet.target,
+        //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
+        //     functionSelectors: [
+        //         "0x9012c4a8", // updateFee(uint256)
+        //         "0x07b4c084", // sell(address,string,uint256,uint256,uint256)
+        //         "0xaa6ecb55", // cancelSell(address,uint256)
+        //         "0x374b2fde", // buy(address,address,string,uint256,uint256[],uint256[])
+        //         "0x225c3131" // getSale(address,uint256)
+        //     ]
+        // },
         // {
         //     facetAddress: flashDuelsViewFacet.target,
         //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove

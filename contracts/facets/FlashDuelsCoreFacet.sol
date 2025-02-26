@@ -454,10 +454,10 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // Update duel status to Cancelled
         if (_duelCategory != DuelCategory.Crypto) {
             s.duels[_duelId].duelStatus = DuelStatus.Cancelled;
-            emit DuelCancelled(_duelId, s.duels[_duelId].startTime, block.timestamp);
+            emit DuelCancelled(_duelId, s.duels[_duelId].createTime, block.timestamp);
         } else {
             s.cryptoDuels[_duelId].duelStatus = DuelStatus.Cancelled;
-            emit DuelCancelled(_duelId, s.cryptoDuels[_duelId].startTime, block.timestamp);
+            emit DuelCancelled(_duelId, s.cryptoDuels[_duelId].createTime, block.timestamp);
         }
 
         // Initiate refund process

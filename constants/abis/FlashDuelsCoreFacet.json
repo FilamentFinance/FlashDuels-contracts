@@ -145,7 +145,7 @@
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "duelStartTime",
+                "name": "duelCreateTime",
                 "type": "uint256"
             },
             {
