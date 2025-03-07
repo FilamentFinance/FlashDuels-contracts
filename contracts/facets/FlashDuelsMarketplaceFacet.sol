@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {BPS, AppStorage, Duel, DuelStatus, Sale, SaleCreated, TokensPurchased, SaleCancelled, FlashDuelsMarketplace__DuelEnded} from "../AppStorage.sol";
+import {BPS, AppStorage, Duel, DuelStatus, Sale, SaleCreated, TokensPurchased, SaleCancelled, FlashDuelsMarketplace__DuelEnded, ParticipationTokenType} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -123,8 +123,13 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
             uint256 receivables = cost - fee;
 
             // Transfer funds and tokens
-            IERC20(s.usdc).safeTransferFrom(buyer, sale.seller, receivables);
-            IERC20(s.usdc).safeTransferFrom(buyer, s.protocolTreasury, fee);
+            if (s.participationTokenType == ParticipationTokenType.USDC) {
+                IERC20(s.usdc).safeTransferFrom(buyer, sale.seller, receivables);
+                IERC20(s.usdc).safeTransferFrom(buyer, s.protocolTreasury, fee);
+            } else {
+                IERC20(s.credits).safeTransferFrom(buyer, sale.seller, receivables);
+                IERC20(s.credits).safeTransferFrom(buyer, s.protocolTreasury, fee);
+            }
             erc20.safeTransferFrom(sale.seller, buyer, buyAmount);
 
             _updateDuelInfoForSellerBuyer(token, sale.seller, buyer, duelId, optionIndex);

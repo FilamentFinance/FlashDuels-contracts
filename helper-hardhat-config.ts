@@ -6,7 +6,9 @@ export interface networkConfigItem {
     usdcAdmin?: string
     bot?: string
     protocolTreasury?: string
-    StartBlock?: number
+    StartBlock?: number,
+    credits?: string
+    creditsMaxSupply?: string
 }
 
 export interface networkConfigInfo {
@@ -20,7 +22,8 @@ export const networkConfig: networkConfigInfo = {
         deployer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         usdcAdmin: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
         bot: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-        protocolTreasury: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D"
+        protocolTreasury: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
+        creditsMaxSupply: "1000000000000000000000000" // 1 Million
     },
     localhost: {
         chainId: 31337,
@@ -28,7 +31,7 @@ export const networkConfig: networkConfigInfo = {
         deployer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         usdcAdmin: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
         bot: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-        protocolTreasury: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D"
+        protocolTreasury: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
     },
     seiTestnet: {
         chainId: 1328,
@@ -36,7 +39,8 @@ export const networkConfig: networkConfigInfo = {
         deployer: "0x91C2352245065B9e5d2514a313b60c1f01BfF60F",
         usdcAdmin: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
         bot: "0x2Eb671E6e0cd965A79A80caF35c5123b7a5D8ebb",
-        protocolTreasury: "0x81F20658e0265d89f4Cca7BAf8FB3933B4FcA6Be"
+        protocolTreasury: "0x81F20658e0265d89f4Cca7BAf8FB3933B4FcA6Be",
+        creditsMaxSupply: "1000000000000000000000000" // 1 Million
     },
     seiMainnet: {
         chainId: 1329,
@@ -44,7 +48,8 @@ export const networkConfig: networkConfigInfo = {
         deployer: "0xc060695ecd8ee28d1cf11cdd27c7f368e86986c5",
         usdc: "0x3894085Ef7Ff0f0aeDf52E2A2704928d1Ec074F1",
         bot: "",
-        protocolTreasury: ""
+        protocolTreasury: "",
+        credits: "0x19657A407403c23796331DDeA8870787a1A1D6C7"
     }
 }
 

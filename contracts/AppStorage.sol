@@ -113,29 +113,29 @@ struct PendingDuel {
     uint256 usdcAmount;
 }
 
-/// @notice Struct that stores details of each pending crypto duel
-struct PendingCryptoDuel {
-    /// @notice Address of the duel creator
-    address creator;
-    /// @notice Category of the duel
-    DuelCategory category;
-    /// @notice Symbol of the token
-    string tokenSymbol;
-    /// @notice Options available in the duel
-    string[] options;
-    /// @notice Duration of the duel
-    DuelDuration duration;
-    /// @notice Approval status of the duel
-    bool isApproved;
-    /// @notice Amount of USDC for the duel
-    uint256 usdcAmount;
-    /// @notice Trigger value of the token
-    int256 triggerValue;
-    /// @notice Trigger type
-    TriggerType triggerType;
-    /// @notice Trigger condition
-    TriggerCondition triggerCondition;
-}
+// /// @notice Struct that stores details of each pending crypto duel
+// struct PendingCryptoDuel {
+//     /// @notice Address of the duel creator
+//     address creator;
+//     /// @notice Category of the duel
+//     DuelCategory category;
+//     /// @notice Symbol of the token
+//     string tokenSymbol;
+//     /// @notice Options available in the duel
+//     string[] options;
+//     /// @notice Duration of the duel
+//     DuelDuration duration;
+//     /// @notice Approval status of the duel
+//     bool isApproved;
+//     /// @notice Amount of USDC for the duel
+//     uint256 usdcAmount;
+//     /// @notice Trigger value of the token
+//     int256 triggerValue;
+//     /// @notice Trigger type
+//     TriggerType triggerType;
+//     /// @notice Trigger condition
+//     TriggerCondition triggerCondition;
+// }
 
 /// @notice Enum representing different possible duel durations
 enum DuelDuration {
@@ -178,6 +178,11 @@ enum TriggerType {
 enum TriggerCondition {
     Above,
     Below
+}
+
+enum ParticipationTokenType {
+    USDC,
+    CRD
 }
 
 /// @notice Emitted when a new duel is created
@@ -359,6 +364,10 @@ event ProtocolTreasuryUpdated(address newProtocolTreasury);
 /// @param newBootstrapPeriod The updated duration for the bootstrap period.
 event BootstrapPeriodUpdated(uint256 newBootstrapPeriod);
 
+/// @notice Emitted when the participation token type is updated.
+/// @param newParticipationTokenType The updated participation token type.
+event ParticipationTokenTypeUpdated(ParticipationTokenType newParticipationTokenType);
+
 /// @notice Emitted when a duel is requested
 /// @param user The address of the user who requested the duel
 /// @param category The category of the duel
@@ -404,7 +413,6 @@ event ResolvingPeriodUpdated(uint256 newResolvingPeriod);
 /// @notice Thrown when the duel has been already ended
 error FlashDuelsMarketplace__DuelEnded(string duelId);
 
-
 /// @notice Thrown when the owner or bot address is invalid
 error FlashDuels__InvalidOwnerOrBot();
 
@@ -444,10 +452,14 @@ struct AppStorage {
     address usdc;
     /// @notice Address of the bot
     address bot;
+    /// @notice Address of the credits contract
+    address credits;
     /// @notice  Storage for all pending duels
     PendingDuel[] allPendingDuels;
-    /// @notice  Storage for all pending crypto duels
-    PendingCryptoDuel[] allPendingCryptoDuels;
+    // /// @notice  Storage for all pending crypto duels
+    // PendingCryptoDuel[] allPendingCryptoDuels;
+    /// @notice The token type for participation in duels
+    ParticipationTokenType participationTokenType;
     /// @notice Mapping for duelId -> option-> user -> 1-based index in the participants array
     mapping(string => mapping(string => mapping(address => uint256))) participantIndices;
     /// @notice Mapping to track total bets on duel option for a particular duel
@@ -458,8 +470,8 @@ struct AppStorage {
     mapping(address => mapping(string => mapping(string => uint256))) userWager;
     /// @notice Mapping to store pending duels by user address
     mapping(address => mapping(DuelCategory => PendingDuel[])) pendingDuels;
-    /// @notice Mapping to store pending crypto duels by user address
-    mapping(address => PendingCryptoDuel[]) pendingCryptoDuels;
+    // /// @notice Mapping to store pending crypto duels by user address
+    // mapping(address => PendingCryptoDuel[]) pendingCryptoDuels;
     /// @notice Mapping of duelId to optionIndex to the option token address
     mapping(string => mapping(uint256 => address)) optionIndexToOptionToken;
     /// @notice Mapping of duelId to the option to the total wager for option

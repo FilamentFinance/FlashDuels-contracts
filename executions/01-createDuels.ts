@@ -24,7 +24,7 @@ const main = async () => {
     const flashDuelsAdmin: FlashDuelsAdminFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsAdminFacetABI, deployer)
     const flashUSDC: FLASHUSDC = new ethers.Contract(netMap[networkName].FLASHUSDC, FLASHUSDCABI, deployer)
 
-    const expiryTime = 1
+    const expiryTime = 3
     // await flashUSDC.connect(deployer).mint(addr1.address, ethers.parseUnits("10", 6))
     await flashUSDC.connect(deployer).approve(flashDuels.target, ethers.parseUnits("10", 6))
     let receipt = await flashDuels

@@ -74,67 +74,6 @@
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "creator",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "tokenSymbol",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "duelId",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "createTime",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "createDuelFee",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "int256",
-                "name": "triggerValue",
-                "type": "int256"
-            },
-            {
-                "indexed": false,
-                "internalType": "enum TriggerType",
-                "name": "triggerType",
-                "type": "uint8"
-            },
-            {
-                "indexed": false,
-                "internalType": "enum TriggerCondition",
-                "name": "triggerCondition",
-                "type": "uint8"
-            },
-            {
-                "indexed": false,
-                "internalType": "enum DuelCategory",
-                "name": "category",
-                "type": "uint8"
-            }
-        ],
-        "name": "CryptoDuelCreated",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
                 "name": "user",
                 "type": "address"
             },
@@ -264,6 +203,19 @@
             }
         ],
         "name": "MinimumWagerThresholdUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "enum ParticipationTokenType",
+                "name": "newParticipationTokenType",
+                "type": "uint8"
+            }
+        ],
+        "name": "ParticipationTokenTypeUpdated",
         "type": "event"
     },
     {
@@ -482,6 +434,19 @@
             }
         ],
         "name": "setMinimumWagerThreshold",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "enum ParticipationTokenType",
+                "name": "_tokenType",
+                "type": "uint8"
+            }
+        ],
+        "name": "setParticipationTokenType",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

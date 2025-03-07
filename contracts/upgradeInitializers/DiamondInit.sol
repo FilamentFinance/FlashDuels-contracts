@@ -33,7 +33,7 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
 
     // You can add parameters to this function in order to pass in
     // data to set your own state variables
-    function init(address _protocolTreasury, address _flashDuels, address _usdc, address _bot)
+    function init(address _protocolTreasury, address _flashDuels, address _usdc, address _bot, address _credits)
         external
         onlyOwner
         initializer
@@ -59,6 +59,7 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
         s.flashDuelsContract = _flashDuels; // @note mainnet - can be removed for mainnet deployment
         s.usdc = _usdc;
         s.bot = _bot;
+        s.credits = _credits;
         s.bootstrapPeriod = 30 minutes;
         s.protocolFeePercentage = 200; // 2%
         s.creatorFeePercentage = 200; // 2%

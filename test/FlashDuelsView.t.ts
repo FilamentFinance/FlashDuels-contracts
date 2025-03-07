@@ -31,7 +31,7 @@ describe("FlashDuelsViewFacet", function () {
             contracts.Diamond.diamond
         )
 
-        const expiryTime = 1
+        const expiryTime = 3
         const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
@@ -142,11 +142,11 @@ describe("FlashDuelsViewFacet", function () {
         expect(pendingDuelsLength).to.be.a("bigint");
     });
 
-    it("should retrieve pending crypto duels for a specific user", async function () {
-        const [pendingCryptoDuels, pendingCryptoDuelsLength] = await flashDuelsView.getPendingCryptoDuels(addr1.address);
-        expect(pendingCryptoDuels).to.be.an("array");
-        expect(pendingCryptoDuelsLength).to.be.a("bigint");
-    });
+    // it("should retrieve pending crypto duels for a specific user", async function () {
+    //     const [pendingCryptoDuels, pendingCryptoDuelsLength] = await flashDuelsView.getPendingCryptoDuels(addr1.address);
+    //     expect(pendingCryptoDuels).to.be.an("array");
+    //     expect(pendingCryptoDuelsLength).to.be.a("bigint");
+    // });
 
 
     it("should retrieve all pending duels and their count", async function () {
@@ -155,11 +155,11 @@ describe("FlashDuelsViewFacet", function () {
         expect(allPendingDuelsLength).to.be.a("bigint");
     });
 
-    it("should retrieve all pending crypto duels and their count", async function () {
-        const [allPendingCryptoDuels, allPendingCryptoDuelsLength] = await flashDuelsView.getAllPendingCryptoDuelsAndCount();
-        expect(allPendingCryptoDuels).to.be.an("array");
-        expect(allPendingCryptoDuelsLength).to.be.a("bigint");
-    });
+    // it("should retrieve all pending crypto duels and their count", async function () {
+    //     const [allPendingCryptoDuels, allPendingCryptoDuelsLength] = await flashDuelsView.getAllPendingCryptoDuelsAndCount();
+    //     expect(allPendingCryptoDuels).to.be.an("array");
+    //     expect(allPendingCryptoDuelsLength).to.be.a("bigint");
+    // });
 
     it("should retrieve the create duel fee", async function () {
         const createDuelFee = await flashDuelsView.getCreateDuelFee();

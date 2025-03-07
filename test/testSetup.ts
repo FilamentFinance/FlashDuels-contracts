@@ -5,7 +5,7 @@ import fs from "fs"
 const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
 export const setupContracts = async () => {
-    let tx, txr, usdAddress, USDC
+    let tx, txr, usdAddress, USDC, creditsAddress, Credits
     let tokenA: any
     let tokenB: any
     let mockOracleA: any
@@ -28,6 +28,7 @@ export const setupContracts = async () => {
     // console.log(startBlock!.number)
     if (networkName === "seiMainnet") {
         usdAddress = { target: networkConfig[networkName].usdc }
+        creditsAddress = { target: networkConfig[networkName].credits }
     } else {
         USDC = await ethers.getContractFactory("FLASHUSDC")
         const usdcNew = await upgrades.deployProxy(USDC, [
@@ -38,6 +39,12 @@ export const setupContracts = async () => {
         let flashUSDC = await usdcNew.waitForDeployment()
         // console.log("USDC deployed to:", flashUSDC.target)
         usdAddress = flashUSDC.target
+
+        const Credits = await ethers.getContractFactory("Credits")
+        const creditsNew = await upgrades.deployProxy(Credits, [networkConfig[networkName].creditsMaxSupply])
+        let flashCredits = await creditsNew.waitForDeployment()
+        // console.log("Credits deployed to:", flashCredits.target)
+        creditsAddress = flashCredits.target
     }
 
     // Deploy mock tokens for the duel
@@ -124,6 +131,7 @@ export const setupContracts = async () => {
         "0x8088a328", // approveAndCreateDuel(address,uint8,uint256)
         "0x3100694f", // revokeCreateDuelRequest(address,uint8,uint256)
         "0x8795cccb", // withdrawProtocolFees()
+        "0x69940054" // setParticipationTokenType(uint8)
     ]
     const flashDuelsCoreFacetSelectors = [
         "0x59a9e4f6", // requestCreateDuel(uint8,string,string[],uint8)
@@ -172,10 +180,10 @@ export const setupContracts = async () => {
         "0xa7745713", // getSales(address,uint256)
         "0x72e14c5f", // getPendingDuels(address,uint8)
         "0x1cb85b1f", // getPendingDuelByIndex(address,uint8,uint256)
-        "0x335b96ff", // getPendingCryptoDuels(address)
-        "0x57710916", // getPendingCryptoDuelByIndex(address,uint256)
+        // "0x335b96ff", // getPendingCryptoDuels(address)
+        // "0x57710916", // getPendingCryptoDuelByIndex(address,uint256)
         "0x583f105b", // getAllPendingDuelsAndCount()
-        "0xee45b057", // getAllPendingCryptoDuelsAndCount()
+        // "0xee45b057", // getAllPendingCryptoDuelsAndCount()
         "0x66ca21a8", // getCreateDuelFee()
         "0x706d9f78", // getProtocolFeePercentage()
         "0xd722ab26", // getCreatorFeePercentage()
@@ -188,7 +196,9 @@ export const setupContracts = async () => {
         "0x2f06c7d5", // getSaleCounter()
         "0xd087d288", // getNonce()
         "0xdbe0b5b2", // getUsdcAddress()
-        "0xc2fdda7d" // getBotAddress()
+        "0xc2fdda7d", // getBotAddress()
+        "0x535eb845", // getCreditsAddress()
+        "0x795c3677" // getParticipationTokenType()
     ]
 
     const ownershipFacetSelectors = [
@@ -240,7 +250,8 @@ export const setupContracts = async () => {
         protocolTreasury,
         diamond.target,
         usdAddress,
-        bot
+        bot,
+        creditsAddress
     ])
     tx = await diamondCut.diamondCut(cut, diamondInit.target, functionCall)
     // console.log("Diamond cut tx: ", tx.hash)
@@ -254,6 +265,10 @@ export const setupContracts = async () => {
         USDC: {
             usdAddress: usdAddress,
             usdcContract: USDC
+        },
+        Credits: {
+            creditsAddress: creditsAddress,
+            creditsContract: Credits
         },
         DiamondCutFacet: { diamondCutFacet: diamondCutFacet.target, diamondCutFacetContract: DiamondCutFacet },
         DiamondLoupeFacet: {

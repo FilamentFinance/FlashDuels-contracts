@@ -79,7 +79,7 @@ describe("FlashDuelsAdminFacet", function () {
             contracts.Diamond.diamond
         )
 
-        const expiryTime = 1
+        const expiryTime = 3
         const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
@@ -101,7 +101,7 @@ describe("FlashDuelsAdminFacet", function () {
             contracts.Diamond.diamond
         )
 
-        const expiryTime = 1
+        const expiryTime = 3
         const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
@@ -277,7 +277,7 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
         const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
             contracts.Diamond.diamond
         )
-        const expiryTime = 1;
+        const expiryTime = 3;
         const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress);
         await usdcToken.connect(owner).mint(user.address, ethers.parseUnits("10", 6));
         await usdcToken.connect(user).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6));
@@ -292,7 +292,7 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
         const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
             contracts.Diamond.diamond
         )
-        const expiryTime = 1;
+        const expiryTime = 3;
         const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress);
         await usdcToken.connect(owner).mint(user.address, ethers.parseUnits("10", 6));
         await usdcToken.connect(user).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6));
@@ -316,5 +316,15 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
 
     it("should revert when setting the protocol address to zero address", async function () {
         await expect(flashDuelsAdmin.connect(owner).setProtocolAddress(ethers.ZeroAddress)).to.be.revertedWith("Invalid protocol address");
+    });
+
+    it("should set the participation token type successfully", async function () {
+        const { contracts } = await loadFixture(deploy);
+        const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
+            contracts.Diamond.diamond
+        )
+        const participationTokenType = 0;
+        await flashDuelsAdmin.connect(owner).setParticipationTokenType(participationTokenType);
+        expect(await flashDuelsView.getParticipationTokenType()).to.equal(participationTokenType);
     });
 });

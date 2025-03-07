@@ -37,7 +37,7 @@ describe("FlashDuels Marketplace Contract", function () {
         addr3 = accounts[3]
         seller = accounts[4]
         owner = accounts[0]
-        const expiryTime = 1
+        const expiryTime = 3
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
         // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
         usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
@@ -147,7 +147,7 @@ describe("Cancel Sale", function () {
         addr3 = accounts[3]
         seller = accounts[4]
         owner = accounts[0]
-        const expiryTime = 1
+        const expiryTime = 3
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
         // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
         usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
@@ -251,7 +251,7 @@ describe("Cancel Sale", function () {
         seller = accounts[4]
         buyer = accounts[5]
         owner = accounts[0]
-        const expiryTime = 1
+        const expiryTime = 3
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
         // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
         usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
@@ -359,7 +359,7 @@ describe("Token Purchase", function () {
         seller = accounts[4]
         buyer = accounts[5]
         owner = accounts[0]
-        const expiryTime = 1
+        const expiryTime = 3
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
         // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
         usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
@@ -466,7 +466,7 @@ describe("Token Purchase", function () {
         seller = accounts[4]
         buyer = accounts[5]
         owner = accounts[0]
-        const expiryTime = 1
+        const expiryTime = 3
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
         // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
         usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
@@ -578,7 +578,7 @@ describe("Token Purchase", function () {
         seller2 = accounts[6]
         buyer = accounts[5]
         owner = accounts[0]
-        const expiryTime = 1
+        const expiryTime = 3
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
         // usdcToken = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
         usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
@@ -693,7 +693,7 @@ describe("Token Purchase", function () {
         let duel: any, usdcToken: any, tx: any, txr: any, sellerOptionToken: any
         let { contracts, accounts } = await loadFixture(deploy)
 
-        const expiryTime = 1
+        const expiryTime = 3
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
         usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress?.toString())
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))

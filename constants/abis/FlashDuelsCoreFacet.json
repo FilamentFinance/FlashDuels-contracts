@@ -76,6 +76,67 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": true,
+                "internalType": "address",
+                "name": "creator",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "tokenSymbol",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "createTime",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "createDuelFee",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "triggerValue",
+                "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum TriggerType",
+                "name": "triggerType",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum TriggerCondition",
+                "name": "triggerCondition",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DuelCategory",
+                "name": "category",
+                "type": "uint8"
+            }
+        ],
+        "name": "CryptoDuelCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": false,
                 "internalType": "string",
                 "name": "duelId",
@@ -131,6 +192,49 @@
             }
         ],
         "name": "CryptoDuelJoined",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DuelCategory",
+                "name": "category",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DuelDuration",
+                "name": "duration",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "DuelApprovedAndCreated",
         "type": "event"
     },
     {
@@ -687,9 +791,9 @@
         "name": "requestCreateCryptoDuel",
         "outputs": [
             {
-                "internalType": "bool",
+                "internalType": "string",
                 "name": "",
-                "type": "bool"
+                "type": "string"
             }
         ],
         "stateMutability": "nonpayable",
