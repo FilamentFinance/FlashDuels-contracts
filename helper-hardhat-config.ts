@@ -7,7 +7,8 @@ export interface networkConfigItem {
     bot?: string
     protocolTreasury?: string
     StartBlock?: number,
-    creditsMaxSupply?: string
+    creditsMaxSupply?: string,
+    Credits?: string
 }
 
 export interface networkConfigInfo {
@@ -53,6 +54,7 @@ export const networkConfig: networkConfigInfo = {
         usdc: "0x3894085Ef7Ff0f0aeDf52E2A2704928d1Ec074F1",
         bot: "",
         protocolTreasury: "",
+        Credits: ""
     }
 }
 

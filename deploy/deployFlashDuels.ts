@@ -12,7 +12,7 @@ import { FlashDuelsCoreFacet } from "../typechain-types"
 const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
 const main = async () => {
-    let tx, txr, usdAddress, FlashDuelsCredits
+    let tx, txr, usdAddress, creditsAddress, Credits
     const accounts = await ethers.getSigners()
     const networkName = network.name
     const owner = accounts[0].address
@@ -31,6 +31,7 @@ const main = async () => {
 
     if (networkName === "seiMainnet") {
         usdAddress = { target: networkConfig[networkName].usdc }
+        creditsAddress = { target: networkConfig[networkName].Credits }
     } else {
         console.log("Deploying USDC")
         let USDC = await ethers.getContractFactory("FLASHUSDC")
@@ -44,8 +45,8 @@ const main = async () => {
         usdAddress = flashUSDC.target
     }
 
-    FlashDuelsCredits = await ethers.getContractFactory("FlashDuelsCredits")
-    const flashDuelsCreditsContract = await upgrades.deployProxy(FlashDuelsCredits, [networkConfig[networkName].creditsMaxSupply])
+    Credits = await ethers.getContractFactory("Credits")
+    const flashDuelsCreditsContract = await upgrades.deployProxy(Credits, [networkConfig[networkName].creditsMaxSupply])
     const flashDuelsCredits = await flashDuelsCreditsContract.waitForDeployment()
     console.log("FlashDuelsCredits deployed:", flashDuelsCredits.target)
 

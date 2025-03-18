@@ -28,7 +28,7 @@ export const setupContracts = async () => {
     // console.log(startBlock!.number)
     if (networkName === "seiMainnet") {
         usdAddress = { target: networkConfig[networkName].usdc }
-        creditsAddress = { target: networkConfig[networkName].credits }
+        creditsAddress = { target: networkConfig[networkName].Credits }
     } else {
         USDC = await ethers.getContractFactory("FLASHUSDC")
         const usdcNew = await upgrades.deployProxy(USDC, [
@@ -40,7 +40,7 @@ export const setupContracts = async () => {
         // console.log("USDC deployed to:", flashUSDC.target)
         usdAddress = flashUSDC.target
 
-        const Credits = await ethers.getContractFactory("FlashDuelsCredits")
+        const Credits = await ethers.getContractFactory("Credits")
         const creditsNew = await upgrades.deployProxy(Credits, [networkConfig[networkName].creditsMaxSupply])
         let flashCredits = await creditsNew.waitForDeployment()
         // console.log("Credits deployed to:", flashCredits.target)
