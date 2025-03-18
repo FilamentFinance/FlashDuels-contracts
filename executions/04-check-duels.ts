@@ -23,8 +23,8 @@ const main = async () => {
     const flashDuelsView: FlashDuelsViewFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsViewABI, deployer)
     const flashDuelsMarketplace: FlashDuelsMarketplaceFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsMarketplaceABI, deployer)
 
-    // tx = await flashDuelsView.checkIfThresholdMet("7fe60b106113aa3c8b95b22462b1fd0089c91f367fcbec58e105d19e907946e1")
-    // console.log("IsThresholdMet", tx)
+    tx = await flashDuelsView.checkIfThresholdMet("aea7050df0ccaa58007d6ed18c6c615e6f8e92c2e27ae92e3a6585435ee287cb")
+    console.log("IsThresholdMet", tx)
     // tx = await flashDuelsView.checkIfThresholdMet("7fe60b106113aa3c8b95b22462b1fd0089c91f367fcbec58e105d19e907946e1")
     // console.log("IsThresholdMet", tx)
     // tx = await flashDuelsView.getCryptoDuel("9b512e34fdbf3950665edfbe6e689158b41bdaa3dcdd0b419d11ea4c474fd2fc")

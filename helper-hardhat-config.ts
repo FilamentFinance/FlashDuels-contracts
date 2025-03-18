@@ -7,12 +7,16 @@ export interface networkConfigItem {
     bot?: string
     protocolTreasury?: string
     StartBlock?: number,
-    credits?: string
     creditsMaxSupply?: string
 }
 
 export interface networkConfigInfo {
     [key: string]: networkConfigItem
+}
+
+export enum ParticipationTokenType {
+    USDC,
+    CRD
 }
 
 export const networkConfig: networkConfigInfo = {
@@ -49,7 +53,6 @@ export const networkConfig: networkConfigInfo = {
         usdc: "0x3894085Ef7Ff0f0aeDf52E2A2704928d1Ec074F1",
         bot: "",
         protocolTreasury: "",
-        credits: "0x19657A407403c23796331DDeA8870787a1A1D6C7"
     }
 }
 

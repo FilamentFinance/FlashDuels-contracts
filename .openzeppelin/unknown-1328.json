@@ -2,70 +2,20 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
-      "address": "0xD90F4848E37A7f22EC1c3f8eB1896Ee570bB4DFE",
-      "txHash": "0x8d43b9d754ab5da9be2fc73ad237304b257cf9bf28dc0aed0989cc7c7436e623",
+      "address": "0xe364cd3fE524D7fD3df9AF4FEf36827A20a4b3E4",
+      "txHash": "0xc66e9e9808041074425a8b94461c19ebb99b3a03a24b8267fe5c07fab015bda4",
       "kind": "uups"
     },
     {
-      "address": "0x62A14B05Db18f4E12890905D359a6939712D0390",
-      "txHash": "0x0fcdb7964b5b576565d61e9e55ed533dbebb6f7db785106971d3b120d4e31e47",
-      "kind": "uups"
-    },
-    {
-      "address": "0x33cc92903462Cd175574C601AFF9D5C381404Db3",
-      "txHash": "0x617118083402c432d63d42f99349d1a3bda8ff1af27609fb92608e9531832068",
-      "kind": "uups"
-    },
-    {
-      "address": "0xC9780e3ADC61e155857F2856d77CfF049e5Fd684",
-      "txHash": "0x35b21bcf9a693513a45c5b6b5e1bd5997ca2ce624c4b7924cf802ea68c2c4d87",
-      "kind": "uups"
-    },
-    {
-      "address": "0xdffd44785e56267E004C80249bF7c1DcAD4ac7d4",
-      "txHash": "0x5c8cfd8eeea3b9aecec3921339a0467cbc5468adbec29e49bd64951bd359de95",
-      "kind": "uups"
-    },
-    {
-      "address": "0x542938B5c37d082159C0933EC982E3585c94BD62",
-      "txHash": "0x0798fa211105f9ea148e26d9cbf7c59e0bc35f660cd8f6ca04156f784b6c54f8",
-      "kind": "uups"
-    },
-    {
-      "address": "0x498e65B2Eca3f726D51fb216eA0fDAbC9E937270",
-      "txHash": "0x06d797fd237b37dd48b8046226365f4f61ba826a4d5fe02b656fc190cbd53d16",
-      "kind": "uups"
-    },
-    {
-      "address": "0x6e588Ce5D69E494E855996E91119807045486339",
-      "txHash": "0x85372146c0220e62c30d25cecf24f81d137cb0d6ee613da74281bf3f3a386090",
-      "kind": "uups"
-    },
-    {
-      "address": "0x83C38d75cEEdC08D94FFfe2FeD6b31a34cA6BDE7",
-      "txHash": "0xb79a9c75eb239043ff246a348658308976a2a7908a91b7f330ad4d5a8764cf38",
-      "kind": "uups"
-    },
-    {
-      "address": "0xa34804A80bc328BE68364D06a92ABbe47B38317B",
-      "txHash": "0x80e747c86fd55fc167ac172595626b5266378c7ca743ab88273b5e648b4b3119",
-      "kind": "uups"
-    },
-    {
-      "address": "0xd6Bb4217156342Bf6d141E22662Ff70513A7B65A",
-      "txHash": "0x1486de9d5bc675a71d612bd3d391a992f7c1442b680f69227baa63278f0f335c",
-      "kind": "uups"
-    },
-    {
-      "address": "0xAF6eABA2c33FA37bE7a23DFBbeBF24880AfF2418",
-      "txHash": "0xfa26f90d9e22afba1aff61dee3713981802fea46bbffbcd072b79a3b75d06960",
+      "address": "0x1D5502b090d24FD93f6bF6764d3E0A10F64C44fc",
+      "txHash": "0xb88217677095ee11c0cef86522a8550cfeba7ca9ebe3696dea8085795a9930a5",
       "kind": "uups"
     }
   ],
   "impls": {
     "b504b47d81ae40fd45d25055625cc039bd99c6112691f7f8bf79b8513f657b54": {
-      "address": "0xe34f7C2E28C07284211650F7dcB2bE7f74cce072",
-      "txHash": "0x02966a4d9f6b1e6901acc12f702dc6623b2dbb302e821fb1ce39d83a7ef0b32d",
+      "address": "0xD36c179cD027fE3bB8546D5818ACab1C6513C758",
+      "txHash": "0xb8db08af2f595ec83b4a1b907a88f83acabe9cd5f95e9254c4bc56774d11637e",
       "layout": {
         "solcVersion": "0.8.26",
         "storage": [
@@ -268,9 +218,9 @@
         }
       }
     },
-    "744a606f5334a0427a016f9ff3c05a6f97fdbdead89201e02bac7c909ed2e114": {
-      "address": "0xC475Fb7970e46d6742890c521770859eA6CF34cB",
-      "txHash": "0x9607189cbf0a05fb1bb758690b9c4fbc2fbd4ce0c08347c87ea170db25d4b7cb",
+    "192e3d1a20937828f82cd8d0589b352955fc4b92051cae7e902e8d92494b012f": {
+      "address": "0x879E38E63b5bDC562d22d74f259d2316B8DA92C4",
+      "txHash": "0xcd9932d0d1d91b714b4ed19476f7b68d077dd45b6ed871173a39de500863a931",
       "layout": {
         "solcVersion": "0.8.26",
         "storage": [
@@ -279,24 +229,24 @@
             "offset": 0,
             "slot": "0",
             "type": "t_uint256",
-            "contract": "Credits",
-            "src": "contracts/mocks/Credits.sol:15"
+            "contract": "FlashDuelsCredits",
+            "src": "contracts/FlashDuelsCredits.sol:15"
           },
           {
             "label": "totalCreditsAllocated",
             "offset": 0,
             "slot": "1",
             "type": "t_uint256",
-            "contract": "Credits",
-            "src": "contracts/mocks/Credits.sol:16"
+            "contract": "FlashDuelsCredits",
+            "src": "contracts/FlashDuelsCredits.sol:16"
           },
           {
             "label": "credits",
             "offset": 0,
             "slot": "2",
             "type": "t_mapping(t_address,t_uint256)",
-            "contract": "Credits",
-            "src": "contracts/mocks/Credits.sol:17"
+            "contract": "FlashDuelsCredits",
+            "src": "contracts/FlashDuelsCredits.sol:17"
           }
         ],
         "types": {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {AppStorage, Duel, DuelCategory, DuelDuration, DuelStatus, PendingDuel, DuelApprovedAndCreated, ParticipationTokenTypeUpdated, ParticipationTokenType, DuelRequestRevoked, DuelCreated, WithdrawProtocolFee, CreateDuelFeeUpdated, MinimumWagerThresholdUpdated, BotAddressUpdated, ProtocolTreasuryUpdated, BootstrapPeriodUpdated, ResolvingPeriodUpdated, WinnersChunkSizesUpdated, RefundChunkSizesUpdated, FlashDuels__InvalidOwnerOrBot} from "../AppStorage.sol";
+import {AppStorage, Duel, DuelCategory, DuelDuration, DuelStatus, PendingDuel, DuelApprovedAndCreated, ParticipationTokenTypeUpdated, ParticipationTokenType, DuelRequestRevoked, DuelCreated, WithdrawProtocolFee, CreateDuelFeeUpdated, MinimumWagerThresholdUpdated, BotAddressUpdated, ProtocolTreasuryUpdated, BootstrapPeriodUpdated, ResolvingPeriodUpdated, WinnersChunkSizesUpdated, RefundChunkSizesUpdated, CreditsAddressUpdated,FlashDuels__InvalidOwnerOrBot} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -127,6 +127,16 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         require(_refundChunkSize >= 30 && _refundChunkSize <= 100, "Chunk size should be in the range 30 to 100");
         s.refundChunkSize = _refundChunkSize;
         emit RefundChunkSizesUpdated(_refundChunkSize);
+    }
+
+    /// @notice Sets the address of the CRD token.
+    /// @dev This function can only be called by the contract owner.
+    /// It updates the credits variable with the specified address.
+    /// @param _creditsAddress The address of the CRD token to set.
+    function setCRDAddress(address _creditsAddress) external onlyOwner {
+        require(_creditsAddress != address(0), "Invalid CRD address");
+        s.credits = _creditsAddress;
+        emit CreditsAddressUpdated(_creditsAddress);
     }
 
     /// @notice Creates a duel for an approved user

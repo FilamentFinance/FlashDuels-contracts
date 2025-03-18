@@ -51,10 +51,10 @@ async function main() {
     // Prepare the cut transaction
     const cut: any = [
         {
-            facetAddress: flashDuelsMarketplaceFacet.target,
+            facetAddress: flashDuelsAdminFacet.target,
             action: FacetCutAction.Add, // 0 means Add
             functionSelectors: [
-                "0x374b2fde", // buy(address,address,string,uint256,uint256[],uint256[])
+                "0xf4c49a9e" // setCRDAddress(address)
             ]
         },
 

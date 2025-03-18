@@ -12,7 +12,7 @@ import { FlashDuelsCoreFacet } from "../typechain-types"
 const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
 const main = async () => {
-    let tx, txr, usdAddress, creditsAddress, Credits
+    let tx, txr, usdAddress, FlashDuelsCredits
     const accounts = await ethers.getSigners()
     const networkName = network.name
     const owner = accounts[0].address
@@ -31,7 +31,6 @@ const main = async () => {
 
     if (networkName === "seiMainnet") {
         usdAddress = { target: networkConfig[networkName].usdc }
-        creditsAddress = { target: networkConfig[networkName].credits }
     } else {
         console.log("Deploying USDC")
         let USDC = await ethers.getContractFactory("FLASHUSDC")
@@ -41,15 +40,19 @@ const main = async () => {
             networkConfig[networkName].usdcAdmin
         ])
         let flashUSDC = await usdcNew.waitForDeployment()
-        console.log("USDC deployed to:", flashUSDC.target)
+        console.log("USDC deployed:", flashUSDC.target)
         usdAddress = flashUSDC.target
-
-        Credits = await ethers.getContractFactory("Credits")
-        const creditsNew = await upgrades.deployProxy(Credits, [networkConfig[networkName].creditsMaxSupply])
-        let credits = await creditsNew.waitForDeployment()
-        console.log("Credits deployed to:", credits.target)
-        creditsAddress = credits.target
     }
+
+    FlashDuelsCredits = await ethers.getContractFactory("FlashDuelsCredits")
+    const flashDuelsCreditsContract = await upgrades.deployProxy(FlashDuelsCredits, [networkConfig[networkName].creditsMaxSupply])
+    const flashDuelsCredits = await flashDuelsCreditsContract.waitForDeployment()
+    console.log("FlashDuelsCredits deployed:", flashDuelsCredits.target)
+
+    const FlashDuelsIncentives = await ethers.getContractFactory("FlashDuelsIncentives")
+    const flashDuelsIncentives = await FlashDuelsIncentives.deploy()
+    await flashDuelsIncentives.waitForDeployment()
+    console.log("FlashDuelsIncentives deployed:", flashDuelsIncentives.target)
 
     // deploy DiamondCutFacet
     const DiamondCutFacet = await ethers.getContractFactory("DiamondCutFacet")
@@ -111,6 +114,7 @@ const main = async () => {
         "0xbb849878", // setResolvingPeriod(uint256)
         "0xe94e40cd", // setWinnersChunkSizes(uint256)
         "0x93d11d38", // setRefundChunkSizes(uint256)
+        "0xf4c49a9e", // setCRDAddress(address)
         "0x8088a328", // approveAndCreateDuel(address,uint8,uint256)
         "0x3100694f", // revokeCreateDuelRequest(address,uint8,uint256)
         "0x8795cccb", // withdrawProtocolFees()
@@ -234,7 +238,7 @@ const main = async () => {
         diamond.target,
         usdAddress,
         bot,
-        creditsAddress
+        flashDuelsCredits.target
     ])
     tx = await diamondCut.diamondCut(cut, diamondInit.target, functionCall)
     console.log("Diamond cut tx: ", tx.hash)
@@ -245,13 +249,14 @@ const main = async () => {
     console.log("Completed diamond cut")
 
     console.log("Setting Protocol Address");
-    const flashDuels: FlashDuelsAdminFacet = await FlashDuelsAdminFacet.attach(diamond.target)
+    const flashDuels: any = await FlashDuelsAdminFacet.attach(diamond.target)
     tx = await flashDuels.setProtocolAddress(networkConfig[networkName].protocolTreasury)
     await tx.wait(1)
 
     let contracts = [
         { name: "FLASHUSDC", address: usdAddress },
-        { name: "Credits", address: creditsAddress },
+        { name: "FlashDuelsCredits", address: flashDuelsCredits.target },
+        { name: "FlashDuelsIncentives", address: flashDuelsIncentives.target },
         { name: "FlashDuelsAdminFacet", address: flashDuelsAdminFacet.target },
         { name: "FlashDuelsCoreFacet", address: flashDuelsCoreFacet.target },
         {

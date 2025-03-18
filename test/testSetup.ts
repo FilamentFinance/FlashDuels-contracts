@@ -40,7 +40,7 @@ export const setupContracts = async () => {
         // console.log("USDC deployed to:", flashUSDC.target)
         usdAddress = flashUSDC.target
 
-        const Credits = await ethers.getContractFactory("Credits")
+        const Credits = await ethers.getContractFactory("FlashDuelsCredits")
         const creditsNew = await upgrades.deployProxy(Credits, [networkConfig[networkName].creditsMaxSupply])
         let flashCredits = await creditsNew.waitForDeployment()
         // console.log("Credits deployed to:", flashCredits.target)
@@ -128,6 +128,7 @@ export const setupContracts = async () => {
         "0xbb849878", // setResolvingPeriod(uint256)
         "0xe94e40cd", // setWinnersChunkSizes(uint256)
         "0x93d11d38", // setRefundChunkSizes(uint256)
+        "0xf4c49a9e", // setCRDAddress(address)
         "0x8088a328", // approveAndCreateDuel(address,uint8,uint256)
         "0x3100694f", // revokeCreateDuelRequest(address,uint8,uint256)
         "0x8795cccb", // withdrawProtocolFees()

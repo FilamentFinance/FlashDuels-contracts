@@ -410,6 +410,10 @@ event DuelRequestRevoked(address indexed user, uint256 refundAmount, uint256 tim
 /// @param newResolvingPeriod The resolving period.
 event ResolvingPeriodUpdated(uint256 newResolvingPeriod);
 
+/// @notice Emitted when the credits address is updated.
+/// @param newCreditsAddress The new address of the credits contract.
+event CreditsAddressUpdated(address newCreditsAddress);
+
 /// @notice Thrown when the duel has been already ended
 error FlashDuelsMarketplace__DuelEnded(string duelId);
 

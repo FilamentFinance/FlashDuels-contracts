@@ -10,7 +10,7 @@ error Credits__MaxSupplyReached();
 error Credits__NotEnoughCredtis();
 error Credits__InvalidValue();
 
-contract Credits is ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract FlashDuelsCredits is ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
 
     uint256 public maxSupply;
     uint256 public totalCreditsAllocated;
@@ -23,7 +23,7 @@ contract Credits is ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
 
     function initialize(uint256 _maxSupply) public initializer {
         maxSupply = _maxSupply;
-        __ERC20_init("Credits", "CRD");
+        __ERC20_init("FlashDuels Credits", "FDCRD");
         __Ownable_init(msg.sender);
         __UUPSUpgradeable_init();
     }
