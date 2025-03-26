@@ -151,7 +151,9 @@ export const setupContracts = async () => {
     ]
 
     const flashDuelsMarketplaceFacetSelectors = [
-        "0x9012c4a8", // updateFee(uint256)
+        // "0x9012c4a8", // updateFee(uint256)
+        "0xf1d6debd", // updateSellerFees(uint256)
+        "0x143c790d", // updateBuyerFees(uint256)
         "0x07b4c084", // sell(address,string,uint256,uint256,uint256)
         "0xaa6ecb55", // cancelSell(address,uint256)
         "0x374b2fde", // buy(address,address,string,uint256,uint256[],uint256[])
@@ -192,7 +194,8 @@ export const setupContracts = async () => {
         "0xecbf647b", // getRefundChunkSize()
         "0xab1a778a", // getResolvingPeriod()
         "0xb734a264", // getBootstrapPeriod()
-        "0x8edf8f0f", // getMarketPlaceFees()
+        // "0x8edf8f0f", // getMarketPlaceFees()
+        "0x5c769f34", // getSellerAndBuyerFees()
         "0xe6bbe9dd", // getMinThreshold()
         "0x2f06c7d5", // getSaleCounter()
         "0xd087d288", // getNonce()

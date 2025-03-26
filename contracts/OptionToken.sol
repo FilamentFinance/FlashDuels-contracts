@@ -43,4 +43,13 @@ contract OptionToken is ERC20 {
     function mint(address to, uint256 amount) external onlyFlashDuelsDiamond {
         _mint(to, amount);
     }
+
+    /**
+     * @notice Burns a specified amount of tokens from the caller's address.
+     * @dev This function can only be called by the FlashDuels Diamond contract.
+     * @param amount The amount of tokens to burn.
+     */
+    function burn(uint256 amount) external onlyFlashDuelsDiamond {
+        _burn(msg.sender, amount);
+    }
 }

@@ -327,11 +327,24 @@
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "_newFee",
+                "name": "_newBuyerFees",
                 "type": "uint256"
             }
         ],
-        "name": "updateFee",
+        "name": "updateBuyerFees",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_newSellerFees",
+                "type": "uint256"
+            }
+        ],
+        "name": "updateSellerFees",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

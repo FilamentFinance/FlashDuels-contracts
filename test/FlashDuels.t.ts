@@ -1111,7 +1111,7 @@ describe("FlashDuels Contract", function () {
 
             const getTotalProtocolFeesGeneratedAfter = await flashDuelsView.getTotalProtocolFeesGenerated()
             // console.log("getTotalProtocolFeesGeneratedAfter", getTotalProtocolFeesGeneratedAfter)
-            expect(getTotalProtocolFeesGeneratedAfter).to.be.equal("5000000") // $1.2
+            expect(getTotalProtocolFeesGeneratedAfter).to.be.equal("5000000") // $5
 
             expect(duelIds.length).to.equal(1)
             // Join Duel with tokenA
@@ -1154,14 +1154,14 @@ describe("FlashDuels Contract", function () {
             let allTImeEarningsaccounts_3 = await flashDuelsView.getAllTimeEarnings(accounts[3].address)
             expect(allTImeEarningsaccounts_3).to.be.equal("0")
             // console.log("allTImeEarningsaccounts_2", allTImeEarningsaccounts_2)
-            expect(allTImeEarningsaccounts_2).to.be.equal("117600000") // $117.6
+            expect(allTImeEarningsaccounts_2).to.be.equal("115200000") // $115.2 (2% * 120 + 2% * 120 = 4.8) (120 -4.8 = 115.2) (120 = 60 + 60)
             const getTotalProtocolFeesGenerated = await flashDuelsView.getTotalProtocolFeesGenerated()
             // console.log("getTotalProtocolFeesGenerated", getTotalProtocolFeesGenerated)
             const getCreatorFeesEarned = await flashDuelsView.getCreatorFeesEarned(accounts[1].address)
             // console.log("getCreatorFeesEarned", getCreatorFeesEarned)
 
-            expect(getTotalProtocolFeesGenerated).to.be.equal("6200000") // $1.2
-            expect(getCreatorFeesEarned).to.be.equal("1200000") // $1.2
+            expect(getTotalProtocolFeesGenerated).to.be.equal("7400000") // $7.4 (5 + 2.4) (2% * 120 = 2.4)
+            expect(getCreatorFeesEarned).to.be.equal("2400000") // $2.4 (2% * 120 = 2.4)
             // expect(await usdcToken.balanceOf(cryptoDuel.creator)).to.be.equal("1200000") // $117.6
 
             await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)

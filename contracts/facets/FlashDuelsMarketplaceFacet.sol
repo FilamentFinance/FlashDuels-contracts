@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {BPS, AppStorage, Duel, DuelStatus, Sale, SaleCreated, TokensPurchased, SaleCancelled, FlashDuelsMarketplace__DuelEnded, ParticipationTokenType} from "../AppStorage.sol";
+import {BPS, AppStorage, Duel, DuelStatus, Sale, SaleCreated, TokensPurchased, SaleCancelled, FlashDuelsMarketplace__DuelEnded, ParticipationTokenType, DuelDuration} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {OptionToken} from "../OptionToken.sol";
 import {IFlashDuels} from "../interfaces/IFlashDuels.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
 
@@ -29,11 +30,20 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         _;
     }
 
-    /// @notice Updates the platform fee for transactions
-    /// @param _newFee The new fee in basis points
-    function updateFee(uint256 _newFee) external onlyOwner {
-        s.marketPlaceFees = _newFee;
+    // /// @notice Updates the platform fee for transactions
+    // /// @param _newFee The new fee in basis points
+    // function updateFee(uint256 _newFee) external onlyOwner {
+    //     s.marketPlaceFees = _newFee;
+    // }
+
+    function updateSellerFees(uint256 _newSellerFees) external onlyOwner {
+        s.sellerFees = _newSellerFees;
+    }   
+
+    function updateBuyerFees(uint256 _newBuyerFees) external onlyOwner {
+        s.buyerFees = _newBuyerFees;
     }
+    
 
     /// @notice Creates a new sale for the given token
     /// @param token The address of the token to be sold
@@ -48,6 +58,14 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         uint256 quantity,
         uint256 totalPrice
     ) external nonReentrant {
+        Duel memory duel = IFlashDuels(s.flashDuelsContract).getDuel(duelId);
+        require(duel.expiryTime > block.timestamp, "Duel has expired");
+
+        // No selling allowed for 5 mins and 15 mins duels
+        if (duel.duelDuration == DuelDuration.FiveMinutes || duel.duelDuration == DuelDuration.FifteenMinutes) {
+            revert("Selling not allowed for short duration duels");
+        }
+
         require(
             token == IFlashDuels(s.flashDuelsContract).getOptionIndexToOptionToken(duelId, optionIndex),
             "Invalid option"
@@ -58,11 +76,7 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         // @note - zokyo-audit-fix-11
         require(erc20.balanceOf(msg.sender) >= quantity, "Insufficient token balance");
         require(erc20.allowance(msg.sender, address(this)) >= quantity, "Insufficient allowance for the contract");
-        s.sales[token][s.saleCounter] = Sale({
-            seller: msg.sender,
-            quantity: quantity,
-            totalPrice: totalPrice
-        });
+        s.sales[token][s.saleCounter] = Sale({seller: msg.sender, quantity: quantity, totalPrice: totalPrice});
         emit SaleCreated(s.saleCounter, msg.sender, token, quantity, totalPrice, block.timestamp);
         ++s.saleCounter;
     }
@@ -99,6 +113,20 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         if (duel.duelStatus == DuelStatus.Settled || duel.duelStatus == DuelStatus.Cancelled) {
             revert FlashDuelsMarketplace__DuelEnded(duelId);
         }
+        require(duel.expiryTime > block.timestamp, "Duel has expired");
+
+        // No market buy for 5 mins and 15 mins duels
+        if (duel.duelDuration == DuelDuration.FiveMinutes || duel.duelDuration == DuelDuration.FifteenMinutes) {
+            revert("Market buy not allowed for short duration duels");
+        }
+
+        // For 30 mins duels, allow market buy in last 10 mins
+        if (duel.duelDuration == DuelDuration.ThirtyMinutes) {
+            require(duel.expiryTime - block.timestamp <= 10 minutes, "Market buy not allowed yet");
+        } else {
+            // For all longer durations (1h, 3h, 6h, 12h), allow market buy in last 30 mins
+            require(duel.expiryTime - block.timestamp <= 30 minutes, "Market buy not allowed yet");
+        }
         require(
             token == IFlashDuels(s.flashDuelsContract).getOptionIndexToOptionToken(duelId, optionIndex),
             "Invalid option"
@@ -119,8 +147,12 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
 
             uint256 sellPricePerToken = (sale.totalPrice * 1e18) / sale.quantity;
             uint256 cost = (buyAmount * sellPricePerToken) / 1e18;
-            uint256 fee = (cost * s.marketPlaceFees) / BPS;
-            uint256 receivables = cost - fee;
+            // uint256 fee = (cost * s.marketPlaceFees) / BPS; // 0.1% (10) (0.05% + 0.05%) 10 = 0.1
+            uint256 sellerfees = (cost * s.sellerFees) / BPS; // 0.03% (3)
+            uint256 buyerFees = (cost * s.buyerFees) / BPS; // 0.05% (5)
+            uint256 fee = sellerfees + buyerFees;
+            // uint256 receivables = cost - fee;
+            uint256 receivables = cost - sellerfees;
 
             // Transfer funds and tokens
             if (s.participationTokenType == ParticipationTokenType.USDC) {
@@ -130,8 +162,14 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
                 IERC20(s.credits).safeTransferFrom(buyer, sale.seller, receivables);
                 IERC20(s.credits).safeTransferFrom(buyer, s.protocolTreasury, fee);
             }
-            erc20.safeTransferFrom(sale.seller, buyer, buyAmount);
-
+            uint256 burnAmount = (buyerFees * 1e18) / sellPricePerToken;
+            uint256 newBuyAmount = buyAmount - burnAmount;
+            erc20.safeTransferFrom(sale.seller, address(this), buyAmount);
+            // burn burnAmount tokens
+            OptionToken(token).burn(burnAmount);
+            if (newBuyAmount > 0) {
+                erc20.safeTransfer(buyer, newBuyAmount);
+            }
             _updateDuelInfoForSellerBuyer(token, sale.seller, buyer, duelId, optionIndex);
             // Update sale details
             if (buyAmount == sale.quantity) {
@@ -143,7 +181,8 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
 
             totalCost += cost;
             platformFee += fee;
-            emit TokensPurchased(buyer, sale.seller, token, buyAmount, cost, block.timestamp);
+            // emit TokensPurchased(buyer, sale.seller, token, buyAmount, cost, block.timestamp);
+            emit TokensPurchased(buyer, sale.seller, token, newBuyAmount, cost, block.timestamp);
         }
     }
 

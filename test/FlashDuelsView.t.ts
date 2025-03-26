@@ -196,9 +196,15 @@ describe("FlashDuelsViewFacet", function () {
         expect(bootstrapPeriod).to.be.a("bigint");
     });
 
-    it("should retrieve the marketplace fees", async function () {
-        const marketPlaceFees = await flashDuelsView.getMarketPlaceFees();
-        expect(marketPlaceFees).to.be.a("bigint");
+    // it("should retrieve the marketplace fees", async function () {
+    //     const marketPlaceFees = await flashDuelsView.getMarketPlaceFees();
+    //     expect(marketPlaceFees).to.be.a("bigint");
+    // });
+
+    it("should retrieve the seller fees", async function () {
+        const [sellerFees, buyerFees] = await flashDuelsView.getSellerAndBuyerFees();
+        expect(sellerFees).to.be.a("bigint");
+        expect(buyerFees).to.be.a("bigint");
     });
 
     it("should retrieve the minimum threshold for wagering", async function () {

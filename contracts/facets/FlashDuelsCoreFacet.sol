@@ -379,9 +379,9 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
                 totalWagerLooser += s.totalWagerForOption[_duelId][options[i]];
             }
         }
-
+        uint256 totalWinningWagers = s.totalWagerForOption[_duelId][winningOption];
         // Calculate protocol fee, creator fee, and final payout using helper function
-        (uint256 protocolFee, uint256 creatorFee, uint256 payout) = _calculateFeesAndPayout(totalWagerLooser);
+        (uint256 protocolFee, uint256 creatorFee, uint256 payout) = _calculateFeesAndPayout(totalWinningWagers, totalWagerLooser);
 
         // Update accumulated fees
         s.totalProtocolFeesGenerated += protocolFee;
@@ -444,8 +444,9 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
             _endTokenPrice,
             cryptoDuel
         );
+        uint256 totalWinningWagers = s.totalWagerForOption[_duelId][winningOption];
         // Calculate fees and payout for distribution
-        (uint256 protocolFee, uint256 creatorFee, uint256 payout) = _calculateFeesAndPayout(totalWagerLooser);
+        (uint256 protocolFee, uint256 creatorFee, uint256 payout) = _calculateFeesAndPayout(totalWinningWagers, totalWagerLooser);
         // Update protocol and creator fee earnings
         s.totalProtocolFeesGenerated += protocolFee;
         s.totalCreatorFeeEarned[cryptoDuel.creator] += creatorFee;
@@ -613,8 +614,9 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         uint256 _payout
     ) internal {
         address[] storage winners = s.duelUsersForOption[_duelId][_winningOption];
-        uint256 totalWinningWagers = s.totalWagerForOption[_duelId][_winningOption];
-        uint256 winningOptionPoolBalance = totalWinningWagers + _payout;
+        // uint256 totalWinningWagers = s.totalWagerForOption[_duelId][_winningOption];
+        // uint256 winningOptionPoolBalance = totalWinningWagers + _payout;
+        uint256 winningOptionPoolBalance = _payout;
 
         // Define the starting index based on progress to allow continuation in chunks
         uint256 startIndex = s.distributionProgress[_duelId];
@@ -729,17 +731,20 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     }
 
     /// @notice Calculates the protocol fee, creator fee, and the payout amount.
+    /// @param totalWinningWagers The total wager amount from the winning side, which will be used to calculate fees.
     /// @param totalWagerLooser The total wager amount from the losing side, which will be used to calculate fees.
     /// @return protocolFee The fee collected by the protocol.
     /// @return creatorFee The fee collected by the creator.
     /// @return payout The remaining amount after fees, which is distributed to the winning side.
     /// @dev This function is a helper to keep the main duel settlement function cleaner and modular.
     function _calculateFeesAndPayout(
+        uint256 totalWinningWagers,
         uint256 totalWagerLooser
     ) internal view returns (uint256 protocolFee, uint256 creatorFee, uint256 payout) {
-        protocolFee = (totalWagerLooser * s.protocolFeePercentage) / 10000;
-        creatorFee = (totalWagerLooser * s.creatorFeePercentage) / 10000;
-        payout = totalWagerLooser - protocolFee - creatorFee;
+        uint256 totalWager = totalWinningWagers + totalWagerLooser;
+        protocolFee = (totalWager * s.protocolFeePercentage) / 10000;
+        creatorFee = (totalWager * s.creatorFeePercentage) / 10000;
+        payout = totalWager - protocolFee - creatorFee;
         return (protocolFee, creatorFee, payout);
     }
 }

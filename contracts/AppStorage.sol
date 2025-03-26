@@ -439,7 +439,11 @@ struct AppStorage {
     /// @notice Time period for bootstrapping before a duel goes live (30 minutes by default)
     uint256 bootstrapPeriod;
     /// @notice Marketplace fees
-    uint256 marketPlaceFees; // 0.1%
+    // uint256 marketPlaceFees; // 0.1%
+    /// @notice SellerFees
+    uint256 sellerFees; // 0.03%
+    /// @notice BuyerFees
+    uint256 buyerFees; // 0.05%
     /// @notice Fee in USDC required to create a duel
     uint256 createDuelFee;
     /// @notice The minimum threshold for wagering, set to 50 USDC (or configurable)
@@ -464,6 +468,8 @@ struct AppStorage {
     // PendingCryptoDuel[] allPendingCryptoDuels;
     /// @notice The token type for participation in duels
     ParticipationTokenType participationTokenType;
+    /// @notice Mapping of duelId to the optionIndex to the winning option to the total winning option payout
+    mapping(string => mapping(uint256 => mapping(string => uint256))) totalWinningOptionPayout; // @note - can be shited up during mainnet deployment
     /// @notice Mapping for duelId -> option-> user -> 1-based index in the participants array
     mapping(string => mapping(string => mapping(address => uint256))) participantIndices;
     /// @notice Mapping to track total bets on duel option for a particular duel
@@ -512,6 +518,4 @@ struct AppStorage {
     mapping(string => bool) isValidDuelId;
     /// @notice Mapping of duel IDs to duel information
     mapping(string => Duel) duels;
-    /// @notice Mapping of duelId to the optionIndex to the winning option to the total winning option payout
-    mapping(string => mapping(uint256 => mapping(string => uint256))) totalWinningOptionPayout; // @note - can be shited up during mainnet deployment
 }

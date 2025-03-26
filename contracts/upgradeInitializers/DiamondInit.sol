@@ -68,7 +68,9 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
         s.minThreshold = 50 * 1e6; // 50 USDC
         s.winnersChunkSize = 50;
         s.refundChunkSize = 50;
-        s.marketPlaceFees = 10; // 0.1%
+        // s.marketPlaceFees = 10; // 0.1%
+        s.sellerFees = 3; // 0.03%
+        s.buyerFees = 5; // 0.05%
             // s.maxStrikes = 5;
     }
 }

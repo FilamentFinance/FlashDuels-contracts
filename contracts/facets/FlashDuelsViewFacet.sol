@@ -312,10 +312,16 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
         return s.bootstrapPeriod;
     }
 
-    /// @notice Returns the marketplace fees.
-    /// @return The marketplace fees.
-    function getMarketPlaceFees() public view returns (uint256) {
-        return s.marketPlaceFees;
+    // /// @notice Returns the marketplace fees.
+    // /// @return The marketplace fees.
+    // function getMarketPlaceFees() public view returns (uint256) {
+    //     return s.marketPlaceFees;
+    // }
+
+    /// @notice Returns the seller and buyer fees.
+    /// @return The seller and buyer fees.
+    function getSellerAndBuyerFees() public view returns (uint256, uint256) {
+        return (s.sellerFees, s.buyerFees);
     }
 
     /// @notice Returns the minimum threshold for wagering.
