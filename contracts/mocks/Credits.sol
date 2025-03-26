@@ -28,7 +28,12 @@ contract Credits is ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
         __UUPSUpgradeable_init();
     }
 
-    function airdrop(address[] calldata _recipients, uint256[] calldata _amounts) external onlyOwner {
+    modifier onlyOwnerOrBot() {
+        require(msg.sender == owner() || msg.sender == 0x2Eb671E6e0cd965A79A80caF35c5123b7a5D8ebb, "Only the owner or bot can call this function");
+        _;
+    }
+
+    function airdrop(address[] calldata _recipients, uint256[] calldata _amounts) external onlyOwnerOrBot {
         require(_recipients.length == _amounts.length, Credits__ArrayLengthMismatch());
         uint256 _totalCreditsAllocated = totalCreditsAllocated;
         uint256 aLength = _recipients.length;
