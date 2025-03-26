@@ -56,7 +56,7 @@ const config: HardhatUserConfig = {
         only: [
             "FLASHUSDC",
             "OptionToken",
-            "FlashDuelsCredits",
+            "Credits",
             "FlashDuelsIncentives",
             "Diamond",
             "FlashDuelsAdminFacet",
