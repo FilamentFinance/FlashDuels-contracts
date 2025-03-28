@@ -96,20 +96,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         } else {
             require(IERC20(s.credits).transferFrom(msg.sender, address(this), s.createDuelFee), "Credits transfer failed");
         }
-        // PendingCryptoDuel memory pendingCryptoDuel = PendingCryptoDuel({
-        //     creator: msg.sender,
-        //     category: DuelCategory.Crypto,
-        //     tokenSymbol: _tokenSymbol,
-        //     options: _options,
-        //     duration: _duelDuration,
-        //     isApproved: false,
-        //     usdcAmount: s.createDuelFee,
-        //     triggerValue: _triggerValue,
-        //     triggerType: _triggerType,
-        //     triggerCondition: _triggerCondition
-        // });
-        // s.pendingCryptoDuels[msg.sender].push(pendingCryptoDuel);
-        // s.allPendingCryptoDuels.push(pendingCryptoDuel);
         emit CreateDuelRequested(
             msg.sender,
             DuelCategory.Crypto,
@@ -154,7 +140,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         uint256 _amount,
         address _user
     ) external nonReentrant whenNotPaused onlyBot {
-        /// @note - zokyo-audit-fix-1 (added onlyBot modifier to be called by out secured bot)
         Duel storage duel = s.duels[_duelId];
         LibFlashDuels.LibFlashDuelsAppStorage storage libFlashDuelsStorage = LibFlashDuels.appStorage();
         require(libFlashDuelsStorage.isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
@@ -185,7 +170,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
             s.userExistsInOption[_duelId][option][_user] = true;
         }
 
-        // @note - zokyo-audit-fix-2
         address optionToken = s.optionIndexToOptionToken[_duelId][_optionsIndex];
         if (optionToken == address(0)) {
             // Deploy a new ERC-20 token contract
@@ -195,7 +179,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
             optionToken = address(newOptionToken);
             s.optionIndexToOptionToken[_duelId][_optionsIndex] = address(newOptionToken);
         } else {
-            // OptionToken(optionToken).mint(msg.sender, amountTokenToMint);
             OptionToken(optionToken).mint(_user, amountTokenToMint);
         }
 
@@ -258,7 +241,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
             // Mark user as added
             s.userExistsInOption[_duelId][option][_user] = true;
         }
-        // @note - zokyo-audit-fix-2
         address optionToken = s.optionIndexToOptionToken[_duelId][_optionsIndex];
         if (optionToken == address(0)) {
             // Deploy a new ERC-20 token contract
@@ -268,7 +250,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
             optionToken = address(newOptionToken);
             s.optionIndexToOptionToken[_duelId][_optionsIndex] = address(newOptionToken);
         } else {
-            // OptionToken(optionToken).mint(msg.sender, amountTokenToMint);
             OptionToken(optionToken).mint(_user, amountTokenToMint);
         }
 
@@ -336,7 +317,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         s.startPriceToken[_duelId][cryptoDuel.tokenSymbol] = _startTokenPrice;
         // Record the start time and mark the duel as live
         cryptoDuel.startTime = block.timestamp;
-        // uint256 duelDuration = cryptoDuel.expiryTime - (cryptoDuel.createTime + bootstrapPeriod);
         uint256 duelDuration = cryptoDuel.duelDuration == DuelDuration.FiveMinutes
             ? 5 minutes
             : cryptoDuel.duelDuration == DuelDuration.FifteenMinutes
@@ -614,8 +594,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         uint256 _payout
     ) internal {
         address[] storage winners = s.duelUsersForOption[_duelId][_winningOption];
-        // uint256 totalWinningWagers = s.totalWagerForOption[_duelId][_winningOption];
-        // uint256 winningOptionPoolBalance = totalWinningWagers + _payout;
         uint256 winningOptionPoolBalance = _payout;
 
         // Define the starting index based on progress to allow continuation in chunks

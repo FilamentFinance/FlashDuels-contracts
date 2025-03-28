@@ -12,7 +12,7 @@ import { FlashDuelsCoreFacet } from "../typechain-types"
 const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
 const main = async () => {
-    let tx, txr, usdAddress, creditsAddress, Credits
+    let tx: any, txr: any, usdAddress: any, creditsAddress: any, Credits: any, flashDuelsCredits: any
     const accounts = await ethers.getSigners()
     const networkName = network.name
     const owner = accounts[0].address
@@ -42,13 +42,16 @@ const main = async () => {
         ])
         let flashUSDC = await usdcNew.waitForDeployment()
         console.log("USDC deployed:", flashUSDC.target)
-        usdAddress = flashUSDC.target
+        usdAddress = { target: flashUSDC.target }
+
+        Credits = await ethers.getContractFactory("Credits")
+        const flashDuelsCreditsContract = await upgrades.deployProxy(Credits, [networkConfig[networkName].creditsMaxSupply])
+        flashDuelsCredits = await flashDuelsCreditsContract.waitForDeployment()
+        console.log("FlashDuelsCredits deployed:", flashDuelsCredits.target)
+        creditsAddress = { target: flashDuelsCredits.target }
     }
 
-    Credits = await ethers.getContractFactory("Credits")
-    const flashDuelsCreditsContract = await upgrades.deployProxy(Credits, [networkConfig[networkName].creditsMaxSupply])
-    const flashDuelsCredits = await flashDuelsCreditsContract.waitForDeployment()
-    console.log("FlashDuelsCredits deployed:", flashDuelsCredits.target)
+
 
     const FlashDuelsIncentives = await ethers.getContractFactory("FlashDuelsIncentives")
     const flashDuelsIncentives = await FlashDuelsIncentives.deploy()
@@ -101,7 +104,6 @@ const main = async () => {
     await diamond.waitForDeployment()
     console.log("Diamond deployed:", diamond.target)
 
-    // const FacetNames = ["DiamondLoupeFacet"]
 
     const diamondLoupe = ["0xcdffacc6", "0x52ef6b2c", "0xadfca15e", "0x7a0ed627", "0x01ffc9a7"]
     const flashDuelsAdminFacetSelectors = [
@@ -138,7 +140,6 @@ const main = async () => {
     ]
 
     const flashDuelsMarketplaceFacetSelectors = [
-        // "0x9012c4a8", // updateFee(uint256)
         "0xf1d6debd", // updateSellerFees(uint256)
         "0x143c790d", // updateBuyerFees(uint256)
         "0x07b4c084", // sell(address,string,uint256,uint256,uint256)
@@ -170,10 +171,7 @@ const main = async () => {
         "0xa7745713", // getSales(address,uint256)
         "0x72e14c5f", // getPendingDuels(address,uint8)
         "0x1cb85b1f", // getPendingDuelByIndex(address,uint8,uint256)
-        // "0x335b96ff", // getPendingCryptoDuels(address)
-        // "0x57710916", // getPendingCryptoDuelByIndex(address,uint256)
         "0x583f105b", // getAllPendingDuelsAndCount()
-        // "0xee45b057", // getAllPendingCryptoDuelsAndCount()
         "0x66ca21a8", // getCreateDuelFee()
         "0x706d9f78", // getProtocolFeePercentage()
         "0xd722ab26", // getCreatorFeePercentage()
@@ -181,7 +179,6 @@ const main = async () => {
         "0xecbf647b", // getRefundChunkSize()
         "0xab1a778a", // getResolvingPeriod()
         "0xb734a264", // getBootstrapPeriod()
-        // "0x8edf8f0f", // getMarketPlaceFees()
         "0x5c769f34", // getSellerAndBuyerFees()
         "0xe6bbe9dd", // getMinThreshold()
         "0x2f06c7d5", // getSaleCounter()
@@ -240,9 +237,9 @@ const main = async () => {
     let functionCall = diamondInit.interface.encodeFunctionData("init", [
         protocolTreasury,
         diamond.target,
-        usdAddress,
+        usdAddress.target,
         bot,
-        flashDuelsCredits.target
+        creditsAddress.target
     ])
     tx = await diamondCut.diamondCut(cut, diamondInit.target, functionCall)
     console.log("Diamond cut tx: ", tx.hash)
@@ -258,8 +255,8 @@ const main = async () => {
     await tx.wait(1)
 
     let contracts = [
-        { name: "FLASHUSDC", address: usdAddress },
-        { name: "FlashDuelsCredits", address: flashDuelsCredits.target },
+        { name: "FLASHUSDC", address: usdAddress.target },
+        { name: "FlashDuelsCredits", address: creditsAddress.target },
         { name: "FlashDuelsIncentives", address: flashDuelsIncentives.target },
         { name: "FlashDuelsAdminFacet", address: flashDuelsAdminFacet.target },
         { name: "FlashDuelsCoreFacet", address: flashDuelsCoreFacet.target },

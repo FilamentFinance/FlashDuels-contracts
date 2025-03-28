@@ -113,30 +113,6 @@ struct PendingDuel {
     uint256 usdcAmount;
 }
 
-// /// @notice Struct that stores details of each pending crypto duel
-// struct PendingCryptoDuel {
-//     /// @notice Address of the duel creator
-//     address creator;
-//     /// @notice Category of the duel
-//     DuelCategory category;
-//     /// @notice Symbol of the token
-//     string tokenSymbol;
-//     /// @notice Options available in the duel
-//     string[] options;
-//     /// @notice Duration of the duel
-//     DuelDuration duration;
-//     /// @notice Approval status of the duel
-//     bool isApproved;
-//     /// @notice Amount of USDC for the duel
-//     uint256 usdcAmount;
-//     /// @notice Trigger value of the token
-//     int256 triggerValue;
-//     /// @notice Trigger type
-//     TriggerType triggerType;
-//     /// @notice Trigger condition
-//     TriggerCondition triggerCondition;
-// }
-
 /// @notice Enum representing different possible duel durations
 enum DuelDuration {
     FiveMinutes,
@@ -453,7 +429,7 @@ struct AppStorage {
     /// @notice Nonce used to generate unique duel IDs
     uint256 nonce;
     /// @notice address of flashDuels diamond contract
-    address flashDuelsContract; // @note mainnet - can be removed for mainnet deployment
+    address flashDuelsContract;
     /// @notice Protocol address to receive fees
     address protocolTreasury;
     /// @notice USDC token contract address used for payments and fees
@@ -464,12 +440,10 @@ struct AppStorage {
     address credits;
     /// @notice  Storage for all pending duels
     PendingDuel[] allPendingDuels;
-    // /// @notice  Storage for all pending crypto duels
-    // PendingCryptoDuel[] allPendingCryptoDuels;
     /// @notice The token type for participation in duels
     ParticipationTokenType participationTokenType;
     /// @notice Mapping of duelId to the optionIndex to the winning option to the total winning option payout
-    mapping(string => mapping(uint256 => mapping(string => uint256))) totalWinningOptionPayout; // @note - can be shited up during mainnet deployment
+    mapping(string => mapping(uint256 => mapping(string => uint256))) totalWinningOptionPayout;
     /// @notice Mapping for duelId -> option-> user -> 1-based index in the participants array
     mapping(string => mapping(string => mapping(address => uint256))) participantIndices;
     /// @notice Mapping to track total bets on duel option for a particular duel
@@ -480,8 +454,6 @@ struct AppStorage {
     mapping(address => mapping(string => mapping(string => uint256))) userWager;
     /// @notice Mapping to store pending duels by user address
     mapping(address => mapping(DuelCategory => PendingDuel[])) pendingDuels;
-    // /// @notice Mapping to store pending crypto duels by user address
-    // mapping(address => PendingCryptoDuel[]) pendingCryptoDuels;
     /// @notice Mapping of duelId to optionIndex to the option token address
     mapping(string => mapping(uint256 => address)) optionIndexToOptionToken;
     /// @notice Mapping of duelId to the option to the total wager for option

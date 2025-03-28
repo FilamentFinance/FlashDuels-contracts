@@ -1,7 +1,11 @@
 {
     "hardhat": {
-        "FLASHUSDC": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-        "FlashDuelsCredits": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+        "FLASHUSDC": {
+            "target": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+        },
+        "FlashDuelsCredits": {
+            "target": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+        },
         "FlashDuelsIncentives": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
         "FlashDuelsMarketplace": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
         "FlashDuelsCoreFacet": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
@@ -15,7 +19,7 @@
         "Goldsky_Subgraph": "",
         "FlashDuelsAdminFacet": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
         "StartBlock": 0,
-        "deploymentDate": "2025-03-26T08:57:48.597Z"
+        "deploymentDate": "2025-03-28T20:36:47.276Z"
     },
     "seiTestnet": {
         "FLASHUSDC": "0x9B640e86ff36C2c0f2b8c3958cD315Bb7fA1fD97",
@@ -51,20 +55,20 @@
         "Goldsky_Subgraph": ""
     },
     "seiMainnet": {
-        "FLASHUSDC": "",
-        "FlashDuelsCredits": "",
-        "FlashDuelsIncentives": "",
-        "FlashDuelsAdminFacet": "",
-        "FlashDuelsCoreFacet": "",
-        "FlashDuelsMarketplaceFacet": "",
-        "FlashDuelsViewFacet": "",
-        "OwnershipFacet": "",
-        "DiamondCutFacet": "",
-        "DiamondLoupeFacet": "",
-        "DiamondInit": "",
-        "Diamond": "",
-        "StartBlock": 156536943,
+        "FLASHUSDC": "0x3894085Ef7Ff0f0aeDf52E2A2704928d1Ec074F1",
+        "FlashDuelsCredits": "0x19657A407403c23796331DDeA8870787a1A1D6C7",
+        "FlashDuelsIncentives": "0xc3f77a442923ED4e39B4d4BE43458c616864f3bb",
+        "FlashDuelsAdminFacet": "0x589d572c5F9F0FcF01bA79268911463e8C9441De",
+        "FlashDuelsCoreFacet": "0xFAf2ACe4B319dc9E9CE632dfD36E81468d1B075d",
+        "FlashDuelsMarketplaceFacet": "0xd1C57A9F5879d812B7f3ABc4D93B93b0552ce76e",
+        "FlashDuelsViewFacet": "0x4D113F5740a7EeEb313ea7FE7d358498334F54C1",
+        "OwnershipFacet": "0x77804237a3880c11C2D4C51ebd33abF4715B947e",
+        "DiamondCutFacet": "0x2aEdE33455BDD02f67AC0fe76Fd16c504f7Ef441",
+        "DiamondLoupeFacet": "0xCe296e3BCBB24aEE210631eceA5e07d037a01eaE",
+        "DiamondInit": "0x4cac87F67Db73b27CcdFCC431EFe08ba2D57176d",
+        "Diamond": "0x8872C473ef15B182A2050C51B8eDbA3f7Cf1D925",
+        "StartBlock": 139070350,
         "Goldsky_Subgraph": "",
-        "deploymentDate": "2025-03-07T10:35:07.851Z"
+        "deploymentDate": "2025-03-28T20:37:12.543Z"
     }
 }

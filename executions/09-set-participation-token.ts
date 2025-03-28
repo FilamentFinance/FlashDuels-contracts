@@ -1,6 +1,3 @@
-0x2Eb671E6e0cd965A79A80caF35c5123b7a5D8ebb
-
-
 import { ethers, network } from "hardhat"
 import * as helpers from "@nomicfoundation/hardhat-network-helpers"
 import netMap from "../constants/networkMapping.json"

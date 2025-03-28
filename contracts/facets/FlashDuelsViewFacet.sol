@@ -232,43 +232,12 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
         return s.pendingDuels[_user][_category][_index];
     }
 
-    // /// @notice Retrieves the pending crypto duels for a specific user.
-    // /// @param _user The address of the user whose pending crypto duels are requested.
-    // /// @return pendingCryptoDuels An array of pending crypto duels.
-    // /// @return pendingCryptoDuelsLength The number of pending crypto duels.
-    // function getPendingCryptoDuels(
-    //     address _user
-    // ) public view returns (PendingCryptoDuel[] memory, uint256 pendingCryptoDuelsLength) {
-    //     PendingCryptoDuel[] memory pendingCryptoDuels = s.pendingCryptoDuels[_user];
-    //     pendingCryptoDuelsLength = pendingCryptoDuels.length;
-    //     return (pendingCryptoDuels, pendingCryptoDuelsLength);
-    // }
-
-    // /// @notice Retrieves a pending crypto duel by index for a specific user.
-    // /// @param _user The address of the user whose pending crypto duel is requested.
-    // /// @param _index The index of the pending crypto duel to retrieve.
-    // /// @return pendingCryptoDuel The pending crypto duel at the specified index.
-    // function getPendingCryptoDuelByIndex(address _user, uint256 _index) public view returns (PendingCryptoDuel memory) {
-    //     return s.pendingCryptoDuels[_user][_index];
-    // }
-
     /// @notice Retrieves all pending duels and their count.
     /// @return allPendingDuels An array of all pending duels.
     /// @return allPendingDuelsLength The number of all pending duels.
     function getAllPendingDuelsAndCount() public view returns (PendingDuel[] memory, uint256 allPendingDuelsLength) {
         return (s.allPendingDuels, s.allPendingDuels.length);
     }
-
-    // /// @notice Retrieves all pending crypto duels and their count.
-    // /// @return allPendingCryptoDuels An array of all pending crypto duels.
-    // /// @return allPendingCryptoDuelsLength The number of all pending crypto duels.
-    // function getAllPendingCryptoDuelsAndCount()
-    //     public
-    //     view
-    //     returns (PendingCryptoDuel[] memory, uint256 allPendingCryptoDuelsLength)
-    // {
-    //     return (s.allPendingCryptoDuels, s.allPendingCryptoDuels.length);
-    // }
 
     /// @notice Retrieves the create duel fee.
     /// @return The create duel fee.
@@ -311,12 +280,6 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     function getBootstrapPeriod() public view returns (uint256) {
         return s.bootstrapPeriod;
     }
-
-    // /// @notice Returns the marketplace fees.
-    // /// @return The marketplace fees.
-    // function getMarketPlaceFees() public view returns (uint256) {
-    //     return s.marketPlaceFees;
-    // }
 
     /// @notice Returns the seller and buyer fees.
     /// @return The seller and buyer fees.

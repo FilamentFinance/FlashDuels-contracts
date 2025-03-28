@@ -30,16 +30,14 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         _;
     }
 
-    // /// @notice Updates the platform fee for transactions
-    // /// @param _newFee The new fee in basis points
-    // function updateFee(uint256 _newFee) external onlyOwner {
-    //     s.marketPlaceFees = _newFee;
-    // }
-
+    /// @notice Updates the seller fees
+    /// @param _newSellerFees The new seller fees
     function updateSellerFees(uint256 _newSellerFees) external onlyOwner {
         s.sellerFees = _newSellerFees;
     }   
 
+    /// @notice Updates the buyer fees
+    /// @param _newBuyerFees The new buyer fees
     function updateBuyerFees(uint256 _newBuyerFees) external onlyOwner {
         s.buyerFees = _newBuyerFees;
     }
@@ -73,7 +71,6 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         require(quantity > 0, "Amount must be greater than zero");
         require(totalPrice > 0, "Price per token must be greater than zero");
         IERC20 erc20 = IERC20(token);
-        // @note - zokyo-audit-fix-11
         require(erc20.balanceOf(msg.sender) >= quantity, "Insufficient token balance");
         require(erc20.allowance(msg.sender, address(this)) >= quantity, "Insufficient allowance for the contract");
         s.sales[token][s.saleCounter] = Sale({seller: msg.sender, quantity: quantity, totalPrice: totalPrice});
@@ -147,11 +144,9 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
 
             uint256 sellPricePerToken = (sale.totalPrice * 1e18) / sale.quantity;
             uint256 cost = (buyAmount * sellPricePerToken) / 1e18;
-            // uint256 fee = (cost * s.marketPlaceFees) / BPS; // 0.1% (10) (0.05% + 0.05%) 10 = 0.1
             uint256 sellerfees = (cost * s.sellerFees) / BPS; // 0.03% (3)
             uint256 buyerFees = (cost * s.buyerFees) / BPS; // 0.05% (5)
             uint256 fee = sellerfees + buyerFees;
-            // uint256 receivables = cost - fee;
             uint256 receivables = cost - sellerfees;
 
             // Transfer funds and tokens
@@ -181,7 +176,6 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
 
             totalCost += cost;
             platformFee += fee;
-            // emit TokensPurchased(buyer, sale.seller, token, buyAmount, cost, block.timestamp);
             emit TokensPurchased(buyer, sale.seller, token, newBuyAmount, cost, block.timestamp);
         }
     }

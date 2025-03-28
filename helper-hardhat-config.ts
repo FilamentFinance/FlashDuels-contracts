@@ -52,9 +52,9 @@ export const networkConfig: networkConfigInfo = {
         goldskySlug: "sei",
         deployer: "0xc060695ecd8ee28d1cf11cdd27c7f368e86986c5",
         usdc: "0x3894085Ef7Ff0f0aeDf52E2A2704928d1Ec074F1",
-        bot: "",
-        protocolTreasury: "",
-        Credits: ""
+        bot: "0x2Eb671E6e0cd965A79A80caF35c5123b7a5D8ebb",
+        protocolTreasury: "0xF4ddE68ed3cbF149fc22db422029e96F4F66f660",
+        Credits: "0x19657A407403c23796331DDeA8870787a1A1D6C7"
     }
 }
 

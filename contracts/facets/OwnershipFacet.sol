@@ -28,7 +28,6 @@ contract OwnershipFacet is IERC173 {
         return LibDiamond.pendingOwner();
     }
 
-    // @note - zokyo-audit-fix-15
     /**
      * @notice Allows the pending owner to accept the transfer of ownership.
      * @dev Can only be called by the pending owner to finalize ownership transfer.
