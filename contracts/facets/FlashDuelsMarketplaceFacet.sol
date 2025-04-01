@@ -50,12 +50,12 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
     function sell(
         string memory duelId,
         address token,
-        DuelCategory duelType,
+        DuelCategory duelCategory,
         uint256 optionIndex,
         uint256 quantity,
         uint256 totalPrice
     ) external nonReentrant {
-        if (duelType == DuelCategory.Crypto) {
+        if (duelCategory == DuelCategory.Crypto) {
             CryptoDuel memory cryptoDuel = IFlashDuelsView(s.flashDuelsContract).getCryptoDuel(duelId);
             _validateDuelSelling(cryptoDuel.expiryTime, cryptoDuel.duelDuration);
         } else {

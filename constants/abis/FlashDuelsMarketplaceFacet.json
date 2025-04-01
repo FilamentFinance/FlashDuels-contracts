@@ -309,7 +309,7 @@
             },
             {
                 "internalType": "enum DuelCategory",
-                "name": "duelType",
+                "name": "duelCategory",
                 "type": "uint8"
             },
             {
