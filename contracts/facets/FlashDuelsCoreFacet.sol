@@ -140,25 +140,28 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         uint256 _amount,
         address _user
     ) external nonReentrant whenNotPaused onlyBot {
+        uint256 amountTokenToMint;
         Duel storage duel = s.duels[_duelId];
         LibFlashDuels.LibFlashDuelsAppStorage storage libFlashDuelsStorage = LibFlashDuels.appStorage();
         require(libFlashDuelsStorage.isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.category != DuelCategory.Crypto, "Should not a crypto duel");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
-        require(_amount >= _optionPrice, "Less than minimum wager");
+
         // Transfer the wager amount in USDC to the contract
         if (s.participationTokenType == ParticipationTokenType.USDC) {
+            require(_amount >= _optionPrice, "Less than minimum wager");
             require(IERC20(s.usdc).transferFrom(_user, address(this), _amount), "Token transfer failed");
+            amountTokenToMint = (_amount * 1e18) / _optionPrice;
         } else {
+            require((_amount / 1e12) >= _optionPrice, "Less than minimum wager");
             require(IERC20(s.credits).transferFrom(_user, address(this), _amount), "Token transfer failed");
+            amountTokenToMint = (_amount * 1e18) / (_optionPrice * 1e12);
         }
 
         string memory option = s.duelIdToOptions[_duelId][_optionsIndex];
         // Increment wager for the selected topic
         s.totalWagerForOption[_duelId][option] += _amount;
         s.userWager[_user][_duelId][option] += _amount;
-
-        uint256 amountTokenToMint = (_amount * 1e18) / _optionPrice;
 
         if (!s.userExistsInOption[_duelId][option][_user]) {
             // Push user to the array
@@ -213,16 +216,20 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         uint256 _amount,
         address _user
     ) external nonReentrant whenNotPaused onlyBot {
+        uint256 amountTokenToMint;
         CryptoDuel storage duel = s.cryptoDuels[_duelId];
         LibFlashDuels.LibFlashDuelsAppStorage storage libFlashDuelsStorage = LibFlashDuels.appStorage();
         require(libFlashDuelsStorage.isValidDuelId[_duelId] && duel.createTime != 0, "Duel doesn't exist");
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
-        require(_amount >= _optionPrice, "Less than minimum wager");
         // Transfer the wager amount in USDC to the contract
         if (s.participationTokenType == ParticipationTokenType.USDC) {
+            require(_amount >= _optionPrice, "Less than minimum wager");
             require(IERC20(s.usdc).transferFrom(_user, address(this), _amount), "Token transfer failed");
+            amountTokenToMint = (_amount * 1e18) / _optionPrice;
         } else {
+            require((_amount / 1e12) >= _optionPrice, "Less than minimum wager");
             require(IERC20(s.credits).transferFrom(_user, address(this), _amount), "Token transfer failed");
+            amountTokenToMint = (_amount * 1e18) / (_optionPrice * 1e12);
         }
 
         string memory option = s.duelIdToOptions[_duelId][_optionsIndex];
@@ -230,7 +237,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         s.totalWagerForOption[_duelId][option] += _amount;
         s.userWager[_user][_duelId][option] += _amount;
 
-        uint256 amountTokenToMint = (_amount * 1e18) / _optionPrice;
 
         if (!s.userExistsInOption[_duelId][option][_user]) {
             // Push user to the array
@@ -332,6 +338,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
                                 : 12 hours;
         cryptoDuel.expiryTime = block.timestamp + duelDuration;
         cryptoDuel.duelStatus = DuelStatus.Live;
+        
 
         emit DuelStarted(_duelId, block.timestamp, cryptoDuel.expiryTime);
     }

@@ -23,41 +23,41 @@ async function main() {
     const DiamondCutFacet = await ethers.getContractAt("IDiamondCut", diamondAddress, deployer)
 
     // Deploy new facet
-    const FlashDuelsAdminFacet = await ethers.getContractFactory("FlashDuelsAdminFacet")
-    const flashDuelsAdminFacet = await FlashDuelsAdminFacet.deploy()
-    await flashDuelsAdminFacet.waitForDeployment()
-    console.log("FlashDuelsAdminFacet deployed:", flashDuelsAdminFacet.target)
+    // const FlashDuelsAdminFacet = await ethers.getContractFactory("FlashDuelsAdminFacet")
+    // const flashDuelsAdminFacet = await FlashDuelsAdminFacet.deploy()
+    // await flashDuelsAdminFacet.waitForDeployment()
+    // console.log("FlashDuelsAdminFacet deployed:", flashDuelsAdminFacet.target)
 
-    const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
-    const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
-    await flashDuelsCoreFacet.waitForDeployment()
-    console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
+    // const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
+    // const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
+    // await flashDuelsCoreFacet.waitForDeployment()
+    // console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
 
     const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
     const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
     await flashDuelsMarketplaceFacet.waitForDeployment()
     console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
-    const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
-    const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
-    await flashDuelsViewFacet.waitForDeployment()
-    console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
+    // const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
+    // const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
+    // await flashDuelsViewFacet.waitForDeployment()
+    // console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
 
-    const OwnershipFacet = await ethers.getContractFactory("OwnershipFacet")
-    const ownershipFacet = await OwnershipFacet.deploy()
-    await ownershipFacet.waitForDeployment()
-    console.log("OwnershipFacet deployed:", ownershipFacet.target)
+    // const OwnershipFacet = await ethers.getContractFactory("OwnershipFacet")
+    // const ownershipFacet = await OwnershipFacet.deploy()
+    // await ownershipFacet.waitForDeployment()
+    // console.log("OwnershipFacet deployed:", ownershipFacet.target)
 
     // Prepare the cut transaction
     const cut: any = [
         {
-            facetAddress: flashDuelsAdminFacet.target,
+            facetAddress: flashDuelsMarketplaceFacet.target,
             action: FacetCutAction.Add, // 0 means Add
             functionSelectors: [
-                "0xf4c49a9e" // setCRDAddress(address)
+                "0xe803c94f", // sell(string,address,uint8,uint256,uint256,uint256)
+                "0x2ca85a38" // buy(string,address,address,uint8,uint256,uint256[],uint256[])
             ]
-        },
-
+        }
     ]
 
     try {
