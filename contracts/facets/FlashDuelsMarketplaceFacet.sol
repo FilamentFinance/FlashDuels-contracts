@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {BPS, AppStorage, Duel, DuelStatus, Sale, SaleCreated, TokensPurchased, SaleCancelled, FlashDuelsMarketplace__DuelEnded, ParticipationTokenType, DuelDuration} from "../AppStorage.sol";
+import {BPS, AppStorage, Duel, DuelStatus, Sale, SaleCreated, TokensPurchased, SaleCancelled, FlashDuelsMarketplace__DuelEnded, ParticipationTokenType, DuelDuration, DuelCategory, CryptoDuel} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {OptionToken} from "../OptionToken.sol";
-import {IFlashDuels} from "../interfaces/IFlashDuels.sol";
+import {IFlashDuelsView} from "../interfaces/IFlashDuelsView.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
-
 
 /// @title FlashDuelsMarketplaceFacet
 /// @notice This contract manages the marketplace functionalities for FlashDuels, including token transfers and transaction processing.
@@ -34,38 +33,37 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
     /// @param _newSellerFees The new seller fees
     function updateSellerFees(uint256 _newSellerFees) external onlyOwner {
         s.sellerFees = _newSellerFees;
-    }   
+    }
 
     /// @notice Updates the buyer fees
     /// @param _newBuyerFees The new buyer fees
     function updateBuyerFees(uint256 _newBuyerFees) external onlyOwner {
         s.buyerFees = _newBuyerFees;
     }
-    
 
     /// @notice Creates a new sale for the given token
     /// @param token The address of the token to be sold
     /// @param duelId The ID of the associated duel
     /// @param optionIndex The index of the option
     /// @param quantity The quantity of tokens to be sold
-    /// @param totalPrice The total price for the sale
+    /// @param totalPrice The total price for the sale (must be in 6 decimals for USDC, 18 decimals for Credits)
     function sell(
-        address token,
         string memory duelId,
+        address token,
+        DuelCategory duelCategory,
         uint256 optionIndex,
-        uint256 quantity,
-        uint256 totalPrice
+        uint256 quantity, // always in 18 decimals (option tokens)
+        uint256 totalPrice // in 6 decimals for USDC, 18 decimals for Credits
     ) external nonReentrant {
-        Duel memory duel = IFlashDuels(s.flashDuelsContract).getDuel(duelId);
-        require(duel.expiryTime > block.timestamp, "Duel has expired");
-
-        // No selling allowed for 5 mins and 15 mins duels
-        if (duel.duelDuration == DuelDuration.FiveMinutes || duel.duelDuration == DuelDuration.FifteenMinutes) {
-            revert("Selling not allowed for short duration duels");
+        if (duelCategory == DuelCategory.Crypto) {
+            CryptoDuel memory cryptoDuel = IFlashDuelsView(s.flashDuelsContract).getCryptoDuel(duelId);
+            _validateDuelSelling(cryptoDuel.expiryTime, cryptoDuel.duelDuration);
+        } else {
+            Duel memory flashDuel = IFlashDuelsView(s.flashDuelsContract).getDuel(duelId);
+            _validateDuelSelling(flashDuel.expiryTime, flashDuel.duelDuration);
         }
-
         require(
-            token == IFlashDuels(s.flashDuelsContract).getOptionIndexToOptionToken(duelId, optionIndex),
+            token == IFlashDuelsView(s.flashDuelsContract).getOptionIndexToOptionToken(duelId, optionIndex),
             "Invalid option"
         );
         require(quantity > 0, "Amount must be greater than zero");
@@ -97,35 +95,24 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
     /// @param saleIds Array of sale IDs to buy from
     /// @param amounts Array of amounts to buy from each seller (must be <= seller's available quantity)
     function buy(
+        string memory duelId,
         address buyer,
         address token,
-        string memory duelId,
+        DuelCategory duelCategory,
         uint256 optionIndex,
         uint256[] memory saleIds,
         uint256[] memory amounts
     ) external onlyBot nonReentrant {
         require(saleIds.length == amounts.length, "Mismatched array lengths");
-
-        Duel memory duel = IFlashDuels(s.flashDuelsContract).getDuel(duelId);
-        if (duel.duelStatus == DuelStatus.Settled || duel.duelStatus == DuelStatus.Cancelled) {
-            revert FlashDuelsMarketplace__DuelEnded(duelId);
-        }
-        require(duel.expiryTime > block.timestamp, "Duel has expired");
-
-        // No market buy for 5 mins and 15 mins duels
-        if (duel.duelDuration == DuelDuration.FiveMinutes || duel.duelDuration == DuelDuration.FifteenMinutes) {
-            revert("Market buy not allowed for short duration duels");
-        }
-
-        // For 30 mins duels, allow market buy in last 10 mins
-        if (duel.duelDuration == DuelDuration.ThirtyMinutes) {
-            require(duel.expiryTime - block.timestamp <= 10 minutes, "Market buy not allowed yet");
+        if (duelCategory == DuelCategory.Crypto) {
+            CryptoDuel memory cryptoDuel = IFlashDuelsView(s.flashDuelsContract).getCryptoDuel(duelId);
+            _validateMarketBuyTiming(cryptoDuel.expiryTime, cryptoDuel.duelDuration, cryptoDuel.duelStatus, duelId);
         } else {
-            // For all longer durations (1h, 3h, 6h, 12h), allow market buy in last 30 mins
-            require(duel.expiryTime - block.timestamp <= 30 minutes, "Market buy not allowed yet");
+            Duel memory flashDuel = IFlashDuelsView(s.flashDuelsContract).getDuel(duelId);
+            _validateMarketBuyTiming(flashDuel.expiryTime, flashDuel.duelDuration, flashDuel.duelStatus, duelId);
         }
         require(
-            token == IFlashDuels(s.flashDuelsContract).getOptionIndexToOptionToken(duelId, optionIndex),
+            token == IFlashDuelsView(s.flashDuelsContract).getOptionIndexToOptionToken(duelId, optionIndex),
             "Invalid option"
         );
         IERC20 erc20 = IERC20(token);
@@ -226,6 +213,47 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
                 delete participantIndices[_seller];
                 delete s.userExistsInOption[_duelId][option][_seller];
             }
+        }
+    }
+
+    /// @notice Validates the duel selling timing rules
+    /// @param expiryTime The expiry time of the duel
+    /// @param duelDuration The duration of the duel
+    function _validateDuelSelling(uint256 expiryTime, DuelDuration duelDuration) private view {
+        require(expiryTime > block.timestamp, "Duel has expired");
+
+        if (duelDuration == DuelDuration.FiveMinutes || duelDuration == DuelDuration.FifteenMinutes) {
+            revert("Selling not allowed for short duration duels");
+        }
+    }
+
+    /// @notice Validates the market buy timing rules
+    /// @param expiryTime The expiry time of the duel
+    /// @param duelDuration The duration of the duel
+    /// @param duelStatus The status of the duel
+    /// @param duelId The ID of the duel
+    function _validateMarketBuyTiming(
+        uint256 expiryTime,
+        DuelDuration duelDuration,
+        DuelStatus duelStatus,
+        string memory duelId
+    ) private view {
+        if (duelStatus == DuelStatus.Settled || duelStatus == DuelStatus.Cancelled) {
+            revert FlashDuelsMarketplace__DuelEnded(duelId);
+        }
+        require(expiryTime > block.timestamp, "Duel has expired");
+
+        // No market buy for 5 mins and 15 mins duels
+        if (duelDuration == DuelDuration.FiveMinutes || duelDuration == DuelDuration.FifteenMinutes) {
+            revert("Market buy not allowed for short duration duels");
+        }
+
+        // For 30 mins duels, allow market buy in last 10 mins
+        if (duelDuration == DuelDuration.ThirtyMinutes) {
+            require(expiryTime - block.timestamp <= 10 minutes, "Market buy not allowed yet");
+        } else {
+            // For all longer durations (1h, 3h, 6h, 12h), allow market buy in last 30 mins
+            require(expiryTime - block.timestamp <= 30 minutes, "Market buy not allowed yet");
         }
     }
 }

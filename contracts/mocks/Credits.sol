@@ -15,6 +15,19 @@ contract Credits is ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
     uint256 public maxSupply;
     uint256 public totalCreditsAllocated;
     mapping(address => uint256) public credits;
+    /// @dev This `totalClaimed` mapping was added on March 29, 2025. Before this date, the totalClaimed for all users will be 0. 
+    /// After March 29, it will be taken into account for this variable.
+    mapping(address => uint256) public totalClaimed;
+    /// @dev The botAddress can airdrop credits to users. (Added on March 29, 2025)
+    address public botAddress;
+
+    /// @dev `CreditsClaimed` event emitted when a user claims their credits. (Added on March 29, 2025)
+    event CreditsClaimed(address indexed user, uint256 amount);
+
+    modifier onlyOwnerOrBot() {
+        require(msg.sender == owner() || msg.sender == botAddress, "Only owner or bot can call this function");
+        _;
+    }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -23,14 +36,16 @@ contract Credits is ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
 
     function initialize(uint256 _maxSupply) public initializer {
         maxSupply = _maxSupply;
-        __ERC20_init("FlashDuels Credits", "FDCRD");
+        __ERC20_init("Credits", "CRD");
         __Ownable_init(msg.sender);
         __UUPSUpgradeable_init();
     }
 
-    modifier onlyOwnerOrBot() {
-        require(msg.sender == owner() || msg.sender == 0x2Eb671E6e0cd965A79A80caF35c5123b7a5D8ebb, "Only the owner or bot can call this function");
-        _;
+    /// @dev Set the bot address.
+    /// @param _botAddress The address of the bot.
+    function setBotAddress(address _botAddress) external onlyOwner {
+        require(_botAddress != address(0), "Bot address cannot be 0");
+        botAddress = _botAddress;
     }
 
     function airdrop(address[] calldata _recipients, uint256[] calldata _amounts) external onlyOwnerOrBot {
@@ -49,10 +64,13 @@ contract Credits is ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     function claim() external {
-        require(credits[msg.sender] != 0, Credits__NotEnoughCredtis());
-        require(credits[msg.sender] + totalSupply() <= maxSupply, Credits__MaxSupplyReached());
-        _mint(msg.sender, credits[msg.sender]);
+        uint256 availableCredits = credits[msg.sender];
+        require(availableCredits != 0, Credits__NotEnoughCredtis());
+        require(availableCredits + totalSupply() <= maxSupply, Credits__MaxSupplyReached());
+        _mint(msg.sender, availableCredits);
+        totalClaimed[msg.sender] += availableCredits;
         credits[msg.sender] = 0;
+        emit CreditsClaimed(msg.sender, availableCredits);
     }
 
     function burn(uint256 value) external {

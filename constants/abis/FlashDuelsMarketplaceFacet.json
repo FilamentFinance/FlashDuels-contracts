@@ -196,6 +196,11 @@
     {
         "inputs": [
             {
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
                 "internalType": "address",
                 "name": "buyer",
                 "type": "address"
@@ -206,9 +211,9 @@
                 "type": "address"
             },
             {
-                "internalType": "string",
-                "name": "duelId",
-                "type": "string"
+                "internalType": "enum DuelCategory",
+                "name": "duelCategory",
+                "type": "uint8"
             },
             {
                 "internalType": "uint256",
@@ -293,14 +298,19 @@
     {
         "inputs": [
             {
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
                 "internalType": "address",
                 "name": "token",
                 "type": "address"
             },
             {
-                "internalType": "string",
-                "name": "duelId",
-                "type": "string"
+                "internalType": "enum DuelCategory",
+                "name": "duelCategory",
+                "type": "uint8"
             },
             {
                 "internalType": "uint256",
