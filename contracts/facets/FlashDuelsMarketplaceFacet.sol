@@ -46,14 +46,14 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
     /// @param duelId The ID of the associated duel
     /// @param optionIndex The index of the option
     /// @param quantity The quantity of tokens to be sold
-    /// @param totalPrice The total price for the sale
+    /// @param totalPrice The total price for the sale (must be in 6 decimals for USDC, 18 decimals for Credits)
     function sell(
         string memory duelId,
         address token,
         DuelCategory duelCategory,
         uint256 optionIndex,
-        uint256 quantity,
-        uint256 totalPrice
+        uint256 quantity, // always in 18 decimals (option tokens)
+        uint256 totalPrice // in 6 decimals for USDC, 18 decimals for Credits
     ) external nonReentrant {
         if (duelCategory == DuelCategory.Crypto) {
             CryptoDuel memory cryptoDuel = IFlashDuelsView(s.flashDuelsContract).getCryptoDuel(duelId);

@@ -149,12 +149,17 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
 
         // Transfer the wager amount in USDC to the contract
         if (s.participationTokenType == ParticipationTokenType.USDC) {
+            // USDC: 6 decimals
             require(_amount >= _optionPrice, "Less than minimum wager");
             require(IERC20(s.usdc).transferFrom(_user, address(this), _amount), "Token transfer failed");
+            // Convert to 18 decimal option tokens: (amount * 1e18) / optionPrice
             amountTokenToMint = (_amount * 1e18) / _optionPrice;
         } else {
+            // Credits: 18 decimals
+            // Convert Credits to USD equivalent (18 decimals -> 6 decimals) for comparison
             require((_amount / 1e12) >= _optionPrice, "Less than minimum wager");
             require(IERC20(s.credits).transferFrom(_user, address(this), _amount), "Token transfer failed");
+            // Convert to 18 decimal option tokens: (amount * 1e18) / (optionPrice * 1e12)
             amountTokenToMint = (_amount * 1e18) / (_optionPrice * 1e12);
         }
 
@@ -223,12 +228,17 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         require(duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live, "Duel isn't live");
         // Transfer the wager amount in USDC to the contract
         if (s.participationTokenType == ParticipationTokenType.USDC) {
+            // USDC: 6 decimals
             require(_amount >= _optionPrice, "Less than minimum wager");
             require(IERC20(s.usdc).transferFrom(_user, address(this), _amount), "Token transfer failed");
+            // Convert to 18 decimal option tokens: (amount * 1e18) / optionPrice
             amountTokenToMint = (_amount * 1e18) / _optionPrice;
         } else {
+            // Credits: 18 decimals
+            // Convert Credits to USD equivalent (18 decimals -> 6 decimals) for comparison
             require((_amount / 1e12) >= _optionPrice, "Less than minimum wager");
             require(IERC20(s.credits).transferFrom(_user, address(this), _amount), "Token transfer failed");
+            // Convert to 18 decimal option tokens: (amount * 1e18) / (optionPrice * 1e12)
             amountTokenToMint = (_amount * 1e18) / (_optionPrice * 1e12);
         }
 
@@ -236,7 +246,6 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // Increment wager for the selected topic
         s.totalWagerForOption[_duelId][option] += _amount;
         s.userWager[_user][_duelId][option] += _amount;
-
 
         if (!s.userExistsInOption[_duelId][option][_user]) {
             // Push user to the array
