@@ -28,10 +28,10 @@ async function main() {
     // await flashDuelsAdminFacet.waitForDeployment()
     // console.log("FlashDuelsAdminFacet deployed:", flashDuelsAdminFacet.target)
 
-    // const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
-    // const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
-    // await flashDuelsCoreFacet.waitForDeployment()
-    // console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
+    const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
+    const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
+    await flashDuelsCoreFacet.waitForDeployment()
+    console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
 
     const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
     const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
@@ -67,25 +67,25 @@ async function main() {
         // ]
         // },
 
-        // {
-        //     facetAddress: flashDuelsCoreFacet.target,
-        //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
-        //     functionSelectors: [
-        //         "0x59a9e4f6", // requestCreateDuel(uint8,string,string[],uint8)
-        //         "0x48fa0ebe", // requestCreateCryptoDuel(string,string[],int256,uint8,uint8,uint8)
-        //         "0x1852d000", // joinDuel(string,string,uint256,uint256,uint256,address)
-        //         "0xdd20ca2a", // joinCryptoDuel(string,string,uint256,uint256,uint256,address)
-        //         "0xf78283bd", // startDuel(string)
-        //         "0xb117a1dc", // startCryptoDuel(string,int256)
-        //         "0xc0dbdcab", // settleDuel(string,uint256)
-        //         "0x0f9f3b7c", // continueWinningsDistribution(string,uint256,string)
-        //         "0x2afa99d9", // settleCryptoDuel(string,int256)
-        //         "0x3f3a631b", // cancelDuelIfThresholdNotMet(uint8,string)
-        //         "0x6e70096e", // withdrawEarnings(uint256)
-        //         "0xf1675271", // withdrawCreatorFee()
-        //         "0xef82031a" // continueRefundsInChunks(string)
-        //     ]
-        // },
+        {
+            facetAddress: flashDuelsCoreFacet.target,
+            action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
+            functionSelectors: [
+                "0x59a9e4f6", // requestCreateDuel(uint8,string,string[],uint8)
+                "0x48fa0ebe", // requestCreateCryptoDuel(string,string[],int256,uint8,uint8,uint8)
+                "0x1852d000", // joinDuel(string,string,uint256,uint256,uint256,address)
+                "0xdd20ca2a", // joinCryptoDuel(string,string,uint256,uint256,uint256,address)
+                "0xf78283bd", // startDuel(string)
+                "0xb117a1dc", // startCryptoDuel(string,int256)
+                "0xc0dbdcab", // settleDuel(string,uint256)
+                "0x0f9f3b7c", // continueWinningsDistribution(string,uint256,string)
+                "0x2afa99d9", // settleCryptoDuel(string,int256)
+                "0x3f3a631b", // cancelDuelIfThresholdNotMet(uint8,string)
+                "0x6e70096e", // withdrawEarnings(uint256)
+                "0xf1675271", // withdrawCreatorFee()
+                "0xef82031a" // continueRefundsInChunks(string)
+            ]
+        },
         {
             facetAddress: flashDuelsMarketplaceFacet.target,
             action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
