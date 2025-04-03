@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { contracts, FlashDuels, FLASHUSDC } from "../typechain-types"
+import { contracts, FLASHUSDC } from "../typechain-types"
 import { time, loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers"
 import { ethers, upgrades, network } from "hardhat"
 import { networkConfig, testNetworkChains } from "../helper-hardhat-config"
@@ -106,17 +106,18 @@ describe("FlashDuels Marketplace Contract", function () {
             }
         }
         // console.log("sellerOptionToken", sellerOptionToken);
-        let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        // let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        let optionToken: any = await contracts.USDC.usdcContract?.attach(sellerOptionToken as string)
         await optionToken.connect(seller).approve(contracts.Diamond.diamond, ethers.parseUnits("5", 18))
         tx = await flashDuelsMarketplace
             .connect(seller)
-            .sell(sellerOptionToken, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
+            .sell(duelIds[0], sellerOptionToken, 2, 1, ethers.parseUnits("5", 18), "7000000")
         txr = await tx.wait(1)
 
         await expect(
             flashDuelsMarketplace
                 .connect(seller)
-                .sell(sellerOptionToken, duelIds[0], 1, ethers.parseUnits("0", 18), "7000000")
+                .sell(duelIds[0], sellerOptionToken, 2, 1, ethers.parseUnits("0", 18), "7000000")
         ).to.be.revertedWith("Amount must be greater than zero")
     })
 })
@@ -218,11 +219,13 @@ describe("Cancel Sale", function () {
 
         // console.log("sellerOptionToken", sellerOptionToken);
 
-        let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        // let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        let optionToken: any = await contracts.USDC.usdcContract?.attach(sellerOptionToken as string)
+
         await optionToken.connect(seller).approve(contracts.Diamond.diamond, ethers.parseUnits("5", 18))
         tx = await flashDuelsMarketplace
             .connect(seller)
-            .sell(sellerOptionToken, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
+            .sell(duelIds[0], sellerOptionToken, 2, 1, ethers.parseUnits("5", 18), "7000000")
         txr = await tx.wait(1)
 
         await flashDuelsMarketplace.connect(seller).cancelSell(sellerOptionToken, 0)
@@ -322,11 +325,12 @@ describe("Cancel Sale", function () {
 
         // console.log("sellerOptionToken", sellerOptionToken);
 
-        let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        // let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        let optionToken: any = await contracts.USDC.usdcContract?.attach(sellerOptionToken as string)
         await optionToken.connect(seller).approve(contracts.Diamond.diamond, ethers.parseUnits("5", 18))
         tx = await flashDuelsMarketplace
             .connect(seller)
-            .sell(sellerOptionToken, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
+            .sell(duelIds[0], sellerOptionToken, 2, 1, ethers.parseUnits("5", 18), "7000000")
         txr = await tx.wait(1)
 
         await expect(flashDuelsMarketplace.connect(buyer).cancelSell(sellerOptionToken, 0)).to.be.revertedWith(
@@ -431,11 +435,12 @@ describe("Token Purchase", function () {
 
         // console.log("sellerOptionToken", sellerOptionToken);
 
-        let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        // let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        let optionToken: any = await contracts.USDC.usdcContract?.attach(sellerOptionToken as string)
         await optionToken.connect(seller).approve(contracts.Diamond.diamond, ethers.parseUnits("5", 18))
         tx = await flashDuelsMarketplace
             .connect(seller)
-            .sell(sellerOptionToken, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
+            .sell(duelIds[0], sellerOptionToken, 2, 1, ethers.parseUnits("5", 18), "7000000")
         txr = await tx.wait(1)
 
         amount = ethers.parseUnits("70", 6)
@@ -446,9 +451,8 @@ describe("Token Purchase", function () {
 
         await ethers.provider.send("evm_increaseTime", [50 * 60])
         await ethers.provider.send("evm_mine", [])
-
         
-        await flashDuelsMarketplace.connect(contracts.Bot.bot).buy(buyer.address, sellerOptionToken, duelIds[0], 1, [0], [ethers.parseUnits("5", 18)])
+        await flashDuelsMarketplace.connect(contracts.Bot.bot).buy(duelIds[0], buyer.address, sellerOptionToken, 2, 1, [0], [ethers.parseUnits("5", 18)])
         const sale = await flashDuelsView.getSales(sellerOptionToken, 0)
         expect(sale.seller).to.equal("0x0000000000000000000000000000000000000000") // Ensure the sale is deleted
     })
@@ -542,11 +546,12 @@ describe("Token Purchase", function () {
 
         // console.log("sellerOptionToken", sellerOptionToken);
 
-        let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        // let optionToken: FLASHUSDC = new ethers.Contract(sellerOptionToken, FLASHUSDCABI, owner)
+        let optionToken: any = await contracts.USDC.usdcContract?.attach(sellerOptionToken as string)
         await optionToken.connect(seller).approve(contracts.Diamond.diamond, ethers.parseUnits("5", 18))
         tx = await flashDuelsMarketplace
             .connect(seller)
-            .sell(sellerOptionToken, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
+            .sell(duelIds[0], sellerOptionToken, 2, 1, ethers.parseUnits("5", 18), "7000000")
         txr = await tx.wait(1)
 
         amount = ethers.parseUnits("54", 6)
@@ -556,7 +561,7 @@ describe("Token Purchase", function () {
         tx = await flashDuelsView.getDuel(duelIds[0])
         await ethers.provider.send("evm_increaseTime", [50 * 60])
         await ethers.provider.send("evm_mine", [])
-        await flashDuelsMarketplace.connect(contracts.Bot.bot).buy(buyer.address, sellerOptionToken, duelIds[0], 1, [0], [ethers.parseUnits("3", 18)])
+        await flashDuelsMarketplace.connect(contracts.Bot.bot).buy(duelIds[0], buyer.address, sellerOptionToken, 2, 1, [0], [ethers.parseUnits("3", 18)])
         const sale = await flashDuelsView.getSales(sellerOptionToken, 0)
         expect(sale.seller).to.equal(seller.address) // Ensure the sale is deleted
         expect(sale.quantity).to.equal(ethers.parseUnits("2", 18)) // Ensure the sale is deleted
@@ -665,18 +670,20 @@ describe("Token Purchase", function () {
 
         // console.log("sellerOptionToken", sellerOptionToken);
 
-        let optionToken1: FLASHUSDC = new ethers.Contract(sellerOptionToken1, FLASHUSDCABI, owner)
+        // let optionToken1: FLASHUSDC = new ethers.Contract(sellerOptionToken1, FLASHUSDCABI, owner)
+        let optionToken1: any = await contracts.USDC.usdcContract?.attach(sellerOptionToken1 as string)
         await optionToken1.connect(seller1).approve(contracts.Diamond.diamond, ethers.parseUnits("5", 18))
         tx = await flashDuelsMarketplace
             .connect(seller1)
-            .sell(sellerOptionToken1, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
+            .sell(duelIds[0], sellerOptionToken1, 2, 1, ethers.parseUnits("5", 18), "7000000")
         txr = await tx.wait(1)
 
-        let optionToken2: FLASHUSDC = new ethers.Contract(sellerOptionToken2, FLASHUSDCABI, owner)
+        // let optionToken2: FLASHUSDC = new ethers.Contract(sellerOptionToken2, FLASHUSDCABI, owner)
+        let optionToken2: any = await contracts.USDC.usdcContract?.attach(sellerOptionToken2 as string)
         await optionToken2.connect(seller2).approve(contracts.Diamond.diamond, ethers.parseUnits("5", 18))
         tx = await flashDuelsMarketplace
             .connect(seller2)
-            .sell(sellerOptionToken2, duelIds[0], 1, ethers.parseUnits("5", 18), "7000000")
+            .sell(duelIds[0], sellerOptionToken2, 2, 1, ethers.parseUnits("5", 18), "7000000")
 
         amount = ethers.parseUnits("140", 6)
 
@@ -686,7 +693,7 @@ describe("Token Purchase", function () {
         await ethers.provider.send("evm_increaseTime", [50 * 60])
         await ethers.provider.send("evm_mine", [])
         // @note - here sellerOptionToken1 == sellerOptionToken2
-        await flashDuelsMarketplace.connect(contracts.Bot.bot).buy(buyer.address, sellerOptionToken1, duelIds[0], 1, [0, 1], [ethers.parseUnits("5", 18), ethers.parseUnits("3", 18)])
+        await flashDuelsMarketplace.connect(contracts.Bot.bot).buy(duelIds[0], buyer.address, sellerOptionToken1, 2, 1, [0, 1], [ethers.parseUnits("5", 18), ethers.parseUnits("3", 18)])
         let sale = await flashDuelsView.getSales(sellerOptionToken1, 0)
         expect(sale.seller).to.equal("0x0000000000000000000000000000000000000000") // Ensure the sale is deleted
         expect(sale.quantity).to.equal(ethers.parseUnits("0", 18)) // Ensure the sale is deleted
@@ -721,7 +728,7 @@ describe("Token Purchase", function () {
 
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-        await usdcToken.connect(accounts[1]).approve(flashDuelsCore.target, ethers.parseUnits("10", 6))
+        await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         tx = await flashDuelsCore
             .connect(accounts[1])
             .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -793,7 +800,7 @@ describe("Token Purchase", function () {
         let bot = accounts[3]
 
         await expect(
-            flashDuelsMarketplace.connect(contracts.Bot.bot).buy(buyer.address, sellerOptionToken, duelIds[0], 1, [0], [amount])
+            flashDuelsMarketplace.connect(contracts.Bot.bot).buy(duelIds[0], buyer.address, sellerOptionToken, 2, 1, [0], [amount])
         ).to.be.revertedWithCustomError(flashDuelsMarketplace, "FlashDuelsMarketplace__DuelEnded")
     })
 })
