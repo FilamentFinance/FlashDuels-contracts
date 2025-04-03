@@ -49,7 +49,11 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// It updates the createDuelFee variable with the new fee value.
     /// @param _fee The new fee amount to set for creating a duel.
     function setCreateDuelFee(uint256 _fee) external onlyOwner {
-        require(_fee <= 10 * 1e6, "Duel fees cannot be more than 10 dollars");
+        if (s.participationTokenType == ParticipationTokenType.USDC) {
+            require(_fee <= 10 * 1e6, "Duel fees cannot be more than 10 dollars");
+        } else {
+            require(_fee <= 10 * 1e18, "Duel fees cannot be more than 10 credits");
+        }
         s.createDuelFee = _fee;
         emit CreateDuelFeeUpdated(_fee);
     }
@@ -79,10 +83,14 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// It updates the minThreshold variable with the new threshold value.
     /// @param _minThreshold The minimum threshold for the duel to start for each topic.
     function setMinimumWagerThreshold(uint256 _minThreshold) external onlyOwner {
-        require(
-            _minThreshold >= 50 * 1e6 && _minThreshold <= 200 * 1e6,
-            "Minimum threshold should be in the range 50 to 100 dollars"
-        );
+        if (s.participationTokenType == ParticipationTokenType.USDC) {
+            require(
+                _minThreshold >= 50 * 1e6 && _minThreshold <= 200 * 1e6,
+                "Minimum threshold should be in the range 50 to 100 dollars"
+            );
+        } else {
+            require(_minThreshold >= 50 * 1e18 && _minThreshold <= 200 * 1e18, "Minimum threshold should be in the range 50 to 100 credits");
+        }
         s.minThreshold = _minThreshold;
         emit MinimumWagerThresholdUpdated(_minThreshold);
     }

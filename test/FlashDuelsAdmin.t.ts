@@ -80,9 +80,9 @@ describe("FlashDuelsAdminFacet", function () {
         )
 
         const expiryTime = 3
-        const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
-        await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-        await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+        const usdcToken: any = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+        await usdcToken?.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+        await usdcToken?.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         await flashDuelsCore.connect(accounts[1]).requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
         await expect(flashDuelsAdmin.connect(user).approveAndCreateDuel(user.address, 2, 0)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuels__InvalidOwnerOrBot");
     });
@@ -102,7 +102,7 @@ describe("FlashDuelsAdminFacet", function () {
         )
 
         const expiryTime = 3
-        const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress)
+        const usdcToken: any = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         await flashDuelsCore.connect(accounts[1]).requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -278,7 +278,7 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
             contracts.Diamond.diamond
         )
         const expiryTime = 3;
-        const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress);
+        const usdcToken: any = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string);
         await usdcToken.connect(owner).mint(user.address, ethers.parseUnits("10", 6));
         await usdcToken.connect(user).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6));
         await flashDuelsCore.connect(user).requestCreateDuel(2, "Will it rain tomorrow?", ["Yes", "No"], expiryTime);
@@ -293,7 +293,7 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
             contracts.Diamond.diamond
         )
         const expiryTime = 3;
-        const usdcToken: any = await contracts.USDC.usdcContract.attach(contracts.USDC.usdAddress);
+        const usdcToken: any = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string);
         await usdcToken.connect(owner).mint(user.address, ethers.parseUnits("10", 6));
         await usdcToken.connect(user).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6));
         await flashDuelsCore.connect(user).requestCreateDuel(2, "Will it rain tomorrow?", ["Yes", "No"], expiryTime);

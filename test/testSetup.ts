@@ -151,12 +151,11 @@ export const setupContracts = async () => {
     ]
 
     const flashDuelsMarketplaceFacetSelectors = [
-        // "0x9012c4a8", // updateFee(uint256)
         "0xf1d6debd", // updateSellerFees(uint256)
         "0x143c790d", // updateBuyerFees(uint256)
-        "0x07b4c084", // sell(address,string,uint256,uint256,uint256)
+        "0xe803c94f", // sell(string,address,uint8,uint256,uint256,uint256)
         "0xaa6ecb55", // cancelSell(address,uint256)
-        "0x374b2fde", // buy(address,address,string,uint256,uint256[],uint256[])
+        "0x2ca85a38", // buy(string,address,address,uint8,uint256,uint256[],uint256[])
         "0x225c3131" // getSale(address,uint256)
     ]
 

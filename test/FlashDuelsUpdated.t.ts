@@ -6,6 +6,8 @@ import { networkConfig, testNetworkChains } from "../helper-hardhat-config"
 const helpers = require("@nomicfoundation/hardhat-network-helpers")
 import { setupContracts } from "./testSetup"
 
+const isCRDParticipationToken = true;
+
 describe("FlashDuels Contract", function () {
     // We define a fixture to reuse the same setup in every test.
     // We use loadFixture to run this setup once, snapshot that state,
@@ -13,6 +15,12 @@ describe("FlashDuels Contract", function () {
     async function deploy() {
         const accounts = await ethers.getSigners()
         const contracts = await setupContracts()
+        const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+            contracts.Diamond.diamond
+        )
+        await flashDuelsAdmin.setParticipationTokenType(1)
+        await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18))
+        await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18))
         return { contracts, accounts }
     }
 
@@ -30,9 +38,19 @@ describe("FlashDuels Contract", function () {
             )
 
             const expiryTime = 3
-            const usdcToken: any = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                const usdcToken: any = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
+
             await flashDuelsCore.connect(accounts[1]).requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
             let pendingDuels = await flashDuelsView.getAllPendingDuelsAndCount()
             // console.log("pendingDuels: ", pendingDuels)
@@ -70,6 +88,12 @@ describe("FlashDuels Contract", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            await flashDuelsAdmin.setParticipationTokenType(1)
+            await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18))
+            await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18))
             return { contracts, accounts }
         }
 
@@ -78,10 +102,17 @@ describe("FlashDuels Contract", function () {
             let { contracts, accounts } = await loadFixture(deploy)
 
             const expiryTime = 3
-            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                const usdcToken: any = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -91,10 +122,17 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
-
-            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             tx = await flashDuelsCore
                 .connect(accounts[1])
                 .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -102,17 +140,38 @@ describe("FlashDuels Contract", function () {
             await flashDuelsAdmin
                 .connect(accounts[0])
                 .approveAndCreateDuel(accounts[1].address, 2, 0)
-            const amount = ethers.parseUnits("60", 6)
-            const optionPrice = ethers.parseUnits("10", 6)
 
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("60", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("60", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
 
-            // Approve token transfer
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[4].address], [amount])
+
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[4]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            }
 
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
@@ -154,9 +213,17 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 3
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -168,8 +235,16 @@ describe("FlashDuels Contract", function () {
             )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             // tx = await flashDuelsCore
             //     .connect(accounts[1])
             //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -196,6 +271,12 @@ describe("FlashDuels Contract", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            await flashDuelsAdmin.setParticipationTokenType(1)
+            await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18))
+            await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18))
             return { contracts, accounts }
         }
 
@@ -205,9 +286,17 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 3
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -219,8 +308,16 @@ describe("FlashDuels Contract", function () {
             )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             tx = await flashDuelsCore
                 .connect(accounts[1])
                 .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -228,17 +325,34 @@ describe("FlashDuels Contract", function () {
             tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
             await tx.wait(1)
 
-            const amount = ethers.parseUnits("60", 6) // 60 USDC
-            const optionPrice = ethers.parseUnits("10", 6) // 10 USDC
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("60", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("60", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
 
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
 
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [amount])
 
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+            }
 
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
@@ -278,6 +392,12 @@ describe("FlashDuels Contract", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            await flashDuelsAdmin.setParticipationTokenType(1)
+            await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18))
+            await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18))
             return { contracts, accounts }
         }
 
@@ -287,9 +407,17 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 3
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -301,25 +429,52 @@ describe("FlashDuels Contract", function () {
             )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             tx = await flashDuelsCore
                 .connect(accounts[1])
                 .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
             await tx.wait(1)
             tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
             await tx.wait(1)
-            const amount = ethers.parseUnits("60", 6)
-            const optionPrice = ethers.parseUnits("10", 6)
 
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("60", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("60", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[4].address], [amount])
 
-            // Approve token transfer
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[4]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            }
 
             let duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
@@ -336,8 +491,16 @@ describe("FlashDuels Contract", function () {
             await ethers.provider.send("evm_increaseTime", [30 * 60])
 
             // Check balances before settlement
-            const initialBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address) // 0
-            const initialBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address) // 0
+            let initialBalanceAccounts_2;
+            let initialBalanceAccounts_3;
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                initialBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address) // 0
+                initialBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address) // 0
+            } else {
+                initialBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address) // 0
+                initialBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address) // 0
+            }
 
             await flashDuelsCore.connect(contracts.Bot.bot).startDuel(duelIds[0])
 
@@ -352,8 +515,16 @@ describe("FlashDuels Contract", function () {
             await flashDuelsCore.connect(contracts.Bot.bot).settleDuel(duelIds[0], "0")
 
             // Check balances after settlement
-            let finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
-            let finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+            let finalBalanceAccounts_2;
+            let finalBalanceAccounts_3;
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+                finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+            } else {
+                finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+                finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+            }
             expect(finalBalanceAccounts_2).to.be.equal("0")
             expect(finalBalanceAccounts_3).to.be.equal("0")
 
@@ -363,7 +534,12 @@ describe("FlashDuels Contract", function () {
             await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsAccounts_2)
 
             // Check if accounts[2] (winner) received the rewards
-            finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            } else {
+                finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            }
             expect(finalBalanceAccounts_2).to.be.gt(initialBalanceAccounts_2) // accounts[2]'s balance should increase
             // Check if accounts[3] (loser) lost their wager amount
             expect(finalBalanceAccounts_3).to.be.lte(initialBalanceAccounts_3) // accounts[3]'s balance should decrease or remain the same
@@ -375,9 +551,17 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 3
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -389,25 +573,51 @@ describe("FlashDuels Contract", function () {
             )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             tx = await flashDuelsCore
                 .connect(accounts[1])
                 .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
             await tx.wait(1)
             tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 2, 0)
             await tx.wait(1)
-            const amount = ethers.parseUnits("60", 6)
-            const optionPrice = ethers.parseUnits("10", 6)
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("60", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("60", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[4].address], [amount])
 
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
-
-            // Approve token transfer
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[4]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            }
 
             let duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
@@ -425,9 +635,17 @@ describe("FlashDuels Contract", function () {
             await ethers.provider.send("evm_mine", [])
 
             // Check balances before settlement
-            const initialBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address) // 0
-            const initialBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address) // 0
-
+            let initialBalanceAccounts_2;
+            let initialBalanceAccounts_3;
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                initialBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address) // 0
+                initialBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address) // 0
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                initialBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address) // 0
+                initialBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address) // 0
+            }
             await flashDuelsCore.connect(contracts.Bot.bot).startDuel(duelIds[0])
 
             let time = 3600 * 6
@@ -438,8 +656,15 @@ describe("FlashDuels Contract", function () {
             await helpers.time.increase(time)
 
             // No settlement is triggered, balances should remain the same
-            expect(await usdcToken.balanceOf(accounts[2].address)).to.equal(initialBalanceAccounts_2)
-            expect(await usdcToken.balanceOf(accounts[3].address)).to.equal(initialBalanceAccounts_3)
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                expect(await usdcToken.balanceOf(accounts[2].address)).to.equal(initialBalanceAccounts_2)
+                expect(await usdcToken.balanceOf(accounts[3].address)).to.equal(initialBalanceAccounts_3)
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                expect(await usdcToken.balanceOf(accounts[2].address)).to.equal(initialBalanceAccounts_2)
+                expect(await usdcToken.balanceOf(accounts[3].address)).to.equal(initialBalanceAccounts_3)
+            }
         })
     })
 
@@ -447,6 +672,12 @@ describe("FlashDuels Contract", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            await flashDuelsAdmin.setParticipationTokenType(1)
+            await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18))
+            await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18))
             return { contracts, accounts }
         }
 
@@ -456,9 +687,17 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 3
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -470,8 +709,16 @@ describe("FlashDuels Contract", function () {
             )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             tx = await flashDuelsCore
                 .connect(accounts[1])
                 .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -506,7 +753,17 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 3
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -518,8 +775,16 @@ describe("FlashDuels Contract", function () {
             )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             tx = await flashDuelsCore
                 .connect(accounts[1])
                 .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -529,14 +794,30 @@ describe("FlashDuels Contract", function () {
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
 
             // Simulate meeting the threshold
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("25", 6))
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, ethers.parseUnits("25", 6))
+            if (isCRDParticipationToken) {
+                const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [ethers.parseUnits("25", 18)])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [ethers.parseUnits("25", 18)])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 18))
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("25", 6))
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, ethers.parseUnits("25", 6))
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 6))
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 6))
+            }
 
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 6))
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 6))
-
-            let amount = ethers.parseUnits("25", 6)
-            let optionPrice = "1000000"
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("25", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("25", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
                 .joinDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[2].address)
@@ -560,7 +841,11 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 3
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+            }
             const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -572,8 +857,15 @@ describe("FlashDuels Contract", function () {
             )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             tx = await flashDuelsCore
                 .connect(accounts[1])
                 .requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -595,6 +887,12 @@ describe("FlashDuels Contract", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            await flashDuelsAdmin.setParticipationTokenType(1)
+            await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18))
+            await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18))
             return { contracts, accounts }
         }
         it("should refund users who wagered on options", async function () {
@@ -604,20 +902,24 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
-            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
-                contracts.Diamond.diamond
-            )
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
+
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
-
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
@@ -652,14 +954,30 @@ describe("FlashDuels Contract", function () {
             expect(duel.duelStatus).to.equal(1) // BootStrapped status
 
             // Simulate meeting the threshold
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("20", 6))
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, ethers.parseUnits("20", 6))
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [ethers.parseUnits("20", 18)])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [ethers.parseUnits("20", 18)])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 18))
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("20", 6))
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, ethers.parseUnits("20", 6))
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 6))
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 6))
+            }
 
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 6))
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 6))
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("20", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("20", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
 
-            let amount = ethers.parseUnits("20", 6)
-            let optionPrice = "1000000"
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
                 .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[2].address)
@@ -668,11 +986,12 @@ describe("FlashDuels Contract", function () {
                 .connect(contracts.Bot.bot)
                 .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[3].address)
 
-            const initialBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            let initialBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+
             duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
 
             let wager = await flashDuelsView.getWagerAmountDeposited(duelIds[0], accounts[2].address)
-            expect(wager[2][0]).to.equal(20000000)
+            expect(wager[2][0]).to.equal(amount)
             expect(wager[2][1]).to.equal(0)
 
             // Call cancelDuelIfThresholdNotMet by the bot
@@ -683,8 +1002,13 @@ describe("FlashDuels Contract", function () {
             expect(cancelledDuel.duelStatus).to.equal(4) // Cancelled status
 
             // Check that the wager was refunded
-            let finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
-            expect(finalBalanceAccounts_2).to.equal(20000000)
+            let finalBalanceAccounts_2;
+            if (isCRDParticipationToken) {
+                finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            } else {
+                finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            }
+            expect(finalBalanceAccounts_2).to.equal(amount)
 
             tx = await flashDuelsView.getAllTimeEarnings(accounts[2].address)
             expect(tx).to.equal(0)
@@ -695,8 +1019,14 @@ describe("FlashDuels Contract", function () {
             expect(wager[2][1]).to.equal(0)
 
             // Check that the wager was refunded
-            let finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
-            expect(finalBalanceAccounts_3).to.equal(20000000)
+            let finalBalanceAccounts_3;
+            if (isCRDParticipationToken) {
+                finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+                expect(finalBalanceAccounts_3).to.equal(ethers.parseUnits("20", 18))
+            } else {
+                finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+                expect(finalBalanceAccounts_3).to.equal(ethers.parseUnits("20", 6))
+            }
 
             tx = await flashDuelsView.getAllTimeEarnings(accounts[3].address)
             expect(tx).to.equal(0)
@@ -712,6 +1042,12 @@ describe("FlashDuels Contract", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            await flashDuelsAdmin.setParticipationTokenType(1)
+            await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18))
+            await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18))
             return { contracts, accounts }
         }
         it("should create a crypto duel successfully", async function () {
@@ -721,21 +1057,24 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
-            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
-                contracts.Diamond.diamond
-            )
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
+
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
-
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
-
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
 
@@ -778,13 +1117,18 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
 
-            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
-                contracts.Diamond.diamond
-            )
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -792,17 +1136,34 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
-            const amount = ethers.parseUnits("60", 6)
-            const optionPrice = ethers.parseUnits("10", 6)
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("60", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("60", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
 
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
-
-            // Approve token transfer
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[4].address], [amount])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[4]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            }
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let BTC = "tokenA"
@@ -859,12 +1220,18 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
-            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
-                contracts.Diamond.diamond
-            )
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
+
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -907,12 +1274,17 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
-            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
-                contracts.Diamond.diamond
-            )
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -939,11 +1311,23 @@ describe("FlashDuels Contract", function () {
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             expect(duelIds.length).to.equal(1)
 
-            const amount = ethers.parseUnits("5", 6)
-            const optionPrice = ethers.parseUnits("10", 6)
-            await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
-            // Approve token transfer
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("5", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("5", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+            }
 
             await expect(
                 flashDuelsCore
@@ -957,6 +1341,12 @@ describe("FlashDuels Contract", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            await flashDuelsAdmin.setParticipationTokenType(1)
+            await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18))
+            await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18))
             return { contracts, accounts }
         }
 
@@ -967,12 +1357,17 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
-            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
-                contracts.Diamond.diamond
-            )
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -980,17 +1375,33 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
-            const amount = ethers.parseUnits("60", 6)
-            const optionPrice = ethers.parseUnits("10", 6)
-
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
-
-            // Approve token transfer
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("60", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("60", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[4].address], [amount])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[4]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            }
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let BTC = "tokenA"
@@ -1051,6 +1462,12 @@ describe("FlashDuels Contract", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            await flashDuelsAdmin.setParticipationTokenType(1)
+            await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18))
+            await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18))
             return { contracts, accounts }
         }
 
@@ -1061,12 +1478,17 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
-            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
-                contracts.Diamond.diamond
-            )
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -1074,17 +1496,33 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
-            const amount = ethers.parseUnits("60", 6)
-            const optionPrice = ethers.parseUnits("10", 6)
-
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
-
-            // Approve token transfer
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("60", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("60", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[4].address], [amount])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[4]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            }
 
             const getTotalProtocolFeesGeneratedBefore = await flashDuelsView.getTotalProtocolFeesGenerated()
             // console.log("getTotalProtocolFeesGeneratedBefore", getTotalProtocolFeesGeneratedBefore)
@@ -1111,7 +1549,11 @@ describe("FlashDuels Contract", function () {
 
             const getTotalProtocolFeesGeneratedAfter = await flashDuelsView.getTotalProtocolFeesGenerated()
             // console.log("getTotalProtocolFeesGeneratedAfter", getTotalProtocolFeesGeneratedAfter)
-            expect(getTotalProtocolFeesGeneratedAfter).to.be.equal("5000000") // $5
+            if (isCRDParticipationToken) {
+                expect(getTotalProtocolFeesGeneratedAfter).to.be.equal(ethers.parseUnits("5", 18)) // $5
+            } else {
+                expect(getTotalProtocolFeesGeneratedAfter).to.be.equal(ethers.parseUnits("5", 6)) // $5
+            }
 
             expect(duelIds.length).to.equal(1)
             // Join Duel with tokenA
@@ -1154,14 +1596,26 @@ describe("FlashDuels Contract", function () {
             let allTImeEarningsaccounts_3 = await flashDuelsView.getAllTimeEarnings(accounts[3].address)
             expect(allTImeEarningsaccounts_3).to.be.equal("0")
             // console.log("allTImeEarningsaccounts_2", allTImeEarningsaccounts_2)
-            expect(allTImeEarningsaccounts_2).to.be.equal("115200000") // $115.2 (2% * 120 + 2% * 120 = 4.8) (120 -4.8 = 115.2) (120 = 60 + 60)
+            if (isCRDParticipationToken) {
+                expect(allTImeEarningsaccounts_2).to.be.equal(ethers.parseUnits("115.2", 18)) // $115.2 (2% * 120 + 2% * 120 = 4.8) (120 -4.8 = 115.2) (120 = 60 + 60)
+            } else {
+                expect(allTImeEarningsaccounts_2).to.be.equal(ethers.parseUnits("115.2", 6)) // $115.2 (2% * 120 + 2% * 120 = 4.8) (120 -4.8 = 115.2) (120 = 60 + 60)
+            }
             const getTotalProtocolFeesGenerated = await flashDuelsView.getTotalProtocolFeesGenerated()
             // console.log("getTotalProtocolFeesGenerated", getTotalProtocolFeesGenerated)
             const getCreatorFeesEarned = await flashDuelsView.getCreatorFeesEarned(accounts[1].address)
             // console.log("getCreatorFeesEarned", getCreatorFeesEarned)
-
-            expect(getTotalProtocolFeesGenerated).to.be.equal("7400000") // $7.4 (5 + 2.4) (2% * 120 = 2.4)
-            expect(getCreatorFeesEarned).to.be.equal("2400000") // $2.4 (2% * 120 = 2.4)
+            if (isCRDParticipationToken) {
+                expect(getTotalProtocolFeesGenerated).to.be.equal(ethers.parseUnits("7.4", 18)) // $7.4 (5 + 2.4) (2% * 120 = 2.4)
+            } else {
+                expect(getTotalProtocolFeesGenerated).to.be.equal(ethers.parseUnits("7.4", 6)) // $7.4 (5 + 2.4) (2% * 120 = 2.4)
+            }
+            // console.log("getCreatorFeesEarned", getCreatorFeesEarned)
+            if (isCRDParticipationToken) {
+                expect(getCreatorFeesEarned).to.be.equal(ethers.parseUnits("2.4", 18)) // $2.4 (2% * 120 = 2.4)
+            } else {
+                expect(getCreatorFeesEarned).to.be.equal(ethers.parseUnits("2.4", 6)) // $2.4 (2% * 120 = 2.4)
+            }
             // expect(await usdcToken.balanceOf(cryptoDuel.creator)).to.be.equal("1200000") // $117.6
 
             await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)
@@ -1181,9 +1635,17 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -1194,27 +1656,58 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
-            const amount = ethers.parseUnits("60", 6)
-            const optionPrice = ethers.parseUnits("10", 6)
-
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[5].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[6].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[7].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[8].address, amount)
-            await usdcToken.connect(accounts[0]).mint(accounts[9].address, amount)
-
-            // Approve token transfer
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[5]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[6]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[7]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[8]).approve(contracts.Diamond.diamond, amount)
-            await usdcToken.connect(accounts[9]).approve(contracts.Diamond.diamond, amount)
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("60", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("60", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[4].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[5].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[6].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[7].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[8].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[9].address], [amount])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[4]).claim()
+                await usdcToken.connect(accounts[5]).claim()
+                await usdcToken.connect(accounts[6]).claim()
+                await usdcToken.connect(accounts[7]).claim()
+                await usdcToken.connect(accounts[8]).claim()
+                await usdcToken.connect(accounts[9]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[5]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[6]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[7]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[8]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[9]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[5].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[6].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[7].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[8].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[9].address, amount)
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[5]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[6]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[7]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[8]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[9]).approve(contracts.Diamond.diamond, amount)
+            }
             const getTotalProtocolFeesGeneratedBefore = await flashDuelsView.getTotalProtocolFeesGenerated()
             // console.log("getTotalProtocolFeesGeneratedBefore", getTotalProtocolFeesGeneratedBefore)
             expect(getTotalProtocolFeesGeneratedBefore).to.be.equal("0") // $1.2
@@ -1240,7 +1733,11 @@ describe("FlashDuels Contract", function () {
 
             const getTotalProtocolFeesGeneratedAfter = await flashDuelsView.getTotalProtocolFeesGenerated()
             // console.log("getTotalProtocolFeesGeneratedAfter", getTotalProtocolFeesGeneratedAfter)
-            expect(getTotalProtocolFeesGeneratedAfter).to.be.equal("5000000") // $1.2
+            if (isCRDParticipationToken) {
+                expect(getTotalProtocolFeesGeneratedAfter).to.be.equal(ethers.parseUnits("5", 18)) // $1.2
+            } else {
+                expect(getTotalProtocolFeesGeneratedAfter).to.be.equal(ethers.parseUnits("5", 6)) // $1.2
+            }
 
             expect(duelIds.length).to.equal(1)
             // Join Duel with tokenA
@@ -1317,28 +1814,54 @@ describe("FlashDuels Contract", function () {
             let allTImeEarningsaccounts_7 = await flashDuelsView.getAllTimeEarnings(accounts[7].address)
             let allTImeEarningsaccounts_8 = await flashDuelsView.getAllTimeEarnings(accounts[8].address)
             let allTImeEarningsaccounts_9 = await flashDuelsView.getAllTimeEarnings(accounts[9].address)
-            expect(allTImeEarningsaccounts_3).to.be.equal("0")
-            expect(allTImeEarningsaccounts_5).to.be.equal("0")
-            expect(allTImeEarningsaccounts_7).to.be.equal("0")
-            expect(allTImeEarningsaccounts_9).to.be.equal("0")
+            if (isCRDParticipationToken) {
+                expect(allTImeEarningsaccounts_3).to.be.equal(ethers.parseUnits("0", 18))
+                expect(allTImeEarningsaccounts_5).to.be.equal(ethers.parseUnits("0", 18))
+                expect(allTImeEarningsaccounts_7).to.be.equal(ethers.parseUnits("0", 18))
+                expect(allTImeEarningsaccounts_9).to.be.equal(ethers.parseUnits("0", 18))
+            } else {
+                expect(allTImeEarningsaccounts_3).to.be.equal(ethers.parseUnits("0", 6))
+                expect(allTImeEarningsaccounts_5).to.be.equal(ethers.parseUnits("0", 6))
+                expect(allTImeEarningsaccounts_7).to.be.equal(ethers.parseUnits("0", 6))
+                expect(allTImeEarningsaccounts_9).to.be.equal(ethers.parseUnits("0", 6))
+            }
             // console.log("allTImeEarningsaccounts_2", allTImeEarningsaccounts_2)
             // console.log("allTImeEarningsaccounts_4", allTImeEarningsaccounts_4)
-            expect(allTImeEarningsaccounts_2).to.be.equal("117600000") // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
-            expect(allTImeEarningsaccounts_4).to.be.equal("117600000") // before continueWiningDistributionInChunks
-            expect(allTImeEarningsaccounts_6).to.be.equal("0")
-            expect(allTImeEarningsaccounts_8).to.be.equal("0")
+            if (isCRDParticipationToken) {
+                expect(allTImeEarningsaccounts_2).to.be.equal(ethers.parseUnits("117.6", 18)) // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+                expect(allTImeEarningsaccounts_4).to.be.equal(ethers.parseUnits("117.6", 18)) // before continueWiningDistributionInChunks
+                expect(allTImeEarningsaccounts_6).to.be.equal(ethers.parseUnits("0", 18))
+                expect(allTImeEarningsaccounts_8).to.be.equal(ethers.parseUnits("0", 18))
+            } else {
+                expect(allTImeEarningsaccounts_2).to.be.equal(ethers.parseUnits("117.6", 6)) // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+                expect(allTImeEarningsaccounts_4).to.be.equal(ethers.parseUnits("117.6", 6)) // before continueWiningDistributionInChunks
+                expect(allTImeEarningsaccounts_6).to.be.equal(ethers.parseUnits("0", 6))
+                expect(allTImeEarningsaccounts_8).to.be.equal(ethers.parseUnits("0", 6))
+            }
             await flashDuelsCore.connect(contracts.Bot.bot).continueWinningsDistribution(duelIds[0], 0, "Yes")
             allTImeEarningsaccounts_6 = await flashDuelsView.getAllTimeEarnings(accounts[6].address)
-            expect(allTImeEarningsaccounts_6).to.be.equal("117600000") // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+            if (isCRDParticipationToken) {
+                expect(allTImeEarningsaccounts_6).to.be.equal(ethers.parseUnits("117.6", 18)) // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+            } else {
+                expect(allTImeEarningsaccounts_6).to.be.equal(ethers.parseUnits("117.6", 6)) // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+            }
             allTImeEarningsaccounts_8 = await flashDuelsView.getAllTimeEarnings(accounts[8].address)
-            expect(allTImeEarningsaccounts_8).to.be.equal("117600000") // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+            if (isCRDParticipationToken) {
+                expect(allTImeEarningsaccounts_8).to.be.equal(ethers.parseUnits("117.6", 18)) // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+            } else {
+                expect(allTImeEarningsaccounts_8).to.be.equal(ethers.parseUnits("117.6", 6)) // $117.6 (60 + (120 - 2.4 - 2.4)/2) // 2.4 is the protocol fee, 2.4 is the creator fee
+            }
             const getTotalProtocolFeesGenerated = await flashDuelsView.getTotalProtocolFeesGenerated()
             // console.log("getTotalProtocolFeesGenerated", getTotalProtocolFeesGenerated)
             const getCreatorFeesEarned = await flashDuelsView.getCreatorFeesEarned(accounts[1].address)
             console.log("getCreatorFeesEarned", getCreatorFeesEarned)
-
-            expect(getTotalProtocolFeesGenerated).to.be.equal("9800000") // $5 + $4.8 (2% of 240)
-            expect(getCreatorFeesEarned).to.be.equal("4800000") // $4.8 (2% of 240)
+            if (isCRDParticipationToken) {
+                expect(getTotalProtocolFeesGenerated).to.be.equal(ethers.parseUnits("9.8", 18)) // $5 + $4.8 (2% of 240)
+                expect(getCreatorFeesEarned).to.be.equal(ethers.parseUnits("4.8", 18)) // $4.8 (2% of 240)
+            } else {
+                expect(getTotalProtocolFeesGenerated).to.be.equal(ethers.parseUnits("9.8", 6)) // $5 + $4.8 (2% of 240)
+                expect(getCreatorFeesEarned).to.be.equal(ethers.parseUnits("4.8", 6)) // $4.8 (2% of 240)
+            }
 
             await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)
             await flashDuelsCore.connect(accounts[4]).withdrawEarnings(allTImeEarningsaccounts_4)
@@ -1352,13 +1875,18 @@ describe("FlashDuels Contract", function () {
             expect(finalBalanceaccounts_5).to.be.lte(initialBalanceaccounts_5) // accounts[5]'s balance should decrease or remain the same
         })
 
-
     })
 
     describe("Crypto Duel Cancel and Refund Logic", function () {
         async function deploy() {
             const accounts = await ethers.getSigners()
             const contracts = await setupContracts()
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            await flashDuelsAdmin.setParticipationTokenType(1)
+            await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18))
+            await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18))
             return { contracts, accounts }
         }
         it("should cancel the duel if the threshold is not met after the bootstrap period", async function () {
@@ -1368,20 +1896,23 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
-            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
-                contracts.Diamond.diamond
-            )
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                await usdcToken.connect(accounts[1]).claim()
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
+          
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
-
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
@@ -1428,7 +1959,16 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                await usdcToken.connect(accounts[1]).claim()
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -1439,9 +1979,6 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
-            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
             let duelDuration = 0
@@ -1463,14 +2000,29 @@ describe("FlashDuels Contract", function () {
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
 
             // Simulate meeting the threshold
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("25", 6))
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, ethers.parseUnits("25", 6))
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [ethers.parseUnits("25", 18)])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [ethers.parseUnits("25", 18)])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 18))
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("25", 6))
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, ethers.parseUnits("25", 6))
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 6))
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 6))
+            }
 
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 6))
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 6))
-
-            let amount = ethers.parseUnits("25", 6)
-            let optionPrice = "1000000"
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("25", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("25", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
                 .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[2].address)
@@ -1496,20 +2048,21 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                await usdcToken.connect(accounts[1]).claim()
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+            }
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
-            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
-                contracts.Diamond.diamond
-            )
 
-            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
             let duelDuration = 0
@@ -1531,12 +2084,23 @@ describe("FlashDuels Contract", function () {
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
 
             // Simulate meeting the threshold
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("25", 6))
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [ethers.parseUnits("25", 18)])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("25", 6))
+            }
 
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("25", 6))
-
-            let amount = ethers.parseUnits("25", 6)
-            let optionPrice = "1000000"
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("25", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("25", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
                 .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[2].address)
@@ -1558,13 +2122,15 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                await usdcToken.connect(accounts[1]).claim()
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+            }
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
-                contracts.Diamond.diamond
-            )
-            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
 
@@ -1572,7 +2138,6 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
@@ -1606,14 +2171,29 @@ describe("FlashDuels Contract", function () {
             expect(duel.duelStatus).to.equal(1) // BootStrapped status
 
             // Simulate meeting the threshold
-            await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("20", 6))
-            await usdcToken.connect(accounts[0]).mint(accounts[3].address, ethers.parseUnits("20", 6))
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [ethers.parseUnits("20", 18)])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [ethers.parseUnits("20", 18)])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 18))
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 18))
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, ethers.parseUnits("20", 6))
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, ethers.parseUnits("20", 6))
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 6))
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 6))
+            }
 
-            await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 6))
-            await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 6))
-
-            let amount = ethers.parseUnits("20", 6)
-            let optionPrice = "1000000"
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("20", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("20", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
                 .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[2].address)
@@ -1626,14 +2206,14 @@ describe("FlashDuels Contract", function () {
             duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
 
             let wager = await flashDuelsView.getWagerAmountDeposited(duelIds[0], accounts[2].address)
-            expect(wager[2][0]).to.equal(20000000)
+            expect(wager[2][0]).to.equal(amount)
             expect(wager[2][1]).to.equal(0)
             let finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
             expect(finalBalanceAccounts_2).to.equal(0)
 
             wager = await flashDuelsView.getWagerAmountDeposited(duelIds[0], accounts[3].address)
             expect(wager[2][0]).to.equal(0)
-            expect(wager[2][1]).to.equal(20000000)
+            expect(wager[2][1]).to.equal(amount)
             let finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
             expect(finalBalanceAccounts_3).to.equal(0)
 
@@ -1646,7 +2226,7 @@ describe("FlashDuels Contract", function () {
 
             // Check that the wager was refunded
             finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
-            expect(finalBalanceAccounts_2).to.equal(20000000)
+            expect(finalBalanceAccounts_2).to.equal(amount)
 
             tx = await flashDuelsView.getAllTimeEarnings(accounts[2].address)
             expect(tx).to.equal(0)
@@ -1658,7 +2238,7 @@ describe("FlashDuels Contract", function () {
 
             // Check that the wager was refunded
             finalBalanceAccounts_3 = await usdcToken.balanceOf(accounts[3].address)
-            expect(finalBalanceAccounts_3).to.equal(20000000)
+            expect(finalBalanceAccounts_3).to.equal(amount)
 
             tx = await flashDuelsView.getAllTimeEarnings(accounts[3].address)
             expect(tx).to.equal(0)
@@ -1678,9 +2258,14 @@ describe("FlashDuels Contract", function () {
 
             const expiryTime = 1
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
-            usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
-            await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                await usdcToken.connect(accounts[1]).claim()
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+            }
 
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
@@ -1692,7 +2277,6 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
-            await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
 
             let tokenA = "tokenA"
 
@@ -1708,8 +2292,8 @@ describe("FlashDuels Contract", function () {
                 .connect(accounts[1])
                 .requestCreateCryptoDuel(tokenA, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
             await tx.wait(1)
-            tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
-            await tx.wait(1)
+            // tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            // await tx.wait(1)
 
             let duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
             const cryptoDuel = await flashDuelsView.getDuels(duelIds[0])
