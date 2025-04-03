@@ -31,7 +31,7 @@ const main = async () => {
     await tx.wait(1)
 
     creatorFee = await viewFacet.getCreateDuelFee();
-    console.log("After Creator Fee: ", creatorFee); // 5000000
+    console.log("After Creator Fee: ", creatorFee); // 5000000000000000000
 }
 
 main()
