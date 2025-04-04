@@ -64,8 +64,8 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
         s.protocolFeePercentage = 200; // 2%
         s.creatorFeePercentage = 200; // 2%
         s.resolvingPeriod = 48 hours;
-        s.createDuelFee = 5 * 1e6; // 5 USDC
-        s.minThreshold = 50 * 1e6; // 50 USDC
+        s.createDuelFee = 5 * 1e6; // 5 USDC , 5*10^18 (for CRD tokens)
+        s.minThreshold = 50 * 1e6; // 50 USDC, 50*10^18 (for CRD tokens)
         s.winnersChunkSize = 50;
         s.refundChunkSize = 50;
         // s.marketPlaceFees = 10; // 0.1%
