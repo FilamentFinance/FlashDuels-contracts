@@ -1626,6 +1626,318 @@ describe("FlashDuels Contract", function () {
             // Check if accounts[3] (loser) lost their wager amount
             expect(finalBalanceaccounts_3).to.be.lte(initialBalanceaccounts_3) // accounts[3]'s balance should decrease or remain the same
         })
+        it("should settle duel and distribute rewards correctly to winner in case of one side bets (YES)", async function () {
+            let duel: any, usdcToken: any, tx: any, txr: any
+            let { contracts, accounts } = await loadFixture(deploy)
+            const duelDuration = 0 // 3 hours
+
+            const expiryTime = 1
+            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
+            const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("60", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("60", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[4].address], [amount])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[4]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            }
+
+            const getTotalProtocolFeesGeneratedBefore = await flashDuelsView.getTotalProtocolFeesGenerated()
+            // console.log("getTotalProtocolFeesGeneratedBefore", getTotalProtocolFeesGeneratedBefore)
+            expect(getTotalProtocolFeesGeneratedBefore).to.be.equal("0") // $1.2
+
+            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
+            let BTC = "tokenA"
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     BTC,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(BTC, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            // tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            // await tx.wait(1)
+            const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
+            const cryptoDuel = await flashDuelsView.getDuels(duelIds[0])
+
+            const getTotalProtocolFeesGeneratedAfter = await flashDuelsView.getTotalProtocolFeesGenerated()
+            // console.log("getTotalProtocolFeesGeneratedAfter", getTotalProtocolFeesGeneratedAfter)
+            if (isCRDParticipationToken) {
+                expect(getTotalProtocolFeesGeneratedAfter).to.be.equal(ethers.parseUnits("5", 18)) // $5
+            } else {
+                expect(getTotalProtocolFeesGeneratedAfter).to.be.equal(ethers.parseUnits("5", 6)) // $5
+            }
+
+            expect(duelIds.length).to.equal(1)
+            // Join Duel with tokenA
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[2].address)
+            // await flashDuelsCore
+            //     .connect(contracts.Bot.bot)
+            //     .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[3].address)
+
+            // Simulate time passage for the bootstrap period to end
+            await ethers.provider.send("evm_increaseTime", [30 * 60])
+            await ethers.provider.send("evm_mine", [])
+
+            // Check balances before settlement
+            const initialBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address) // 0
+            // const initialBalanceaccounts_3 = await usdcToken.balanceOf(accounts[3].address) // 0
+            await network.provider.send("evm_mine")
+
+            const startTokenPrice = "6500000000000"
+            await flashDuelsCore.connect(contracts.Bot.bot).startCryptoDuel(duelIds[0], startTokenPrice)
+
+            let time = 3600 * 6
+            await network.provider.request({
+                method: "evm_increaseTime",
+                params: [time]
+            })
+            // await helpers.time.increase(time)
+            const endTokenPrice = "6600000000000"
+            // Settle the duel
+            await flashDuelsCore.connect(contracts.Bot.bot).settleCryptoDuel(duelIds[0], endTokenPrice)
+
+            // Check balances after settlement
+            let finalBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            // let finalBalanceaccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+            expect(finalBalanceaccounts_2).to.be.equal("0")
+            // expect(finalBalanceaccounts_3).to.be.equal("0")
+
+            let allTImeEarningsaccounts_2 = await flashDuelsView.getAllTimeEarnings(accounts[2].address)
+            // let allTImeEarningsaccounts_3 = await flashDuelsView.getAllTimeEarnings(accounts[3].address)
+            // expect(allTImeEarningsaccounts_3).to.be.equal("0")
+            // console.log("allTImeEarningsaccounts_2", allTImeEarningsaccounts_2)
+            if (isCRDParticipationToken) {
+                expect(allTImeEarningsaccounts_2).to.be.equal(ethers.parseUnits("57.6", 18)) // $57.6 (2% * 60 + 2% * 60 = 2.4) (60 -2.4 = 57.6) (60 = 60 + 60)
+            } else {
+                expect(allTImeEarningsaccounts_2).to.be.equal(ethers.parseUnits("57.6", 6)) // $57.6 (2% * 60 + 2% * 60 = 2.4) (60 -2.4 = 57.6) (60 = 60 + 60)
+            }
+            const getTotalProtocolFeesGenerated = await flashDuelsView.getTotalProtocolFeesGenerated()
+            // console.log("getTotalProtocolFeesGenerated", getTotalProtocolFeesGenerated)
+            const getCreatorFeesEarned = await flashDuelsView.getCreatorFeesEarned(accounts[1].address)
+            // console.log("getCreatorFeesEarned", getCreatorFeesEarned)
+            if (isCRDParticipationToken) {
+                expect(getTotalProtocolFeesGenerated).to.be.equal(ethers.parseUnits("6.2", 18)) // $6.2 (5 + 1.2) (2% * 60 = 1.2)
+            } else {
+                expect(getTotalProtocolFeesGenerated).to.be.equal(ethers.parseUnits("6.2", 6)) // $6.2 (5 + 1.2) (2% * 60 = 1.2)
+            }
+            // console.log("getCreatorFeesEarned", getCreatorFeesEarned)
+            if (isCRDParticipationToken) {
+                expect(getCreatorFeesEarned).to.be.equal(ethers.parseUnits("1.2", 18)) // $1.2 (2% * 60 = 1.2)
+            } else {
+                expect(getCreatorFeesEarned).to.be.equal(ethers.parseUnits("1.2", 6)) // $1.2 (2% * 60 = 1.2)
+            }
+            // expect(await usdcToken.balanceOf(cryptoDuel.creator)).to.be.equal("1200000") // $117.6
+
+            await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)
+
+            // Check if accounts[2] (winner) received the rewards
+            finalBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            expect(finalBalanceaccounts_2).to.be.gt(initialBalanceaccounts_2) // accounts[2]'s balance should increase
+            // Check if accounts[3] (loser) lost their wager amount
+            // expect(finalBalanceaccounts_3).to.be.lte(initialBalanceaccounts_3) // accounts[3]'s balance should decrease or remain the same
+        })
+        it("should settle duel and distribute rewards correctly to winner in case of one side bets (YES), but no winner", async function () {
+            let duel: any, usdcToken: any, tx: any, txr: any
+            let { contracts, accounts } = await loadFixture(deploy)
+            const duelDuration = 0 // 3 hours
+
+            const expiryTime = 1
+            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
+            if (isCRDParticipationToken) {
+                usdcToken = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
+                await usdcToken.connect(accounts[0]).airdrop([accounts[1].address], [ethers.parseUnits("10", 18)])
+                let tx = await usdcToken.connect(accounts[1]).claim()
+                await tx.wait(1)
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 18))
+            } else {
+                usdcToken = await contracts.USDC.usdcContract?.attach(contracts.USDC.usdAddress as string)
+                await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
+                await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
+            }
+            const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+
+            let amount;
+            let optionPrice;
+            if (isCRDParticipationToken) {
+                amount = ethers.parseUnits("60", 18)
+                optionPrice = ethers.parseUnits("10", 6)
+            } else {
+                amount = ethers.parseUnits("60", 6)
+                optionPrice = ethers.parseUnits("10", 6)
+            }
+            if (isCRDParticipationToken) {
+                await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[3].address], [amount])
+                await usdcToken.connect(accounts[0]).airdrop([accounts[4].address], [amount])
+                await usdcToken.connect(accounts[2]).claim()
+                await usdcToken.connect(accounts[3]).claim()
+                await usdcToken.connect(accounts[4]).claim()
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            } else {
+                await usdcToken.connect(accounts[0]).mint(accounts[2].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[3].address, amount)
+                await usdcToken.connect(accounts[0]).mint(accounts[4].address, amount)
+                await usdcToken.connect(accounts[2]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, amount)
+                await usdcToken.connect(accounts[4]).approve(contracts.Diamond.diamond, amount)
+            }
+
+            const getTotalProtocolFeesGeneratedBefore = await flashDuelsView.getTotalProtocolFeesGenerated()
+            // console.log("getTotalProtocolFeesGeneratedBefore", getTotalProtocolFeesGeneratedBefore)
+            expect(getTotalProtocolFeesGeneratedBefore).to.be.equal("0") // $1.2
+
+            // const minWager = ethers.parseUnits("10", 6) // 10 USDC
+            let BTC = "tokenA"
+            // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
+            //     BTC,
+            //     ["Yes", "No"],
+            //     6500000000000, // triggerValue
+            //     0, // triggerType: aboslute
+            //     0, // triggerCondition: Above
+            //     duelDuration
+            // )
+            tx = await flashDuelsCore
+                .connect(accounts[1])
+                .requestCreateCryptoDuel(BTC, ["Yes", "No"], 6500000000000, 0, 0, duelDuration)
+            await tx.wait(1)
+            // tx = await flashDuelsAdmin.connect(accounts[0]).approveAndCreateDuel(accounts[1].address, 1, 0)
+            // await tx.wait(1)
+            const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
+            const cryptoDuel = await flashDuelsView.getDuels(duelIds[0])
+
+            const getTotalProtocolFeesGeneratedAfter = await flashDuelsView.getTotalProtocolFeesGenerated()
+            // console.log("getTotalProtocolFeesGeneratedAfter", getTotalProtocolFeesGeneratedAfter)
+            if (isCRDParticipationToken) {
+                expect(getTotalProtocolFeesGeneratedAfter).to.be.equal(ethers.parseUnits("5", 18)) // $5
+            } else {
+                expect(getTotalProtocolFeesGeneratedAfter).to.be.equal(ethers.parseUnits("5", 6)) // $5
+            }
+
+            expect(duelIds.length).to.equal(1)
+            // Join Duel with tokenA
+            await flashDuelsCore
+                .connect(contracts.Bot.bot)
+                .joinCryptoDuel(duelIds[0], "Yes", 0, optionPrice, amount, accounts[2].address)
+            // await flashDuelsCore
+            //     .connect(contracts.Bot.bot)
+            //     .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[3].address)
+
+            // Simulate time passage for the bootstrap period to end
+            await ethers.provider.send("evm_increaseTime", [30 * 60])
+            await ethers.provider.send("evm_mine", [])
+
+            // Check balances before settlement
+            const initialBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address) // 0
+            // const initialBalanceaccounts_3 = await usdcToken.balanceOf(accounts[3].address) // 0
+            await network.provider.send("evm_mine")
+
+            const startTokenPrice = "6500000000000"
+            await flashDuelsCore.connect(contracts.Bot.bot).startCryptoDuel(duelIds[0], startTokenPrice)
+
+            let time = 3600 * 6
+            await network.provider.request({
+                method: "evm_increaseTime",
+                params: [time]
+            })
+            // await helpers.time.increase(time)
+            const endTokenPrice = "6400000000000"
+            // Settle the duel
+            await flashDuelsCore.connect(contracts.Bot.bot).settleCryptoDuel(duelIds[0], endTokenPrice)
+
+            // Check balances after settlement
+            let finalBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            // let finalBalanceaccounts_3 = await usdcToken.balanceOf(accounts[3].address)
+            expect(finalBalanceaccounts_2).to.be.equal("0")
+            // expect(finalBalanceaccounts_3).to.be.equal("0")
+
+            let allTImeEarningsaccounts_2 = await flashDuelsView.getAllTimeEarnings(accounts[2].address)
+            // let allTImeEarningsaccounts_3 = await flashDuelsView.getAllTimeEarnings(accounts[3].address)
+            // expect(allTImeEarningsaccounts_3).to.be.equal("0")
+            // console.log("allTImeEarningsaccounts_2", allTImeEarningsaccounts_2)
+            if (isCRDParticipationToken) {
+                expect(allTImeEarningsaccounts_2).to.be.equal(ethers.parseUnits("0", 18)) 
+            } else {
+                expect(allTImeEarningsaccounts_2).to.be.equal(ethers.parseUnits("0", 6))
+            }
+            const getTotalProtocolFeesGenerated = await flashDuelsView.getTotalProtocolFeesGenerated()
+            // console.log("getTotalProtocolFeesGenerated", getTotalProtocolFeesGenerated)
+            const getCreatorFeesEarned = await flashDuelsView.getCreatorFeesEarned(accounts[1].address)
+            // console.log("getCreatorFeesEarned", getCreatorFeesEarned)
+            if (isCRDParticipationToken) {
+                expect(getTotalProtocolFeesGenerated).to.be.equal(ethers.parseUnits("6.2", 18)) // expected 6.2
+            } else {
+                expect(getTotalProtocolFeesGenerated).to.be.equal(ethers.parseUnits("6.2", 6)) // expected 6.2
+            }
+            // console.log("getCreatorFeesEarned", getCreatorFeesEarned)
+            if (isCRDParticipationToken) {
+                expect(getCreatorFeesEarned).to.be.equal(ethers.parseUnits("1.2", 18)) // $1.2 (2% * 60 = 1.2)
+            } else {
+                expect(getCreatorFeesEarned).to.be.equal(ethers.parseUnits("1.2", 6)) // $1.2 (2% * 60 = 1.2)
+            }
+            // expect(await usdcToken.balanceOf(cryptoDuel.creator)).to.be.equal("1200000") // $117.6
+
+            await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)
+
+            // Check if accounts[2] (winner) received the rewards
+            finalBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address)
+            expect(finalBalanceaccounts_2).to.be.equal(initialBalanceaccounts_2) // accounts[2]'s balance should increase
+            // Check if accounts[3] (loser) lost their wager amount
+            const totalProtocolWinnings = await usdcToken.balanceOf(contracts.Diamond.diamond)
+            expect(totalProtocolWinnings).to.be.equal(ethers.parseUnits("65", 18)) // $5 it should be 62.6 + 2.4 (fees + creator fee)
+            // expect(finalBalanceaccounts_3).to.be.lte(initialBalanceaccounts_3) // accounts[3]'s balance should decrease or remain the same
+        })
         // Test that the winners are processed in chunks
         // Tested with chunk size 2 (with commenting out the chunk size check in the contract)
         xit("should settle the duel and distribute rewards correctly to winner in chunks", async function () {

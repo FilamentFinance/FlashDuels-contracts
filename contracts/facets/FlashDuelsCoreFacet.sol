@@ -713,11 +713,19 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
             if (cryptoDuel.triggerCondition == TriggerCondition.Above) {
                 winningOption = _endTokenPrice > _triggerValue ? _options[0] : _options[1];
                 optionIndex = _endTokenPrice > _triggerValue ? 0 : 1;
-                totalWagerLooser = s.totalWagerForOption[_duelId][_options[1]];
+                if (optionIndex == 0) {
+                    totalWagerLooser = s.totalWagerForOption[_duelId][_options[1]];
+                } else {
+                    totalWagerLooser = s.totalWagerForOption[_duelId][_options[0]];
+                }
             } else if (cryptoDuel.triggerCondition == TriggerCondition.Below) {
                 winningOption = _endTokenPrice > _triggerValue ? _options[1] : _options[0];
                 optionIndex = _endTokenPrice > _triggerValue ? 1 : 0;
-                totalWagerLooser = s.totalWagerForOption[_duelId][_options[0]];
+                if (optionIndex == 0) {
+                    totalWagerLooser = s.totalWagerForOption[_duelId][_options[1]];
+                } else {
+                    totalWagerLooser = s.totalWagerForOption[_duelId][_options[0]];
+                }
             }
         }
         // @note - TriggerType.Percentage can be implemented here when supported
