@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
+import {AppStorage, Duel, CryptoDuel, Sale, PendingDuel, DuelCategory, ParticipationTokenType} from "../AppStorage.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {AppStorage, Duel, CryptoDuel, Sale, PendingDuel, DuelCategory, ParticipationTokenType} from "../AppStorage.sol";
 import {LibFlashDuels} from "../libraries/LibFlashDuels.sol";
+
 /// @title FlashDuelsViewFacet
+/// @author FlashDuels
 /// @notice Provides view functions to access and retrieve FlashDuels data.
 /// @dev This contract is part of the FlashDuels system and allows for reading various stored values.
 contract FlashDuelsViewFacet is PausableUpgradeable {
@@ -109,10 +111,10 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     function getDuel(string memory _duelId) public view returns (Duel memory) {
         return s.duels[_duelId];
     }
+
     /// @notice Retrieves detailed information about a crypto duel.
     /// @param _duelId The unique identifier of the crypto duel.
-    /// @return A Duel struct containing all details of the specified duel.
-
+    /// @return A CryptoDuel struct containing all details of the specified crypto duel.
     function getCryptoDuel(string memory _duelId) public view returns (CryptoDuel memory) {
         return s.cryptoDuels[_duelId];
     }
@@ -143,10 +145,10 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
         return s.duels[_duelId];
     }
 
-    /// @notice Retrieves the details of a specific duel by ID.
-    /// @param optionToken The option token.
-    /// @param saleId The saleId.
-    /// @return The `Sale` struct containing all information about the specified duel.
+    /// @notice Retrieves the details of a specific sale.
+    /// @param optionToken The address of the option token.
+    /// @param saleId The unique identifier of the sale.
+    /// @return The `Sale` struct containing all information about the specified sale.
     function getSales(address optionToken, uint256 saleId) public view returns (Sale memory) {
         return s.sales[optionToken][saleId];
     }

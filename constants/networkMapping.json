@@ -1,11 +1,7 @@
 {
     "hardhat": {
-        "FLASHUSDC": {
-            "target": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-        },
-        "FlashDuelsCredits": {
-            "target": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
-        },
+        "FLASHUSDC": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        "FlashDuelsCredits": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
         "FlashDuelsIncentives": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
         "FlashDuelsMarketplace": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
         "FlashDuelsCoreFacet": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
@@ -19,7 +15,7 @@
         "Goldsky_Subgraph": "",
         "FlashDuelsAdminFacet": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
         "StartBlock": 0,
-        "deploymentDate": "2025-03-28T20:36:47.276Z"
+        "deploymentDate": "2025-04-14T09:27:40.034Z"
     },
     "seiTestnet": {
         "FLASHUSDC": "0x9B640e86ff36C2c0f2b8c3958cD315Bb7fA1fD97",

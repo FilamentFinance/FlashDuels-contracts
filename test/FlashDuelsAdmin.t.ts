@@ -84,7 +84,7 @@ describe("FlashDuelsAdminFacet", function () {
         await usdcToken?.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken?.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         await flashDuelsCore.connect(accounts[1]).requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-        await expect(flashDuelsAdmin.connect(user).approveAndCreateDuel(user.address, 2, 0)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuels__InvalidOwnerOrBot");
+        await expect(flashDuelsAdmin.connect(user).approveAndCreateDuel(user.address, 2, 0)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__InvalidOwnerOrBot");
     });
 
     it("only owner or bot can revoke a duel request", async function () {
@@ -106,7 +106,7 @@ describe("FlashDuelsAdminFacet", function () {
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
         await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
         await flashDuelsCore.connect(accounts[1]).requestCreateDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
-        await expect(flashDuelsAdmin.connect(user).revokeCreateDuelRequest(user.address, category, index)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuels__InvalidOwnerOrBot");
+        await expect(flashDuelsAdmin.connect(user).revokeCreateDuelRequest(user.address, category, index)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__InvalidOwnerOrBot");
     });
 
     it("should withdraw protocol fees if called by the owner and otherwise reverted", async function () {
@@ -119,7 +119,7 @@ describe("FlashDuelsAdminFacet", function () {
         )
         await expect(flashDuelsAdmin.connect(user).withdrawProtocolFees()).to.be.revertedWith("LibDiamond: Must be contract owner");
         expect(await flashDuelsView.getTotalProtocolFeesGenerated()).to.equal(0);
-        await expect(flashDuelsAdmin.connect(owner).withdrawProtocolFees()).to.be.revertedWith("No funds available");
+        await expect(flashDuelsAdmin.connect(owner).withdrawProtocolFees()).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__NoFundsAvailable");
 
     });
 });
@@ -165,7 +165,7 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
         );
 
         const excessiveFee = ethers.parseUnits("11", 6); // 11 USDC
-        await expect(flashDuelsAdmin.connect(owner).setCreateDuelFee(excessiveFee)).to.be.revertedWith("Duel fees cannot be more than 10 dollars");
+        await expect(flashDuelsAdmin.connect(owner).setCreateDuelFee(excessiveFee)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__InvalidCreateDuelFee");
     });
 
     it("should set the minimum wager threshold to the lower boundary", async function () {
@@ -189,7 +189,7 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
         );
 
         const belowMinThreshold = ethers.parseUnits("49", 6); // 49 USDC
-        await expect(flashDuelsAdmin.connect(owner).setMinimumWagerThreshold(belowMinThreshold)).to.be.revertedWith("Minimum threshold should be in the range 50 to 100 dollars");
+        await expect(flashDuelsAdmin.connect(owner).setMinimumWagerThreshold(belowMinThreshold)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__InvalidMinimumWagerThreshold");
     });
 
     it("should set the bootstrap period to the lower boundary", async function () {
@@ -213,7 +213,7 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
         );
 
         const belowMinBootstrapPeriod = 4 * 60; // 4 minutes
-        await expect(flashDuelsAdmin.connect(owner).updateBootstrapPeriod(belowMinBootstrapPeriod)).to.be.revertedWith("Bootstrap period should be in the range 5 to 30 mins");
+        await expect(flashDuelsAdmin.connect(owner).updateBootstrapPeriod(belowMinBootstrapPeriod)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__InvalidBootstrapPeriod");
     });
 
     it("should set the resolving period to the minimum allowed value", async function () {
@@ -237,7 +237,7 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
         );
 
         const belowMinResolvingPeriod = 47 * 60 * 60; // 47 hours
-        await expect(flashDuelsAdmin.connect(owner).setResolvingPeriod(belowMinResolvingPeriod)).to.be.revertedWith("Resolving period should be atleast 48 hours");
+        await expect(flashDuelsAdmin.connect(owner).setResolvingPeriod(belowMinResolvingPeriod)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__InvalidResolvingPeriod");
     });
 
     it("should set the winners chunk size to the lower boundary", async function () {
@@ -258,7 +258,7 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
         );
 
         const belowMinChunkSize = 29;
-        await expect(flashDuelsAdmin.connect(owner).setWinnersChunkSizes(belowMinChunkSize)).to.be.revertedWith("Chunk size should be in the range 30 to 100");
+        await expect(flashDuelsAdmin.connect(owner).setWinnersChunkSizes(belowMinChunkSize)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__InvalidWinnersChunkSize");
     });
 
     it("should set the refund chunk size to the lower boundary", async function () {
@@ -269,7 +269,7 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
 
     it("should revert when setting the refund chunk size below the allowed range", async function () {
         const belowMinRefundChunkSize = 29;
-        await expect(flashDuelsAdmin.connect(owner).setRefundChunkSizes(belowMinRefundChunkSize)).to.be.revertedWith("Chunk size should be in the range 30 to 100");
+        await expect(flashDuelsAdmin.connect(owner).setRefundChunkSizes(belowMinRefundChunkSize)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__InvalidRefundChunkSize");
     });
 
     it("should approve and create a duel successfully", async function () {
@@ -306,16 +306,16 @@ describe("FlashDuelsAdminFacet Additional Tests", function () {
         // Simulate protocol fees being generated
         const protocolFees = ethers.parseUnits("10", 6);
         await flashDuelsAdmin.connect(owner).setCreateDuelFee(protocolFees);
-        await expect(flashDuelsAdmin.connect(owner).withdrawProtocolFees()).to.be.revertedWith("No funds available");
+        await expect(flashDuelsAdmin.connect(owner).withdrawProtocolFees()).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__NoFundsAvailable");
         expect(await flashDuelsView.getTotalProtocolFeesGenerated()).to.equal(0);
     });
 
     it("should revert when setting the bot address to zero address", async function () {
-        await expect(flashDuelsAdmin.connect(owner).setBotAddress(ethers.ZeroAddress)).to.be.revertedWith("Invalid bot address");
+        await expect(flashDuelsAdmin.connect(owner).setBotAddress(ethers.ZeroAddress)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__InvalidBot");
     });
 
     it("should revert when setting the protocol address to zero address", async function () {
-        await expect(flashDuelsAdmin.connect(owner).setProtocolAddress(ethers.ZeroAddress)).to.be.revertedWith("Invalid protocol address");
+        await expect(flashDuelsAdmin.connect(owner).setProtocolAddress(ethers.ZeroAddress)).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__InvalidProtocolAddress");
     });
 
     it("should set the participation token type successfully", async function () {

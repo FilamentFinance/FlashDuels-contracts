@@ -2,12 +2,11 @@
 pragma solidity 0.8.26;
 
 /**
- * \
- * Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
- * EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535
- *
- * Implementation of a diamond.
- * /*****************************************************************************
+ * @title DiamondInit
+ * @author Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
+ * @notice Initialization contract for EIP-2535 Diamond implementation
+ * @dev This contract is responsible for initializing the diamond's state variables and interfaces
+ * @dev It implements Initializable, ReentrancyGuardUpgradeable, and PausableUpgradeable for upgradeable functionality
  */
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
@@ -24,20 +23,29 @@ import {AppStorage} from "../AppStorage.sol";
 // of your diamond. Add parameters to the init function if you need to.
 
 contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable {
+    /// @notice AppStorage instance for managing contract state
     AppStorage internal s;
 
+    /// @notice Modifier to ensure only the contract owner can execute certain functions
     modifier onlyOwner() {
         LibDiamond.enforceIsContractOwner();
         _;
     }
 
-    // You can add parameters to this function in order to pass in
-    // data to set your own state variables
-    function init(address _protocolTreasury, address _flashDuels, address _usdc, address _bot, address _credits)
-        external
-        onlyOwner
-        initializer
-    {
+    /// @notice Initializes the diamond contract with required parameters and state variables
+    /// @dev This function sets up ERC165 interfaces, initializes upgradeable contracts, and sets initial state variables
+    /// @param _protocolTreasury Address of the protocol treasury
+    /// @param _flashDuels Address of the FlashDuels contract
+    /// @param _usdc Address of the USDC token contract
+    /// @param _bot Address of the bot contract
+    /// @param _credits Address of the credits token contract
+    function init(
+        address _protocolTreasury,
+        address _flashDuels,
+        address _usdc,
+        address _bot,
+        address _credits
+    ) external onlyOwner initializer {
         // adding ERC165 data
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         ds.supportedInterfaces[type(IERC165).interfaceId] = true;
@@ -55,6 +63,7 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
         __Pausable_init();
         __ReentrancyGuard_init();
 
+        // Initialize contract state variables
         s.protocolTreasury = _protocolTreasury;
         s.flashDuelsContract = _flashDuels; // @note mainnet - can be removed for mainnet deployment
         s.usdc = _usdc;
@@ -71,6 +80,6 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
         // s.marketPlaceFees = 10; // 0.1%
         s.sellerFees = 3; // 0.03%
         s.buyerFees = 5; // 0.05%
-            // s.maxStrikes = 5;
+        // s.maxStrikes = 5;
     }
 }

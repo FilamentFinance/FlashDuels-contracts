@@ -103,7 +103,7 @@
     },
     {
         "inputs": [],
-        "name": "OptionToken__InvalidFlashDuels",
+        "name": "OptionToken__InvalidFlashDuelsDiamond",
         "type": "error"
     },
     {

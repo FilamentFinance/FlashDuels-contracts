@@ -262,7 +262,7 @@ describe("FlashDuels Contract", function () {
             // Attempt to start the duel with a non-bot account (should fail)
             await expect(flashDuelsCore.connect(accounts[1]).startDuel(duelIds[0])).to.be.revertedWithCustomError(
                 flashDuelsCore,
-                "FlashDuels__InvalidBot"
+                "FlashDuelsCoreFacet__InvalidBot"
             )
         })
     })
@@ -832,7 +832,7 @@ describe("FlashDuels Contract", function () {
             // Attempt to cancel the duel
             await expect(
                 flashDuelsCore.connect(contracts.Bot.bot).cancelDuelIfThresholdNotMet(2, duelIds[0])
-            ).to.be.revertedWith("Threshold met, cannot cancel")
+            ).to.be.revertedWithCustomError(flashDuelsCore, "FlashDuelsCoreFacet__ThresholdMet")
         })
 
         it("should revert if non-bot tries to cancel the duel", async function () {
@@ -879,7 +879,7 @@ describe("FlashDuels Contract", function () {
 
             await expect(
                 flashDuelsCore.connect(accounts[1]).cancelDuelIfThresholdNotMet(2, duelIds[0])
-            ).to.be.revertedWithCustomError(flashDuelsCore, "FlashDuels__InvalidBot")
+            ).to.be.revertedWithCustomError(flashDuelsCore, "FlashDuelsCoreFacet__InvalidBot")
         })
     })
 
@@ -1264,7 +1264,7 @@ describe("FlashDuels Contract", function () {
             // Attempt to start the duel with a non-bot account (should fail)
             await expect(
                 flashDuelsCore.connect(accounts[1]).startCryptoDuel(duelIds[0], "6500000000000")
-            ).to.be.revertedWithCustomError(flashDuelsCore, "FlashDuels__InvalidBot")
+            ).to.be.revertedWithCustomError(flashDuelsCore, "FlashDuelsCoreFacet__InvalidBot")
         })
 
         it("should fail if less than minimum wager", async function () {
@@ -1333,7 +1333,7 @@ describe("FlashDuels Contract", function () {
                 flashDuelsCore
                     .connect(contracts.Bot.bot)
                     .joinCryptoDuel(duelIds[0], "No", 1, optionPrice, amount, accounts[2].address)
-            ).to.be.revertedWith("Less than minimum wager")
+            ).to.be.revertedWithCustomError(flashDuelsCore, "FlashDuelsCoreFacet__LessThanMinimumWager")
         })
     })
 
@@ -2351,7 +2351,7 @@ describe("FlashDuels Contract", function () {
             // Attempt to cancel the duel
             await expect(
                 flashDuelsCore.connect(contracts.Bot.bot).cancelDuelIfThresholdNotMet(1, duelIds[0])
-            ).to.be.revertedWith("Threshold met, cannot cancel")
+            ).to.be.revertedWithCustomError(flashDuelsCore, "FlashDuelsCoreFacet__ThresholdMet")
         })
 
         it("should revert if non-bot tries to cancel the duel", async function () {
@@ -2424,7 +2424,7 @@ describe("FlashDuels Contract", function () {
 
             await expect(
                 flashDuelsCore.connect(accounts[1]).cancelDuelIfThresholdNotMet(1, duelIds[0])
-            ).to.be.revertedWithCustomError(flashDuelsCore, "FlashDuels__InvalidBot")
+            ).to.be.revertedWithCustomError(flashDuelsCore, "FlashDuelsCoreFacet__InvalidBot")
         })
 
         it("should refund users who wagered on options", async function () {

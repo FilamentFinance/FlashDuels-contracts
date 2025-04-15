@@ -11,7 +11,102 @@
     },
     {
         "inputs": [],
-        "name": "FlashDuels__InvalidOwnerOrBot",
+        "name": "FlashDuelsAdminFacet__CreditsRefundFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__DuelAlreadyApproved",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidBootstrapPeriod",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidBot",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidCRDAddress",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidCategory",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidCreateDuelFee",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidDuelDuration",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMinimumWagerThreshold",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidOwnerOrBot",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidPendingDuelsIndex",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidProtocolAddress",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidRefundChunkSize",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidResolvingPeriod",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidUSDCAmount",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidWinnersChunkSize",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__NoFundsAvailable",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__NoUSDCAmountToRefund",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__TransferFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__USDCRefundFailed",
         "type": "error"
     },
     {

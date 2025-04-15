@@ -2,10 +2,11 @@
 pragma solidity 0.8.26;
 
 /**
- * \
- * Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
- * EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535
- * /*****************************************************************************
+ * @title DiamondCutFacet
+ * @author Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)
+ * @notice Implementation of the Diamond Cut interface for EIP-2535 Diamonds
+ * @dev This contract implements the Diamond Cut interface which provides functions to modify a diamond's facets and selectors
+ * @dev The loupe functions from DiamondLoupeFacet must be added to the diamond as they are required by the EIP2535 Diamonds standard
  */
 import {IDiamondCut} from "../interfaces/IDiamondCut.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
@@ -14,8 +15,11 @@ import {LibDiamond} from "../libraries/LibDiamond.sol";
 // The loupe functions are required by the EIP2535 Diamonds standard
 
 contract DiamondCutFacet is IDiamondCut {
+    
     /// @notice Add/replace/remove any number of functions and optionally execute
     ///         a function with delegatecall
+    /// @dev This function allows the diamond owner to modify the diamond's facets and selectors
+    /// @dev The function uses gas-efficient bit operations for selector slot management
     /// @param _diamondCut Contains the facet addresses and function selectors
     /// @param _init The address of the contract or facet to execute _calldata
     /// @param _calldata A function call, including function selector and arguments
@@ -35,7 +39,7 @@ contract DiamondCutFacet is IDiamondCut {
         }
 
         // loop through diamond cut
-        for (uint256 facetIndex; facetIndex < _diamondCut.length;) {
+        for (uint256 facetIndex; facetIndex < _diamondCut.length; ) {
             (selectorCount, selectorSlot) = LibDiamond.addReplaceRemoveFacetSelectors(
                 selectorCount,
                 selectorSlot,
