@@ -251,7 +251,6 @@ export const setupContracts = async () => {
 
     let functionCall = diamondInit.interface.encodeFunctionData("init", [
         protocolTreasury,
-        diamond.target,
         usdAddress,
         bot,
         creditsAddress
