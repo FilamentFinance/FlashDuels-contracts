@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {AppStorage, Duel, DuelCategory, DuelDuration, DuelStatus, PendingDuel, DuelApprovedAndCreated, ParticipationTokenTypeUpdated, ParticipationTokenType, DuelRequestRevoked, DuelCreated, WithdrawProtocolFee, CreateDuelFeeUpdated, MinimumWagerThresholdUpdated, BotAddressUpdated, ProtocolTreasuryUpdated, BootstrapPeriodUpdated, ResolvingPeriodUpdated, WinnersChunkSizesUpdated, RefundChunkSizesUpdated, CreditsAddressUpdated, FlashDuels__InvalidOwnerOrBot} from "../AppStorage.sol";
+import {AppStorage, Duel, DuelCategory, DuelDuration, DuelStatus, PendingDuel, DuelApprovedAndCreated, ParticipationTokenTypeUpdated, ParticipationTokenType, DuelRequestRevoked, DuelCreated, WithdrawProtocolFee, CreateDuelFeeUpdated, MinimumWagerThresholdUpdated, BotAddressUpdated, ProtocolTreasuryUpdated, BootstrapPeriodUpdated, ResolvingPeriodUpdated, WinnersChunkSizesUpdated, RefundChunkSizesUpdated, CreditsAddressUpdated, FlashDuelsAdminFacet__InvalidOwnerOrBot, FlashDuelsAdminFacet__InvalidProtocolAddress, FlashDuelsAdminFacet__InvalidCRDAddress, FlashDuelsAdminFacet__InvalidCreateDuelFee, FlashDuelsAdminFacet__InvalidMinimumWagerThreshold, FlashDuelsAdminFacet__InvalidBootstrapPeriod, FlashDuelsAdminFacet__InvalidResolvingPeriod, FlashDuelsAdminFacet__InvalidWinnersChunkSize, FlashDuelsAdminFacet__InvalidRefundChunkSize, FlashDuelsAdminFacet__InvalidDuelDuration, FlashDuelsAdminFacet__DuelAlreadyApproved, FlashDuelsAdminFacet__InvalidUSDCAmount, FlashDuelsAdminFacet__NoUSDCAmountToRefund, FlashDuelsAdminFacet__NoFundsAvailable, FlashDuelsAdminFacet__TransferFailed, FlashDuelsAdminFacet__InvalidCategory, FlashDuelsAdminFacet__InvalidBot, FlashDuelsAdminFacet__USDCRefundFailed, FlashDuelsAdminFacet__CreditsRefundFailed, FlashDuelsAdminFacet__InvalidPendingDuelsIndex, FlashDuelsAdminFacet__InvalidCRDAddress, FlashDuelsAdminFacet__InvalidCreateDuelFee, FlashDuelsAdminFacet__InvalidMinimumWagerThreshold, FlashDuelsAdminFacet__InvalidBootstrapPeriod, FlashDuelsAdminFacet__InvalidResolvingPeriod, FlashDuelsAdminFacet__InvalidWinnersChunkSize, FlashDuelsAdminFacet__InvalidRefundChunkSize, FlashDuelsAdminFacet__InvalidDuelDuration, FlashDuelsAdminFacet__DuelAlreadyApproved, FlashDuelsAdminFacet__InvalidUSDCAmount, FlashDuelsAdminFacet__NoUSDCAmountToRefund, FlashDuelsAdminFacet__NoFundsAvailable, FlashDuelsAdminFacet__TransferFailed, FlashDuelsAdminFacet__InvalidCategory, FlashDuelsAdminFacet__InvalidBot, FlashDuelsAdminFacet__USDCRefundFailed, FlashDuelsAdminFacet__CreditsRefundFailed, FlashDuelsAdminFacet__InvalidPendingDuelsIndex} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -14,12 +14,14 @@ import {LibFlashDuels} from "../libraries/LibFlashDuels.sol";
 contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20 for IERC20;
     using LibFlashDuels for LibFlashDuels.LibFlashDuelsAppStorage;
+
     AppStorage internal s;
 
+    /// ============ Modifiers ============ ///
     /// @notice Modifier to restrict function access to only the bot address.
     /// @dev Throws FlashDuels__InvalidOwnerOrBot if the caller is not the owner or the bot address
     modifier onlyOwnerOrBot() {
-        require(msg.sender == LibDiamond.contractOwner() || msg.sender == s.bot, FlashDuels__InvalidOwnerOrBot());
+        require(msg.sender == LibDiamond.contractOwner() || msg.sender == s.bot, FlashDuelsAdminFacet__InvalidOwnerOrBot());
         _;
     }
 
@@ -30,8 +32,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         _;
     }
 
-    // ========================== External Functions ========================== //
-
+    // ============ External Functions ============
     /// @notice Pauses the contract, disabling certain critical functions
     /// @dev Can only be called by the owner to prevent further operations during an emergency
     function pause() external onlyOwner {
@@ -50,9 +51,9 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// @param _fee The new fee amount to set for creating a duel.
     function setCreateDuelFee(uint256 _fee) external onlyOwner {
         if (s.participationTokenType == ParticipationTokenType.USDC) {
-            require(_fee <= 10 * 1e6, "Duel fees cannot be more than 10 dollars");
+            require(_fee <= 10 * 1e6, FlashDuelsAdminFacet__InvalidCreateDuelFee());
         } else {
-            require(_fee <= 10 * 1e18, "Duel fees cannot be more than 10 credits");
+            require(_fee <= 10 * 1e18, FlashDuelsAdminFacet__InvalidCreateDuelFee());
         }
         s.createDuelFee = _fee;
         emit CreateDuelFeeUpdated(_fee);
@@ -63,7 +64,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// It updates the bot variable with the specified address.
     /// @param _bot The address of the bot to set.
     function setBotAddress(address _bot) external onlyOwner {
-        require(_bot != address(0), "Invalid bot address");
+        require(_bot != address(0), FlashDuelsAdminFacet__InvalidBot());
         s.bot = _bot;
         emit BotAddressUpdated(_bot);
     }
@@ -73,7 +74,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// It updates the protocolAddress variable with the new address.
     /// @param _protocolTreasury The address of the protocol to set.
     function setProtocolAddress(address _protocolTreasury) external onlyOwner {
-        require(_protocolTreasury != address(0), "Invalid protocol address");
+        require(_protocolTreasury != address(0), FlashDuelsAdminFacet__InvalidProtocolAddress());
         s.protocolTreasury = _protocolTreasury;
         emit ProtocolTreasuryUpdated(_protocolTreasury);
     }
@@ -86,10 +87,13 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         if (s.participationTokenType == ParticipationTokenType.USDC) {
             require(
                 _minThreshold >= 50 * 1e6 && _minThreshold <= 200 * 1e6,
-                "Minimum threshold should be in the range 50 to 100 dollars"
+                FlashDuelsAdminFacet__InvalidMinimumWagerThreshold()
             );
         } else {
-            require(_minThreshold >= 50 * 1e18 && _minThreshold <= 200 * 1e18, "Minimum threshold should be in the range 50 to 100 credits");
+            require(
+                _minThreshold >= 50 * 1e18 && _minThreshold <= 200 * 1e18,
+                FlashDuelsAdminFacet__InvalidMinimumWagerThreshold()
+            );
         }
         s.minThreshold = _minThreshold;
         emit MinimumWagerThresholdUpdated(_minThreshold);
@@ -100,7 +104,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     function updateBootstrapPeriod(uint256 _bootstrapPeriod) external onlyOwner {
         require(
             _bootstrapPeriod >= 5 minutes && _bootstrapPeriod <= 30 minutes,
-            "Bootstrap period should be in the range 5 to 30 mins"
+            FlashDuelsAdminFacet__InvalidBootstrapPeriod()
         );
         s.bootstrapPeriod = _bootstrapPeriod;
         emit BootstrapPeriodUpdated(_bootstrapPeriod);
@@ -110,7 +114,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// @dev Allows only the owner to set a new resolving period for duels.
     /// @param _newResolvingPeriod The new duration (in seconds) for the resolving period.
     function setResolvingPeriod(uint256 _newResolvingPeriod) external onlyOwner {
-        require(_newResolvingPeriod >= 48 hours, "Resolving period should be atleast 48 hours");
+        require(_newResolvingPeriod >= 48 hours, FlashDuelsAdminFacet__InvalidResolvingPeriod());
         s.resolvingPeriod = _newResolvingPeriod;
         emit ResolvingPeriodUpdated(_newResolvingPeriod);
     }
@@ -120,7 +124,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// @param _winnersChunkSize The size of the chunk for distributing winnings, in the range of 30 to 100.
     /// @custom:restriction This function can only be called by the contract owner.
     function setWinnersChunkSizes(uint256 _winnersChunkSize) external onlyOwner {
-        require(_winnersChunkSize >= 30 && _winnersChunkSize <= 100, "Chunk size should be in the range 30 to 100");
+        require(_winnersChunkSize >= 30 && _winnersChunkSize <= 100, FlashDuelsAdminFacet__InvalidWinnersChunkSize());
         s.winnersChunkSize = _winnersChunkSize;
         emit WinnersChunkSizesUpdated(_winnersChunkSize);
     }
@@ -130,7 +134,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// @param _refundChunkSize The size of the chunk for distributing winnings, in the range of 30 to 100.
     /// @custom:restriction This function can only be called by the contract owner.
     function setRefundChunkSizes(uint256 _refundChunkSize) external onlyOwner {
-        require(_refundChunkSize >= 30 && _refundChunkSize <= 100, "Chunk size should be in the range 30 to 100");
+        require(_refundChunkSize >= 30 && _refundChunkSize <= 100, FlashDuelsAdminFacet__InvalidRefundChunkSize());
         s.refundChunkSize = _refundChunkSize;
         emit RefundChunkSizesUpdated(_refundChunkSize);
     }
@@ -140,9 +144,17 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// It updates the credits variable with the specified address.
     /// @param _creditsAddress The address of the CRD token to set.
     function setCRDAddress(address _creditsAddress) external onlyOwner {
-        require(_creditsAddress != address(0), "Invalid CRD address");
+        require(_creditsAddress != address(0), FlashDuelsAdminFacet__InvalidCRDAddress());
         s.credits = _creditsAddress;
         emit CreditsAddressUpdated(_creditsAddress);
+    }
+
+    /// @notice Sets the token type for participation in duels.
+    /// @dev This function can only be called by the contract owner.
+    /// @param _tokenType The token type to set for participation (0 for USDC, 1 for Credits).
+    function setParticipationTokenType(ParticipationTokenType _tokenType) external onlyOwner {
+        s.participationTokenType = _tokenType;
+        emit ParticipationTokenTypeUpdated(_tokenType);
     }
 
     /// @notice Creates a duel for an approved user
@@ -156,7 +168,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         uint256 _index
     ) external whenNotPaused onlyOwnerOrBot returns (string memory) {
         string memory duelId;
-        require(_category != DuelCategory.Crypto, "Should not crypto category duel");
+        require(_category != DuelCategory.Crypto, FlashDuelsAdminFacet__InvalidCategory());
         duelId = _processPendingDuel(_user, _category, _index);
         return duelId;
     }
@@ -172,12 +184,12 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         uint256 _index
     ) external whenNotPaused onlyOwnerOrBot returns (bool) {
         uint256 refundAmount;
-        require(_category != DuelCategory.Crypto, "Should not crypto category duel");
+        require(_category != DuelCategory.Crypto, FlashDuelsAdminFacet__InvalidCategory());
         refundAmount = _revokePendingDuel(_user, _category, _index);
         if (s.participationTokenType == ParticipationTokenType.USDC) {
-            require(IERC20(s.usdc).transfer(_user, refundAmount), "USDC refund failed");
+            require(IERC20(s.usdc).transfer(_user, refundAmount), FlashDuelsAdminFacet__USDCRefundFailed());
         } else {
-            require(IERC20(s.credits).transfer(_user, refundAmount), "Credits refund failed");
+            require(IERC20(s.credits).transfer(_user, refundAmount), FlashDuelsAdminFacet__CreditsRefundFailed());
         }
         emit DuelRequestRevoked(_user, refundAmount, block.timestamp);
         return true;
@@ -187,26 +199,17 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// @dev This function can only be called by the owner.
     function withdrawProtocolFees() external nonReentrant onlyOwner {
         uint256 protocolBalance = s.totalProtocolFeesGenerated;
-        require(protocolBalance > 0, "No funds available");
+        require(protocolBalance > 0, FlashDuelsAdminFacet__NoFundsAvailable());
         if (s.participationTokenType == ParticipationTokenType.USDC) {
-            require(IERC20(s.usdc).transfer(msg.sender, protocolBalance), "Transfer failed");
+            require(IERC20(s.usdc).transfer(msg.sender, protocolBalance), FlashDuelsAdminFacet__TransferFailed());
         } else {
-            require(IERC20(s.credits).transfer(msg.sender, protocolBalance), "Transfer failed");
+            require(IERC20(s.credits).transfer(msg.sender, protocolBalance), FlashDuelsAdminFacet__TransferFailed());
         }
         s.totalProtocolFeesGenerated = 0;
         emit WithdrawProtocolFee(msg.sender, protocolBalance, block.timestamp);
     }
 
-    /// @notice Sets the token type for participation in duels.
-    /// @dev This function can only be called by the contract owner.
-    /// @param _tokenType The token type to set for participation (0 for USDC, 1 for Credits).
-    function setParticipationTokenType(ParticipationTokenType _tokenType) external onlyOwner {
-        s.participationTokenType = _tokenType;
-        emit ParticipationTokenTypeUpdated(_tokenType);
-    }
-
-    // ========================== Internal Functions ========================== //
-
+    // ============ Internal Functions ============
     /// @notice Creates a new duel with the specified parameters
     /// @dev Internal function that allows any user to create a duel with a predefined duel duration.
     ///       A USDC fee is required for duel creation, and the duel starts after the bootstrap period.
@@ -223,7 +226,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         string[] memory _options,
         DuelDuration _duelDuration
     ) internal returns (string memory) {
-        require(_category != DuelCategory.Crypto, "Should not crypto category duel");
+        require(_category != DuelCategory.Crypto, FlashDuelsAdminFacet__InvalidCategory());
         s.totalProtocolFeesGenerated = s.totalProtocolFeesGenerated + s.createDuelFee;
 
         require(
@@ -234,7 +237,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
                 _duelDuration == DuelDuration.ThreeHours ||
                 _duelDuration == DuelDuration.SixHours ||
                 _duelDuration == DuelDuration.TwelveHours,
-            "Invalid duel duration"
+            FlashDuelsAdminFacet__InvalidDuelDuration()
         );
 
         string memory _duelId = LibFlashDuels._generateDuelId(_user);
@@ -264,10 +267,10 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         uint256 _index
     ) internal returns (string memory) {
         PendingDuel[] storage userPendingDuels = s.pendingDuels[_user][_category];
-        require(_index < userPendingDuels.length, "Invalid pending duels index");
+        require(_index < userPendingDuels.length, FlashDuelsAdminFacet__InvalidPendingDuelsIndex());
         PendingDuel memory pendingDuel = userPendingDuels[_index];
-        require(!pendingDuel.isApproved, "Duel already approved");
-        require(pendingDuel.usdcAmount == s.createDuelFee, "Invalid USDC amount stored");
+        require(!pendingDuel.isApproved, FlashDuelsAdminFacet__DuelAlreadyApproved());
+        require(pendingDuel.usdcAmount == s.createDuelFee, FlashDuelsAdminFacet__InvalidUSDCAmount());
         string memory duelId = _createDuel(
             _user,
             pendingDuel.category,
@@ -304,10 +307,10 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
     /// @return The amount of USDC to be refunded.
     function _revokePendingDuel(address _user, DuelCategory _category, uint256 _index) internal returns (uint256) {
         PendingDuel[] storage userPendingDuels = s.pendingDuels[_user][_category];
-        require(_index < userPendingDuels.length, "Invalid pending duels index");
+        require(_index < userPendingDuels.length, FlashDuelsAdminFacet__InvalidPendingDuelsIndex());
         PendingDuel memory pendingDuel = userPendingDuels[_index];
-        require(!pendingDuel.isApproved, "Duel already approved");
-        require(pendingDuel.usdcAmount > 0, "No USDC to refund");
+        require(!pendingDuel.isApproved, FlashDuelsAdminFacet__DuelAlreadyApproved());
+        require(pendingDuel.usdcAmount > 0, FlashDuelsAdminFacet__NoUSDCAmountToRefund());
         uint256 refundAmount = pendingDuel.usdcAmount;
         uint256 lastIndex = userPendingDuels.length - 1;
         if (_index != lastIndex) {

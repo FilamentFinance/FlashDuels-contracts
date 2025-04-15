@@ -118,7 +118,7 @@ describe("FlashDuels Marketplace Contract", function () {
             flashDuelsMarketplace
                 .connect(seller)
                 .sell(duelIds[0], sellerOptionToken, 2, 1, ethers.parseUnits("0", 18), "7000000")
-        ).to.be.revertedWith("Amount must be greater than zero")
+        ).to.be.revertedWithCustomError(flashDuelsMarketplace, "FlashDuelsMarketplaceFacet__AmountMustBeGreaterThanZero")
     })
 })
 
@@ -333,9 +333,7 @@ describe("Cancel Sale", function () {
             .sell(duelIds[0], sellerOptionToken, 2, 1, ethers.parseUnits("5", 18), "7000000")
         txr = await tx.wait(1)
 
-        await expect(flashDuelsMarketplace.connect(buyer).cancelSell(sellerOptionToken, 0)).to.be.revertedWith(
-            "You are not the seller"
-        )
+        await expect(flashDuelsMarketplace.connect(buyer).cancelSell(sellerOptionToken, 0)).to.be.revertedWithCustomError(flashDuelsMarketplace, "FlashDuelsMarketplaceFacet__NotTheSeller")
     })
 })
 
@@ -801,6 +799,6 @@ describe("Token Purchase", function () {
 
         await expect(
             flashDuelsMarketplace.connect(contracts.Bot.bot).buy(duelIds[0], buyer.address, sellerOptionToken, 2, 1, [0], [amount])
-        ).to.be.revertedWithCustomError(flashDuelsMarketplace, "FlashDuelsMarketplace__DuelEnded")
+        ).to.be.revertedWithCustomError(flashDuelsMarketplace, "FlashDuelsMarketplaceFacet__DuelEnded")
     })
 })

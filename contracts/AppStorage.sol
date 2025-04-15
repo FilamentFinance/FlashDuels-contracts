@@ -4,45 +4,235 @@ pragma solidity 0.8.26;
 /// @dev Basis points
 uint256 constant BPS = 10000;
 
-/// @notice Emitted when a sale is created
-/// @param saleId The ID of the sale
-/// @param seller The address of the seller
-/// @param token The address of the token being sold
-/// @param quantity The quantity of tokens being sold
-/// @param totalPrice The total price for the sale
-/// @param saleTime The sale created time
-event SaleCreated(
-    uint256 saleId,
-    address indexed seller,
-    address token,
-    uint256 quantity,
-    uint256 totalPrice,
-    uint256 saleTime
-);
+/// ============ Enums ============ ///
+/// @notice Enum representing different possible duel durations
+enum DuelDuration {
+    FiveMinutes,
+    FifteenMinutes,
+    ThirtyMinutes,
+    OneHour,
+    ThreeHours,
+    SixHours,
+    TwelveHours
+}
 
-/// @notice Emitted when a sale is cancelled
-/// @param saleId The ID of the sale
-/// @param seller The address of the seller
-/// @param token The address of the token for the cancelled sale
-/// @param saleCancelledTime The sale cancelled time
-event SaleCancelled(uint256 saleId, address indexed seller, address token, uint256 saleCancelledTime);
+/// @notice Enum representing the current status of a duel
+enum DuelStatus {
+    NotStarted,
+    BootStrapped,
+    Live,
+    Settled,
+    Cancelled
+}
 
-/// @notice Emitted when tokens are purchased
-/// @param buyer The address of the buyer
-/// @param seller The address of the seller
-/// @param token The address of the token being purchased
-/// @param quantity The quantity of tokens purchased
-/// @param totalPrice The total price paid by the buyer
-/// @param tokenPurchasedTime The token purchased time
-event TokensPurchased(
-    address indexed buyer,
-    address indexed seller,
-    address token,
-    uint256 quantity,
-    uint256 totalPrice,
-    uint256 tokenPurchasedTime
-);
+/// @notice Enum representing categories a duel can belong to
+enum DuelCategory {
+    Any,
+    Crypto,
+    Politics,
+    Sports,
+    Twitter,
+    NFTs,
+    News
+}
 
+/// @notice Enum representing trigger type
+enum TriggerType {
+    Absolute,
+    Percentage
+}
+
+/// @notice Enum representing trigger condition
+enum TriggerCondition {
+    Above,
+    Below
+}
+
+/// @notice Enum representing participation token type
+enum ParticipationTokenType {
+    USDC,
+    CRD
+}
+
+/// ============ Errors ============ ///
+/// @notice Thrown when the owner or bot address is invalid
+error FlashDuelsAdminFacet__InvalidOwnerOrBot();
+
+/// @notice Thrown when the protocol address is invalid
+error FlashDuelsAdminFacet__InvalidProtocolAddress();
+
+/// @notice Thrown when the CRD address is invalid
+error FlashDuelsAdminFacet__InvalidCRDAddress();
+
+/// @notice Thrown when the create duel fee is invalid
+error FlashDuelsAdminFacet__InvalidCreateDuelFee();
+
+/// @notice Thrown when the minimum wager threshold is invalid
+error FlashDuelsAdminFacet__InvalidMinimumWagerThreshold();
+
+/// @notice Thrown when the bootstrap period is invalid
+error FlashDuelsAdminFacet__InvalidBootstrapPeriod();
+
+/// @notice Thrown when the resolving period is invalid
+error FlashDuelsAdminFacet__InvalidResolvingPeriod();
+
+/// @notice Thrown when the winners chunk size is invalid
+error FlashDuelsAdminFacet__InvalidWinnersChunkSize();
+
+/// @notice Thrown when the refund chunk size is invalid
+error FlashDuelsAdminFacet__InvalidRefundChunkSize();
+
+/// @notice Thrown when the duel duration is invalid
+error FlashDuelsAdminFacet__InvalidDuelDuration();
+
+/// @notice Thrown when the duel already approved
+error FlashDuelsAdminFacet__DuelAlreadyApproved();
+
+/// @notice Thrown when the USDC amount is invalid
+error FlashDuelsAdminFacet__InvalidUSDCAmount();
+
+/// @notice Thrown when the no USDC amount to refund
+error FlashDuelsAdminFacet__NoUSDCAmountToRefund();
+
+/// @notice Thrown when the no funds available
+error FlashDuelsAdminFacet__NoFundsAvailable();
+
+/// @notice Thrown when the transfer failed
+error FlashDuelsAdminFacet__TransferFailed();
+
+/// @notice Thrown when the category is invalid
+error FlashDuelsAdminFacet__InvalidCategory();
+
+/// @notice Thrown when the bot address is invalid in admin facet
+error FlashDuelsAdminFacet__InvalidBot();
+
+/// @notice Thrown when the USDC refund failed
+error FlashDuelsAdminFacet__USDCRefundFailed();
+
+/// @notice Thrown when the credits refund failed
+error FlashDuelsAdminFacet__CreditsRefundFailed();
+
+/// @notice Thrown when the pending duels index is invalid
+error FlashDuelsAdminFacet__InvalidPendingDuelsIndex();
+
+/// @notice Thrown when the bot is invalid in core facet
+error FlashDuelsCoreFacet__InvalidBot();
+
+/// @notice Thrown when the duel category is invalid
+error FlashDuelsCoreFacet__InvalidDuelCategory();
+
+/// @notice Thrown when the duel duration is invalid
+error FlashDuelsCoreFacet__InvalidDuelDuration();
+
+/// @notice Thrown when the bootstrap period is not ended
+error FlashDuelsCoreFacet__BootstrapPeriodNotEnded();
+
+/// @notice Thrown when the threshold is met
+error FlashDuelsCoreFacet__ThresholdMet();
+
+/// @notice Thrown when the duel does not exist
+error FlashDuelsCoreFacet__DuelDoesNotExist();
+
+/// @notice Thrown when the duel is not live
+error FlashDuelsCoreFacet__DuelIsNotLive();
+
+/// @notice Thrown when USDC transfer fails
+error FlashDuelsCoreFacet__USDCTransferFailed();
+
+/// @notice Thrown when Credits transfer fails
+error FlashDuelsCoreFacet__CreditsTransferFailed();
+
+/// @notice Thrown when token transfer fails
+error FlashDuelsCoreFacet__TokenTransferFailed();
+
+/// @notice Thrown when wager amount is less than minimum
+error FlashDuelsCoreFacet__LessThanMinimumWager();
+
+/// @notice Thrown when duel has already started or settled
+error FlashDuelsCoreFacet__DuelHasAlreadyStartedOrSettled();
+
+/// @notice Thrown when threshold is not met
+error FlashDuelsCoreFacet__ThresholdNotMet();
+
+/// @notice Thrown when duel is not live or settled
+error FlashDuelsCoreFacet__DuelIsNotLiveOrSettled();
+
+/// @notice Thrown when duel is not expired
+error FlashDuelsCoreFacet__DuelIsNotExpired();
+
+/// @notice Thrown when resolving time has expired
+error FlashDuelsCoreFacet__ResolvingTimeExpired();
+
+/// @notice Thrown when distribution is already completed
+error FlashDuelsCoreFacet__DistributionAlreadyCompleted();
+
+/// @notice Thrown when there is no payout to distribute
+error FlashDuelsCoreFacet__NoPayoutToDistribute();
+
+/// @notice Thrown when refund distribution is already completed
+error FlashDuelsCoreFacet__RefundDistributionAlreadyCompleted();
+
+/// @notice Thrown when amount is greater than earnings
+error FlashDuelsCoreFacet__AmountShouldBeLessThanEqualEarnings();
+
+/// @notice Thrown when transfer fails
+error FlashDuelsCoreFacet__TransferFailed();
+
+/// @notice Thrown when no funds are available
+error FlashDuelsCoreFacet__NoFundsAvailable();
+
+/// @notice Thrown when the bot is invalid in marketplace facet
+error FlashDuelsMarketplaceFacet__InvalidBot();
+
+/// @notice Thrown when the option is invalid
+error FlashDuelsMarketplaceFacet__InvalidOption();
+
+/// @notice Thrown when the amount is zero
+error FlashDuelsMarketplaceFacet__AmountMustBeGreaterThanZero();
+
+/// @notice Thrown when the price per token is zero
+error FlashDuelsMarketplaceFacet__PricePerTokenMustBeGreaterThanZero();
+
+/// @notice Thrown when the seller cannot buy own tokens
+error FlashDuelsMarketplaceFacet__SellerCannotBuyOwnTokens();
+
+/// @notice Thrown when the buyer cannot be the bot
+error FlashDuelsMarketplaceFacet__BuyerCannotBeTheBot();
+
+/// @notice Thrown when the not enough tokens are available
+error FlashDuelsMarketplaceFacet__NotEnoughTokensAvailable();
+
+/// @notice Thrown when the duel has expired
+error FlashDuelsMarketplaceFacet__DuelHasExpired();
+
+/// @notice Thrown when the selling is not allowed for short duration duels
+error FlashDuelsMarketplaceFacet__SellingNotAllowedForShortDurationDuels();
+
+/// @notice Thrown when the market buy is not allowed for short duration duels
+error FlashDuelsMarketplaceFacet__MarketBuyNotAllowedForShortDurationDuels();
+
+/// @notice Thrown when the market buy is not allowed yet
+error FlashDuelsMarketplaceFacet__MarketBuyNotAllowedYet();
+
+/// @notice Thrown when the seller is not the buyer
+error FlashDuelsMarketplaceFacet__NotTheSeller();
+
+/// @notice Thrown when the no active sale
+error FlashDuelsMarketplaceFacet__NoActiveSale();
+
+/// @notice Thrown when the mismatched array lengths
+error FlashDuelsMarketplaceFacet__MismatchedArrayLengths();
+
+/// @notice Thrown when the insufficient token balance
+error FlashDuelsMarketplaceFacet__InsufficientTokenBalance();
+
+/// @notice Thrown when the insufficient allowance
+error FlashDuelsMarketplaceFacet__InsufficientAllowance();
+
+/// @notice Thrown when the duel ended
+error FlashDuelsMarketplaceFacet__DuelEnded(string duelId);
+
+/// ============ Structs ============ ///
 /// @notice Represents a sale listing with details about the seller, quantity, strike, and total price.
 /// @dev This struct is used to store information related to a specific sale in the marketplace.
 struct Sale {
@@ -113,53 +303,45 @@ struct PendingDuel {
     uint256 usdcAmount;
 }
 
-/// @notice Enum representing different possible duel durations
-enum DuelDuration {
-    FiveMinutes,
-    FifteenMinutes,
-    ThirtyMinutes,
-    OneHour,
-    ThreeHours,
-    SixHours,
-    TwelveHours
-}
+/// ============ Events ============ ///
+/// @notice Emitted when a sale is created
+/// @param saleId The ID of the sale
+/// @param seller The address of the seller
+/// @param token The address of the token being sold
+/// @param quantity The quantity of tokens being sold
+/// @param totalPrice The total price for the sale
+/// @param saleTime The sale created time
+event SaleCreated(
+    uint256 saleId,
+    address indexed seller,
+    address token,
+    uint256 quantity,
+    uint256 totalPrice,
+    uint256 saleTime
+);
 
-/// @notice Enum representing the current status of a duel
-enum DuelStatus {
-    NotStarted,
-    BootStrapped,
-    Live,
-    Settled,
-    Cancelled
-}
+/// @notice Emitted when a sale is cancelled
+/// @param saleId The ID of the sale
+/// @param seller The address of the seller
+/// @param token The address of the token for the cancelled sale
+/// @param saleCancelledTime The sale cancelled time
+event SaleCancelled(uint256 saleId, address indexed seller, address token, uint256 saleCancelledTime);
 
-/// @notice Enum representing categories a duel can belong to
-enum DuelCategory {
-    Any,
-    Crypto,
-    Politics,
-    Sports,
-    Twitter,
-    NFTs,
-    News
-}
-
-/// @notice Enum representing trigger type
-enum TriggerType {
-    Absolute,
-    Percentage
-}
-
-/// @notice Enum representing trigger condition
-enum TriggerCondition {
-    Above,
-    Below
-}
-
-enum ParticipationTokenType {
-    USDC,
-    CRD
-}
+/// @notice Emitted when tokens are purchased
+/// @param buyer The address of the buyer
+/// @param seller The address of the seller
+/// @param token The address of the token being purchased
+/// @param quantity The quantity of tokens purchased
+/// @param totalPrice The total price paid by the buyer
+/// @param tokenPurchasedTime The token purchased time
+event TokensPurchased(
+    address indexed buyer,
+    address indexed seller,
+    address token,
+    uint256 quantity,
+    uint256 totalPrice,
+    uint256 tokenPurchasedTime
+);
 
 /// @notice Emitted when a new duel is created
 /// @param creator The address of the duel creator
@@ -390,16 +572,9 @@ event ResolvingPeriodUpdated(uint256 newResolvingPeriod);
 /// @param newCreditsAddress The new address of the credits contract.
 event CreditsAddressUpdated(address newCreditsAddress);
 
-/// @notice Thrown when the duel has been already ended
-error FlashDuelsMarketplace__DuelEnded(string duelId);
-
-/// @notice Thrown when the owner or bot address is invalid
-error FlashDuels__InvalidOwnerOrBot();
-
-/// @notice Thrown when the bot address is invalid
-error FlashDuels__InvalidBot();
-
+/// ============ AppStorage ============ ///
 struct AppStorage {
+    /// ============ Protocol Settings ============ ///
     /// @notice Total protocol fees generated by the contract
     uint256 totalProtocolFeesGenerated;
     /// @notice Protocol fee percentage taken from the winnings (default 2%)
@@ -414,8 +589,6 @@ struct AppStorage {
     uint256 resolvingPeriod;
     /// @notice Time period for bootstrapping before a duel goes live (30 minutes by default)
     uint256 bootstrapPeriod;
-    /// @notice Marketplace fees
-    // uint256 marketPlaceFees; // 0.1%
     /// @notice SellerFees
     uint256 sellerFees; // 0.03%
     /// @notice BuyerFees
@@ -428,6 +601,7 @@ struct AppStorage {
     uint256 saleCounter;
     /// @notice Nonce used to generate unique duel IDs
     uint256 nonce;
+    /// ============ Addresses ============ ///
     /// @notice address of flashDuels diamond contract
     address flashDuelsContract;
     /// @notice Protocol address to receive fees
@@ -438,10 +612,13 @@ struct AppStorage {
     address bot;
     /// @notice Address of the credits contract
     address credits;
-    /// @notice  Storage for all pending duels
+    /// ============ Arrays ============ ///
+    /// @notice Storage for all pending duels
     PendingDuel[] allPendingDuels;
+    /// ============ Enums ============ ///
     /// @notice The token type for participation in duels
     ParticipationTokenType participationTokenType;
+    /// ============ Mappings ============ ///
     /// @notice Mapping of duelId to the optionIndex to the winning option to the total winning option payout
     mapping(string => mapping(uint256 => mapping(string => uint256))) totalWinningOptionPayout;
     /// @notice Mapping for duelId -> option-> user -> 1-based index in the participants array

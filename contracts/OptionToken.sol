@@ -9,8 +9,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * @dev The contract is restricted to certain addresses for minting and other administrative actions.
  */
 contract OptionToken is ERC20 {
-    /// @notice Thrown when the flashDuels address is invalid
-    error OptionToken__InvalidFlashDuels();
+    
+    /// @notice Thrown when the flashDuels diamond address is invalid
+    error OptionToken__InvalidFlashDuelsDiamond();
 
     /// @notice The address of the FlashDuels Diamond contract
     address public flashDuelsDiamond;
@@ -20,7 +21,7 @@ contract OptionToken is ERC20 {
      * @dev This modifier ensures that only the FlashDuels Diamond contract can call restricted functions.
      */
     modifier onlyFlashDuelsDiamond() {
-        require(flashDuelsDiamond == msg.sender, OptionToken__InvalidFlashDuels());
+        require(flashDuelsDiamond == msg.sender, OptionToken__InvalidFlashDuelsDiamond());
         _;
     }
 

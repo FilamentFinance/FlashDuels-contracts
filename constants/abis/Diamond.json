@@ -16,6 +16,11 @@
         "type": "constructor"
     },
     {
+        "inputs": [],
+        "name": "Diamond__FunctionDoesNotExist",
+        "type": "error"
+    },
+    {
         "inputs": [
             {
                 "internalType": "address",

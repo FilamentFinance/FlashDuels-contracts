@@ -11,7 +11,112 @@
     },
     {
         "inputs": [],
-        "name": "FlashDuels__InvalidBot",
+        "name": "FlashDuelsCoreFacet__AmountShouldBeLessThanEqualEarnings",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__BootstrapPeriodNotEnded",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__CreditsTransferFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__DistributionAlreadyCompleted",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__DuelDoesNotExist",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__DuelHasAlreadyStartedOrSettled",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__DuelIsNotExpired",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__DuelIsNotLive",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__DuelIsNotLiveOrSettled",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__InvalidBot",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__InvalidDuelCategory",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__InvalidDuelDuration",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__LessThanMinimumWager",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__NoFundsAvailable",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__NoPayoutToDistribute",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__RefundDistributionAlreadyCompleted",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__ResolvingTimeExpired",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__ThresholdMet",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__ThresholdNotMet",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__TokenTransferFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__TransferFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__USDCTransferFailed",
         "type": "error"
     },
     {
