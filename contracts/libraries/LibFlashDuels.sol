@@ -3,6 +3,9 @@ pragma solidity 0.8.26;
 
 import {AppStorage} from "../AppStorage.sol";
 
+/// @notice Thrown when a collision is detected in the duel ID
+error LibFlashDuels__IDCollisionDetected();
+
 library LibFlashDuels {
     struct LibFlashDuelsAppStorage {
         uint256 nonce;
@@ -23,7 +26,7 @@ library LibFlashDuels {
     /// @return duelIdStr A string representing the unique duel ID
     function _generateDuelId(address userAddress) internal returns (string memory) {
         LibFlashDuelsAppStorage storage s = appStorage();
-        
+
         s.nonce++; // Increment nonce to ensure uniqueness
 
         // Generate a new duel ID using keccak256
@@ -35,7 +38,7 @@ library LibFlashDuels {
         string memory duelIdStr = toHexString(newId);
 
         // Ensure the generated ID is unique
-        require(!s.isValidDuelId[duelIdStr], "ID collision detected");
+        require(!s.isValidDuelId[duelIdStr], LibFlashDuels__IDCollisionDetected());
 
         // Mark the ID as used
         s.isValidDuelId[duelIdStr] = true;

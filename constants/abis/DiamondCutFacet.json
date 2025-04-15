@@ -16,6 +16,56 @@
         "type": "error"
     },
     {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotAddFunctionThatAlreadyExists",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotRemoveFunctionThatDoesNotExist",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotRemoveImmutableFunction",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotReplaceFunctionThatDoesNotExist",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotReplaceFunctionWithSameFunction",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotReplaceImmutableFunction",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__IncorrectFacetCutAction",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__NoSelectorsInFacetToCut",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__RemoveFacetAddressMustBeAddressZero",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamond__MustBeContractOwner",
+        "type": "error"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {

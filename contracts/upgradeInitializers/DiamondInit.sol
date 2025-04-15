@@ -35,13 +35,11 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
     /// @notice Initializes the diamond contract with required parameters and state variables
     /// @dev This function sets up ERC165 interfaces, initializes upgradeable contracts, and sets initial state variables
     /// @param _protocolTreasury Address of the protocol treasury
-    /// @param _flashDuels Address of the FlashDuels contract
     /// @param _usdc Address of the USDC token contract
     /// @param _bot Address of the bot contract
     /// @param _credits Address of the credits token contract
     function init(
         address _protocolTreasury,
-        address _flashDuels,
         address _usdc,
         address _bot,
         address _credits
@@ -65,7 +63,6 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
 
         // Initialize contract state variables
         s.protocolTreasury = _protocolTreasury;
-        s.flashDuelsContract = _flashDuels; // @note mainnet - can be removed for mainnet deployment
         s.usdc = _usdc;
         s.bot = _bot;
         s.credits = _credits;
@@ -77,9 +74,7 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
         s.minThreshold = 50 * 1e6; // 50 USDC, 50*10^18 (for CRD tokens)
         s.winnersChunkSize = 50;
         s.refundChunkSize = 50;
-        // s.marketPlaceFees = 10; // 0.1%
         s.sellerFees = 3; // 0.03%
         s.buyerFees = 5; // 0.05%
-        // s.maxStrikes = 5;
     }
 }

@@ -16,6 +16,11 @@
     },
     {
         "inputs": [],
+        "name": "LibDiamond__MustBeContractOwner",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "NotInitializing",
         "type": "error"
     },
@@ -68,11 +73,6 @@
             {
                 "internalType": "address",
                 "name": "_protocolTreasury",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "_flashDuels",
                 "type": "address"
             },
             {

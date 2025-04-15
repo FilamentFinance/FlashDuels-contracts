@@ -126,6 +126,11 @@
     },
     {
         "inputs": [],
+        "name": "LibFlashDuels__IDCollisionDetected",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "NotInitializing",
         "type": "error"
     },

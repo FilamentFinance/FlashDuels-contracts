@@ -44,7 +44,7 @@ describe("OwnershipFacet", function () {
     )
     await expect(
       OwnershipFacet.connect(addr1).transferOwnership(addr2.address)
-    ).to.be.revertedWith("LibDiamond: Must be contract owner");
+    ).to.be.revertedWithCustomError(OwnershipFacet, "LibDiamond__MustBeContractOwner");
   });
 
   it("should not allow non-pending owner to accept ownership", async function () {

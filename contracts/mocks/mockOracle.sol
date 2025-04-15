@@ -1,20 +1,33 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
+/// @title MockOracle
+/// @notice A mock oracle contract that simulates a price feed oracle
+/// @dev This contract is used for testing purposes to simulate price feed behavior
 contract MockOracle {
     int256 private price;
 
-    // Set the price in the mock oracle
+    /// @notice Sets the mock price value
+    /// @dev This function allows setting an arbitrary price value for testing
+    /// @param _price The price value to set
     function setPrice(int256 _price) external {
         price = _price;
     }
 
-    // Get the current price (mimics Chainlink oracle's latestRoundData function)
+    /// @notice Returns the current mock price
+    /// @dev Mimics Chainlink oracle's latestAnswer function
+    /// @return The current price value
     function latestAnswer() external view returns (int256) {
         return price;
     }
 
-    // Optionally, you can mimic Chainlink's more complex `latestRoundData` if needed
+    /// @notice Returns the current mock price with additional metadata
+    /// @dev Mimics Chainlink oracle's latestRoundData function
+    /// @return roundId The round ID (always 0 for mock)
+    /// @return answer The current price value
+    /// @return startedAt The timestamp when the round started (current block timestamp)
+    /// @return updatedAt The timestamp when the round was updated (current block timestamp)
+    /// @return answeredInRound The round ID in which the answer was computed (always 0 for mock)
     function latestRoundData()
         external
         view

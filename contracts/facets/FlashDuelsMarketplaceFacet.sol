@@ -59,15 +59,16 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         uint256 quantity,
         uint256 totalPrice
     ) external nonReentrant {
+        address diamondContract = address(this);
         if (duelCategory == DuelCategory.Crypto) {
-            CryptoDuel memory cryptoDuel = IFlashDuelsView(s.flashDuelsContract).getCryptoDuel(duelId);
+            CryptoDuel memory cryptoDuel = IFlashDuelsView(diamondContract).getCryptoDuel(duelId);
             _validateDuelSelling(cryptoDuel.expiryTime, cryptoDuel.duelDuration);
         } else {
-            Duel memory flashDuel = IFlashDuelsView(s.flashDuelsContract).getDuel(duelId);
+            Duel memory flashDuel = IFlashDuelsView(diamondContract).getDuel(duelId);
             _validateDuelSelling(flashDuel.expiryTime, flashDuel.duelDuration);
         }
         require(
-            token == IFlashDuelsView(s.flashDuelsContract).getOptionIndexToOptionToken(duelId, optionIndex),
+            token == IFlashDuelsView(diamondContract).getOptionIndexToOptionToken(duelId, optionIndex),
             FlashDuelsMarketplaceFacet__InvalidOption()
         );
         require(quantity > 0, FlashDuelsMarketplaceFacet__AmountMustBeGreaterThanZero());
@@ -109,16 +110,17 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         uint256[] memory saleIds,
         uint256[] memory amounts
     ) external onlyBot nonReentrant {
+        address diamondContract = address(this);
         require(saleIds.length == amounts.length, FlashDuelsMarketplaceFacet__MismatchedArrayLengths());
         if (duelCategory == DuelCategory.Crypto) {
-            CryptoDuel memory cryptoDuel = IFlashDuelsView(s.flashDuelsContract).getCryptoDuel(duelId);
+            CryptoDuel memory cryptoDuel = IFlashDuelsView(diamondContract).getCryptoDuel(duelId);
             _validateMarketBuyTiming(cryptoDuel.expiryTime, cryptoDuel.duelDuration, cryptoDuel.duelStatus, duelId);
         } else {
-            Duel memory flashDuel = IFlashDuelsView(s.flashDuelsContract).getDuel(duelId);
+            Duel memory flashDuel = IFlashDuelsView(diamondContract).getDuel(duelId);
             _validateMarketBuyTiming(flashDuel.expiryTime, flashDuel.duelDuration, flashDuel.duelStatus, duelId);
         }
         require(
-            token == IFlashDuelsView(s.flashDuelsContract).getOptionIndexToOptionToken(duelId, optionIndex),
+            token == IFlashDuelsView(diamondContract).getOptionIndexToOptionToken(duelId, optionIndex),
             FlashDuelsMarketplaceFacet__InvalidOption()
         );
         IERC20 erc20 = IERC20(token);

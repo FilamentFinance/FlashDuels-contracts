@@ -602,8 +602,6 @@ struct AppStorage {
     /// @notice Nonce used to generate unique duel IDs
     uint256 nonce;
     /// ============ Addresses ============ ///
-    /// @notice address of flashDuels diamond contract
-    address flashDuelsContract;
     /// @notice Protocol address to receive fees
     address protocolTreasury;
     /// @notice USDC token contract address used for payments and fees

@@ -117,7 +117,7 @@ describe("FlashDuelsAdminFacet", function () {
         flashDuelsView = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
             contracts.Diamond.diamond
         )
-        await expect(flashDuelsAdmin.connect(user).withdrawProtocolFees()).to.be.revertedWith("LibDiamond: Must be contract owner");
+        await expect(flashDuelsAdmin.connect(user).withdrawProtocolFees()).to.be.revertedWithCustomError(flashDuelsAdmin, "LibDiamond__MustBeContractOwner");
         expect(await flashDuelsView.getTotalProtocolFeesGenerated()).to.equal(0);
         await expect(flashDuelsAdmin.connect(owner).withdrawProtocolFees()).to.be.revertedWithCustomError(flashDuelsAdmin, "FlashDuelsAdminFacet__NoFundsAvailable");
 

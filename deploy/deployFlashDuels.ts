@@ -141,7 +141,6 @@ const main = async () => {
 
     let functionCall = diamondInit.interface.encodeFunctionData("init", [
         protocolTreasury,
-        diamond.target,
         usdAddress.target,
         bot,
         creditsAddress.target
