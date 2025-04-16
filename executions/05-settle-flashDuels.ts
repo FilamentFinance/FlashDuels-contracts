@@ -8,7 +8,7 @@ import { forkedChain, networkConfig } from "../helper-hardhat-config"
 
 // Constants
 const EXPIRED_DUELS_URL = 'https://orderbookv3.filament.finance/flashduels/admin/flashDuels/expired';
-const SETTLEMENT_NOTIFICATION_URL = 'https://orderbookv2.filament.finance/flashduels/admin/flashDuels/duration';
+const SETTLEMENT_NOTIFICATION_URL = 'https://orderbookv3.filament.finance/flashduels/admin/flashDuels/duration';
 
 // Types
 interface NetworkMapping {
