@@ -202,8 +202,8 @@ error FlashDuelsMarketplaceFacet__BuyerCannotBeTheBot();
 /// @notice Thrown when the not enough tokens are available
 error FlashDuelsMarketplaceFacet__NotEnoughTokensAvailable();
 
-/// @notice Thrown when the duel has expired
-error FlashDuelsMarketplaceFacet__DuelHasExpired();
+// /// @notice Thrown when the duel has expired
+// error FlashDuelsMarketplaceFacet__DuelHasExpired();
 
 /// @notice Thrown when the selling is not allowed for short duration duels
 error FlashDuelsMarketplaceFacet__SellingNotAllowedForShortDurationDuels();
@@ -231,6 +231,9 @@ error FlashDuelsMarketplaceFacet__InsufficientAllowance();
 
 /// @notice Thrown when the duel ended
 error FlashDuelsMarketplaceFacet__DuelEnded(string duelId);
+
+/// @notice Thrown when the duel is not bootstrapped or live
+error FlashDuelsMarketplaceFacet__DuelNotBootStrappedOrLive();
 
 /// ============ Structs ============ ///
 /// @notice Represents a sale listing with details about the seller, quantity, strike, and total price.

@@ -10,7 +10,10 @@ dotenv.config()
 
 const PRIVATE_KEY_ADMIN_MAINNET = process.env.PRIVATE_KEY_ADMIN_MAINNET || ""
 const PRIVATE_KEY_ADMIN_TESTNET = process.env.PRIVATE_KEY_ADMIN_TESTNET || ""
+const PRIVATE_KEY_BOT_TESTNET = process.env.PRIVATE_KEY_BOT_TESTNET || ""
+const PRIVATE_KEY_BOT_MAINNET = process.env.PRIVATE_KEY_BOT_MAINNET || ""
 const SEITRACE_API_KEY = process.env.SEITRACE_API_KEY || ""
+
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -37,12 +40,12 @@ const config: HardhatUserConfig = {
         seiTestnet: {
             url: "https://evm-rpc-testnet.sei-apis.com",
             chainId: 1328,
-            accounts: [PRIVATE_KEY_ADMIN_TESTNET]
+            accounts: [PRIVATE_KEY_ADMIN_TESTNET, PRIVATE_KEY_BOT_TESTNET]
         },
         seiMainnet: {
             url: "https://evm-rpc.sei-apis.com",
             chainId: 1329,
-            accounts: [PRIVATE_KEY_ADMIN_MAINNET]
+            accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
         }
     },
     abiExporter: {
