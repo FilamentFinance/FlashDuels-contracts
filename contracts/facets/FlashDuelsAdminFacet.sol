@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {AppStorage, Duel, DuelCategory, DuelDuration, DuelStatus, PendingDuel, DuelApprovedAndCreated, ParticipationTokenTypeUpdated, ParticipationTokenType, DuelRequestRevoked, DuelCreated, WithdrawProtocolFee, CreateDuelFeeUpdated, MinimumWagerThresholdUpdated, BotAddressUpdated, ProtocolTreasuryUpdated, BootstrapPeriodUpdated, ResolvingPeriodUpdated, WinnersChunkSizesUpdated, RefundChunkSizesUpdated, CreditsAddressUpdated, FlashDuelsAdminFacet__InvalidOwnerOrBot, FlashDuelsAdminFacet__InvalidProtocolAddress, FlashDuelsAdminFacet__InvalidCRDAddress, FlashDuelsAdminFacet__InvalidCreateDuelFee, FlashDuelsAdminFacet__InvalidMinimumWagerThreshold, FlashDuelsAdminFacet__InvalidBootstrapPeriod, FlashDuelsAdminFacet__InvalidResolvingPeriod, FlashDuelsAdminFacet__InvalidWinnersChunkSize, FlashDuelsAdminFacet__InvalidRefundChunkSize, FlashDuelsAdminFacet__InvalidDuelDuration, FlashDuelsAdminFacet__DuelAlreadyApproved, FlashDuelsAdminFacet__InvalidUSDCAmount, FlashDuelsAdminFacet__NoUSDCAmountToRefund, FlashDuelsAdminFacet__NoFundsAvailable, FlashDuelsAdminFacet__TransferFailed, FlashDuelsAdminFacet__InvalidCategory, FlashDuelsAdminFacet__InvalidBot, FlashDuelsAdminFacet__USDCRefundFailed, FlashDuelsAdminFacet__CreditsRefundFailed, FlashDuelsAdminFacet__InvalidPendingDuelsIndex, FlashDuelsAdminFacet__InvalidCRDAddress, FlashDuelsAdminFacet__InvalidCreateDuelFee, FlashDuelsAdminFacet__InvalidMinimumWagerThreshold, FlashDuelsAdminFacet__InvalidBootstrapPeriod, FlashDuelsAdminFacet__InvalidResolvingPeriod, FlashDuelsAdminFacet__InvalidWinnersChunkSize, FlashDuelsAdminFacet__InvalidRefundChunkSize, FlashDuelsAdminFacet__InvalidDuelDuration, FlashDuelsAdminFacet__DuelAlreadyApproved, FlashDuelsAdminFacet__InvalidUSDCAmount, FlashDuelsAdminFacet__NoUSDCAmountToRefund, FlashDuelsAdminFacet__NoFundsAvailable, FlashDuelsAdminFacet__TransferFailed, FlashDuelsAdminFacet__InvalidCategory, FlashDuelsAdminFacet__InvalidBot, FlashDuelsAdminFacet__USDCRefundFailed, FlashDuelsAdminFacet__CreditsRefundFailed, FlashDuelsAdminFacet__InvalidPendingDuelsIndex} from "../AppStorage.sol";
+import {AppStorage, Duel, DuelCategory, DuelDuration, DuelStatus, PendingDuel, DuelApprovedAndCreated, ParticipationTokenTypeUpdated, ParticipationTokenType, DuelRequestRevoked, DuelCreated, WithdrawProtocolFee, CreateDuelFeeUpdated, MinimumWagerThresholdUpdated, BotAddressUpdated, ProtocolTreasuryUpdated, BootstrapPeriodUpdated, ResolvingPeriodUpdated, WinnersChunkSizesUpdated, RefundChunkSizesUpdated, CreditsAddressUpdated, FlashDuelsAdminFacet__InvalidOwnerOrBot, FlashDuelsAdminFacet__InvalidProtocolAddress, FlashDuelsAdminFacet__InvalidCRDAddress, FlashDuelsAdminFacet__InvalidCreateDuelFee, FlashDuelsAdminFacet__InvalidMinimumWagerThreshold, FlashDuelsAdminFacet__InvalidBootstrapPeriod, FlashDuelsAdminFacet__InvalidResolvingPeriod, FlashDuelsAdminFacet__InvalidWinnersChunkSize, FlashDuelsAdminFacet__InvalidRefundChunkSize, FlashDuelsAdminFacet__InvalidDuelDuration, FlashDuelsAdminFacet__DuelAlreadyApproved, FlashDuelsAdminFacet__InvalidUSDCAmount, FlashDuelsAdminFacet__NoUSDCAmountToRefund, FlashDuelsAdminFacet__NoFundsAvailable, FlashDuelsAdminFacet__TransferFailed, FlashDuelsAdminFacet__InvalidCategory, FlashDuelsAdminFacet__InvalidBot, FlashDuelsAdminFacet__USDCRefundFailed, FlashDuelsAdminFacet__CreditsRefundFailed, FlashDuelsAdminFacet__InvalidPendingDuelsIndex, FlashDuelsAdminFacet__InvalidCRDAddress, FlashDuelsAdminFacet__InvalidCreateDuelFee, FlashDuelsAdminFacet__InvalidMinimumWagerThreshold, FlashDuelsAdminFacet__InvalidBootstrapPeriod, FlashDuelsAdminFacet__InvalidResolvingPeriod, FlashDuelsAdminFacet__InvalidWinnersChunkSize, FlashDuelsAdminFacet__InvalidRefundChunkSize, FlashDuelsAdminFacet__InvalidDuelDuration, FlashDuelsAdminFacet__DuelAlreadyApproved, FlashDuelsAdminFacet__InvalidUSDCAmount, FlashDuelsAdminFacet__NoUSDCAmountToRefund, FlashDuelsAdminFacet__NoFundsAvailable, FlashDuelsAdminFacet__TransferFailed, FlashDuelsAdminFacet__InvalidCategory, FlashDuelsAdminFacet__InvalidBot, FlashDuelsAdminFacet__USDCRefundFailed, FlashDuelsAdminFacet__CreditsRefundFailed, FlashDuelsAdminFacet__InvalidPendingDuelsIndex, FlashDuelsAdminFacet__InvalidMinWagerTradeSize, MinWagerTradeSizeUpdated} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -157,6 +157,19 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         emit ParticipationTokenTypeUpdated(_tokenType);
     }
 
+    /// @notice Sets the minimum wager trade size to join a duel.
+    /// @dev This function can only be called by the contract owner.
+    /// @param _minWagerTradeSize The minimum wager trade size to set.
+    function setMinWagerTradeSize(uint256 _minWagerTradeSize) external onlyOwner {
+        if (s.participationTokenType == ParticipationTokenType.USDC) {
+            require(_minWagerTradeSize >= 5 * 1e6, FlashDuelsAdminFacet__InvalidMinWagerTradeSize());
+        } else {
+            require(_minWagerTradeSize >= 5 * 1e18, FlashDuelsAdminFacet__InvalidMinWagerTradeSize());
+        }
+        s.minWagerTradeSize = _minWagerTradeSize;
+        emit MinWagerTradeSizeUpdated(_minWagerTradeSize);
+    }
+
     /// @notice Creates a duel for an approved user
     /// @param _user Address of the user who approved the duel creation
     /// @param _category The category of the duel to approve
@@ -208,6 +221,7 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         s.totalProtocolFeesGenerated = 0;
         emit WithdrawProtocolFee(msg.sender, protocolBalance, block.timestamp);
     }
+
 
     // ============ Internal Functions ============
     /// @notice Creates a new duel with the specified parameters

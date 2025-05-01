@@ -330,4 +330,10 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     function getParticipationTokenType() public view returns (ParticipationTokenType) {
         return s.participationTokenType;
     }
+
+    /// @notice Returns the minimum wager trade size.
+    /// @return The minimum wager trade size.
+    function getMinWagerTradeSize() public view returns (uint256) {
+        return s.minWagerTradeSize;
+    }
 }

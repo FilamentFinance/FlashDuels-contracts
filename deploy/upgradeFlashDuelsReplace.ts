@@ -24,48 +24,48 @@ async function main() {
     const DiamondCutFacet = await ethers.getContractAt("IDiamondCut", diamondAddress, deployer)
 
     // Deploy new facet
-    // const FlashDuelsAdminFacet = await ethers.getContractFactory("FlashDuelsAdminFacet")
-    // const flashDuelsAdminFacet = await FlashDuelsAdminFacet.deploy()
-    // await flashDuelsAdminFacet.waitForDeployment()
-    // console.log("FlashDuelsAdminFacet deployed:", flashDuelsAdminFacet.target)
+    const FlashDuelsAdminFacet = await ethers.getContractFactory("FlashDuelsAdminFacet")
+    const flashDuelsAdminFacet = await FlashDuelsAdminFacet.deploy()
+    await flashDuelsAdminFacet.waitForDeployment()
+    console.log("FlashDuelsAdminFacet deployed:", flashDuelsAdminFacet.target)
 
-    // const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
-    // const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
-    // await flashDuelsCoreFacet.waitForDeployment()
-    // console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
+    const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
+    const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
+    await flashDuelsCoreFacet.waitForDeployment()
+    console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
 
-    const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
-    const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
-    await flashDuelsMarketplaceFacet.waitForDeployment()
-    console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
+    // const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
+    // const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
+    // await flashDuelsMarketplaceFacet.waitForDeployment()
+    // console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
-    // const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
-    // const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
-    // await flashDuelsViewFacet.waitForDeployment()
-    // console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
+    const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
+    const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
+    await flashDuelsViewFacet.waitForDeployment()
+    console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
 
     // Prepare the cut transaction
     const cut: any = [
-        // {
-        //     facetAddress: flashDuelsAdminFacet.target,
-        //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
-        //     functionSelectors: flashDuelsAdminFacetSelectors
-        // },
-        // {
-        //     facetAddress: flashDuelsCoreFacet.target,
-        //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
-        //     functionSelectors: flashDuelsCoreFacetSelectors
-        // },
         {
-            facetAddress: flashDuelsMarketplaceFacet.target,
+            facetAddress: flashDuelsAdminFacet.target,
             action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
-            functionSelectors: flashDuelsMarketplaceFacetSelectors
+            functionSelectors: flashDuelsAdminFacetSelectors
+        },
+        {
+            facetAddress: flashDuelsCoreFacet.target,
+            action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
+            functionSelectors: flashDuelsCoreFacetSelectors
         },
         // {
-        //     facetAddress: flashDuelsViewFacet.target,
+        //     facetAddress: flashDuelsMarketplaceFacet.target,
         //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
-        //     functionSelectors: flashDuelsViewFacetSelectors
-        // }
+        //     functionSelectors: flashDuelsMarketplaceFacetSelectors
+        // },
+        {
+            facetAddress: flashDuelsViewFacet.target,
+            action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
+            functionSelectors: flashDuelsViewFacetSelectors
+        }
     ]
 
     try {

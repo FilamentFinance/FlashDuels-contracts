@@ -235,6 +235,9 @@ error FlashDuelsMarketplaceFacet__DuelEnded(string duelId);
 /// @notice Thrown when the duel is not bootstrapped or live
 error FlashDuelsMarketplaceFacet__DuelNotBootStrappedOrLive();
 
+/// @notice Thrown when the minimum wager trade size is invalid
+error FlashDuelsAdminFacet__InvalidMinWagerTradeSize();
+
 /// ============ Structs ============ ///
 /// @notice Represents a sale listing with details about the seller, quantity, strike, and total price.
 /// @dev This struct is used to store information related to a specific sale in the marketplace.
@@ -575,6 +578,10 @@ event ResolvingPeriodUpdated(uint256 newResolvingPeriod);
 /// @param newCreditsAddress The new address of the credits contract.
 event CreditsAddressUpdated(address newCreditsAddress);
 
+/// @notice Emitted when the minimum wager trade size is updated.
+/// @param newMinWagerTradeSize The new minimum wager trade size.
+event MinWagerTradeSizeUpdated(uint256 newMinWagerTradeSize);
+
 /// ============ AppStorage ============ ///
 struct AppStorage {
     /// ============ Protocol Settings ============ ///
@@ -668,4 +675,6 @@ struct AppStorage {
     mapping(string => bool) isValidDuelId;
     /// @notice Mapping of duel IDs to duel information
     mapping(string => Duel) duels;
+    /// @notice Minimum wager trade size
+    uint256 minWagerTradeSize; // @note - (5 * 1e6) for USDC, (5 * 1e18) for CRD, Need to move up for mainnet deployemnt
 }

@@ -17,10 +17,11 @@ const flashDuelsAdminFacetSelectors = [
     "0xe94e40cd", // setWinnersChunkSizes(uint256)
     "0x93d11d38", // setRefundChunkSizes(uint256)
     "0xf4c49a9e", // setCRDAddress(address)
+    "0x69940054", // setParticipationTokenType(uint8)
+    "0x662358be", // setMinWagerTradeSize(uint256)
     "0x8088a328", // approveAndCreateDuel(address,uint8,uint256)
     "0x3100694f", // revokeCreateDuelRequest(address,uint8,uint256)
-    "0x8795cccb", // withdrawProtocolFees()
-    "0x69940054" // setParticipationTokenType(uint8)
+    "0x8795cccb" // withdrawProtocolFees()
 ]
 const flashDuelsCoreFacetSelectors = [
     "0x59a9e4f6", // requestCreateDuel(uint8,string,string[],uint8)
@@ -87,7 +88,8 @@ const flashDuelsViewFacetSelectors = [
     "0xdbe0b5b2", // getUsdcAddress()
     "0xc2fdda7d", // getBotAddress()
     "0x535eb845", // getCreditsAddress()
-    "0x795c3677" // getParticipationTokenType()
+    "0x795c3677", // getParticipationTokenType()
+    "0x968ea5ce" // getMinWagerTradeSize()
 ]
 
 const ownershipFacetSelectors = [
