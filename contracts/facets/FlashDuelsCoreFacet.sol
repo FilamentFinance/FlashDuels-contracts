@@ -172,7 +172,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // Transfer the wager amount in USDC to the contract
         if (s.participationTokenType == ParticipationTokenType.USDC) {
             // USDC: 6 decimals
-            require(_amount >= _optionPrice, FlashDuelsCoreFacet__LessThanMinimumWager());
+            require(_amount >= _optionPrice && _amount >= s.minWagerTradeSize, FlashDuelsCoreFacet__LessThanMinimumWager());
             require(
                 IERC20(s.usdc).transferFrom(_user, address(this), _amount),
                 FlashDuelsCoreFacet__TokenTransferFailed()
@@ -182,7 +182,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         } else {
             // Credits: 18 decimals
             // Convert Credits to USD equivalent (18 decimals -> 6 decimals) for comparison
-            require((_amount / 1e12) >= _optionPrice, FlashDuelsCoreFacet__LessThanMinimumWager());
+            require((_amount / 1e12) >= _optionPrice && _amount >= s.minWagerTradeSize, FlashDuelsCoreFacet__LessThanMinimumWager());
             require(
                 IERC20(s.credits).transferFrom(_user, address(this), _amount),
                 FlashDuelsCoreFacet__TokenTransferFailed()
