@@ -433,4 +433,10 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
         WithdrawalRequest storage request = s.withdrawalRequests[_requestId];
         return (request.user, request.amount, request.timestamp, request.status);
     }
+
+    /// @notice Get the maximum auto withdraw amount
+    /// @return The maximum auto withdraw amount
+    function getMaxAutoWithdraw() public view returns (uint256) {
+        return s.maxAutoWithdrawAmount;
+    }
 }

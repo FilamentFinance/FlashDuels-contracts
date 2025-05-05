@@ -131,6 +131,9 @@ error FlashDuelsAdminFacet__InvalidMaxLiquidityCapPerDuel();
 /// @notice Thrown when the max liquidity cap across protocol is invalid
 error FlashDuelsAdminFacet__InvalidMaxLiquidityCapAcrossProtocol();
 
+/// @notice Thrown when the max auto withdraw is invalid
+error FlashDuelsAdminFacet__InvalidMaxAutoWithdraw();
+
 /// @notice Thrown when the bot is invalid in core facet
 error FlashDuelsCoreFacet__InvalidBot();
 
@@ -622,6 +625,10 @@ event MaxLiquidityCapPerDuelUpdated(uint256 newMaxLiquidityCapPerDuel);
 /// @notice Emitted when the maximum liquidity cap across protocol is updated.
 /// @param newMaxLiquidityCapAcrossProtocol The new maximum liquidity cap across protocol.
 event MaxLiquidityCapAcrossProtocolUpdated(uint256 newMaxLiquidityCapAcrossProtocol);
+
+/// @notice Emitted when the maximum auto withdraw is updated.
+/// @param newMaxAutoWithdraw The new maximum auto withdraw.
+event MaxAutoWithdrawUpdated(uint256 newMaxAutoWithdraw);
 
 /// @notice Emitted when a withdrawal request is created
 /// @param user The address of the user requesting withdrawal

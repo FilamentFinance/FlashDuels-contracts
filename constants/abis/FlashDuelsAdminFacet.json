@@ -51,6 +51,11 @@
     },
     {
         "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMaxAutoWithdraw",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "FlashDuelsAdminFacet__InvalidMaxLiquidityCapAcrossProtocol",
         "type": "error"
     },
@@ -323,6 +328,19 @@
             }
         ],
         "name": "Initialized",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newMaxAutoWithdraw",
+                "type": "uint256"
+            }
+        ],
+        "name": "MaxAutoWithdrawUpdated",
         "type": "event"
     },
     {
@@ -606,6 +624,19 @@
             }
         ],
         "name": "setCreateDuelFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_maxAutoWithdrawAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMaxAutoWithdraw",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

@@ -21,6 +21,7 @@ const flashDuelsAdminFacetSelectors = [
     "0x662358be", // setMinWagerTradeSize(uint256)
     "0x42bf3258", // setMaxLiquidityCapPerDuel(uint256)
     "0x2f385fe6", // setMaxLiquidityCapAcrossProtocol(uint256)
+    "0x22de4957", // setMaxAutoWithdraw(uint256)
     "0x8088a328", // approveAndCreateDuel(address,uint8,uint256)
     "0x3100694f", // revokeCreateDuelRequest(address,uint8,uint256)
     "0x8795cccb" // withdrawProtocolFees()
@@ -101,6 +102,7 @@ const flashDuelsViewFacetSelectors = [
     "0x550ec678", // getWithdrawalRequestIds(address)
     "0xf813d8e6", // getWithdrawalRequestIdsPaginated(address,uint256,uint256)
     "0x2e0cf294", // getUserWithdrawalRequest(uint256)
+    "0x61b4f167", // getMaxAutoWithdraw()
 ]
 
 const ownershipFacetSelectors = [

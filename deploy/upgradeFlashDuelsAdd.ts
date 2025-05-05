@@ -28,20 +28,20 @@ async function main() {
     await flashDuelsAdminFacet.waitForDeployment()
     console.log("FlashDuelsAdminFacet deployed:", flashDuelsAdminFacet.target)
 
-    const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
-    const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
-    await flashDuelsCoreFacet.waitForDeployment()
-    console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
+    // const FlashDuelsCoreFacet = await ethers.getContractFactory("FlashDuelsCoreFacet")
+    // const flashDuelsCoreFacet = await FlashDuelsCoreFacet.deploy()
+    // await flashDuelsCoreFacet.waitForDeployment()
+    // console.log("FlashDuelsCoreFacet deployed:", flashDuelsCoreFacet.target)
 
     // const FlashDuelsMarketplaceFacet = await ethers.getContractFactory("FlashDuelsMarketplaceFacet")
     // const flashDuelsMarketplaceFacet = await FlashDuelsMarketplaceFacet.deploy()
     // await flashDuelsMarketplaceFacet.waitForDeployment()
     // console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
-    const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
-    const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
-    await flashDuelsViewFacet.waitForDeployment()
-    console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
+    // const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
+    // const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
+    // await flashDuelsViewFacet.waitForDeployment()
+    // console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
 
     // const OwnershipFacet = await ethers.getContractFactory("OwnershipFacet")
     // const ownershipFacet = await OwnershipFacet.deploy()
@@ -50,35 +50,27 @@ async function main() {
 
     // Prepare the cut transaction
     const cut: any = [
-        {
-            facetAddress: flashDuelsViewFacet.target,
-            action: FacetCutAction.Add, // 0 means Add
-            functionSelectors: [
-                "0x5fb1fb0f", // getTotalProtocolLiquidity()
-                "0x2a477d77", // getLiveDuelIds()
-                "0x48e20264", // isDuelLive(string)
-                "0x55c52bed", // getMaxLiquidityCapPerDuel()
-                "0xc2d71655", // getMaxLiquidityCapAcrossProtocol()
-                "0x550ec678", // getWithdrawalRequestIds(address)
-                "0xf813d8e6", // getWithdrawalRequestIdsPaginated(address,uint256,uint256)
-                "0x2e0cf294", // getUserWithdrawalRequest(uint256)
-            ]
-        },
+        // {
+        //     facetAddress: flashDuelsViewFacet.target,
+        //     action: FacetCutAction.Add, // 0 means Add
+        //     functionSelectors: [
+        //         "0x61b4f167", // getMaxAutoWithdraw()
+        //     ]
+        // },
         {
             facetAddress: flashDuelsAdminFacet.target,
             action: FacetCutAction.Add, // 0 means Add
             functionSelectors: [
-                "0x42bf3258", // setMaxLiquidityCapPerDuel(uint256)
-                "0x2f385fe6", // setMaxLiquidityCapAcrossProtocol(uint256)
+                "0x22de4957", // setMaxAutoWithdraw(uint256)
             ]
         },
-        {
-            facetAddress: flashDuelsCoreFacet.target,
-            action: FacetCutAction.Add, // 0 means Add
-            functionSelectors: [
-                "0xefe75b9c", // updateWithdrawalRequestStatus(uint256,bool)
-            ]
-        }
+        // {
+        //     facetAddress: flashDuelsCoreFacet.target,
+        //     action: FacetCutAction.Add, // 0 means Add
+        //     functionSelectors: [
+        //         "0xefe75b9c", // updateWithdrawalRequestStatus(uint256,bool)
+        //     ]
+        // }
     ]
 
     try {
