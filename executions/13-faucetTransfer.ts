@@ -23,11 +23,11 @@ const main = async () => {
     }
 
     // const usdcContract: FLASHUSDC = new ethers.Contract(netMap[chainName].FLASHUSDC, FLASHUSDCABI, usdcAdmin)
-    const usdcContract: Credits = new ethers.Contract(netMap[chainName].FlashDuelsCredits, CreditsABI, deployer)
+    const usdcContract: Credits = new ethers.Contract("0xc3331D2a9abF356921227fB0adaBECF5Eded5bc0", CreditsABI, deployer)
     console.log(await usdcContract.balanceOf("0x2dC727b15203992B65D7ADbc0108781f1Cb1F9F3"))
 
 
-    let amount = ethers.parseUnits("10000", 18)
+    let amount = ethers.parseUnits("100000", 18)
     tx = await usdcContract.connect(deployer).airdrop([deployer.address], [amount])
     await tx.wait(1)
 

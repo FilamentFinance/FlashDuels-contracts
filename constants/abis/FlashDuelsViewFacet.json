@@ -511,6 +511,45 @@
     },
     {
         "inputs": [],
+        "name": "getLiveDuelIds",
+        "outputs": [
+            {
+                "internalType": "string[]",
+                "name": "",
+                "type": "string[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getMaxLiquidityCapAcrossProtocol",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getMaxLiquidityCapPerDuel",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "getMinThreshold",
         "outputs": [
             {
@@ -929,6 +968,19 @@
     },
     {
         "inputs": [],
+        "name": "getTotalProtocolLiquidity",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "getUsdcAddress",
         "outputs": [
             {
@@ -964,6 +1016,40 @@
                 "internalType": "uint256",
                 "name": "optionShare",
                 "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_requestId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getUserWithdrawalRequest",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            },
+            {
+                "internalType": "enum WithdrawalStatus",
+                "name": "status",
+                "type": "uint8"
             }
         ],
         "stateMutability": "view",
@@ -1011,6 +1097,78 @@
                 "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getWithdrawalRequestIds",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_offset",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_limit",
+                "type": "uint256"
+            }
+        ],
+        "name": "getWithdrawalRequestIdsPaginated",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "_duelId",
+                "type": "string"
+            }
+        ],
+        "name": "isDuelLive",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
             }
         ],
         "stateMutability": "view",

@@ -57,6 +57,12 @@ describe("FlashDuels Marketplace Contract", function () {
             contracts.Diamond.diamond
         )
 
+
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+        await tx.wait(1)
+
         // let receipt = await flashDuelsCore
         //     .connect(accounts[1])
         //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -168,6 +174,10 @@ describe("Cancel Sale", function () {
             contracts.Diamond.diamond
         )
 
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+        await tx.wait(1)
         // let receipt = await flashDuelsCore
         //     .connect(accounts[1])
         //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -273,6 +283,12 @@ describe("Cancel Sale", function () {
         const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
             contracts.Diamond.diamond
         )
+
+
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+        await tx.wait(1)
 
         // let receipt = await flashDuelsCore
         //     .connect(accounts[1])
@@ -380,6 +396,11 @@ describe("Token Purchase", function () {
         const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
             contracts.Diamond.diamond
         )
+
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+        await tx.wait(1)
 
         // let receipt = await flashDuelsCore
         //     .connect(accounts[1])
@@ -491,6 +512,11 @@ describe("Token Purchase", function () {
         const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
             contracts.Diamond.diamond
         )
+
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+        await tx.wait(1)
 
         // let receipt = await flashDuelsCore
         //     .connect(accounts[1])
@@ -606,6 +632,10 @@ describe("Token Purchase", function () {
             contracts.Diamond.diamond
         )
 
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+        await tx.wait(1)
         // let receipt = await flashDuelsCore
         //     .connect(accounts[1])
         //     .createDuel(2, "Donald Trump will win the US election ?", ["Yes", "No"], expiryTime)
@@ -723,6 +753,11 @@ describe("Token Purchase", function () {
         const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
             contracts.Diamond.diamond
         )
+
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+        await tx.wait(1)
+        tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+        await tx.wait(1)
 
         // const minWager = ethers.parseUnits("10", 6) // 10 USDC
         await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))

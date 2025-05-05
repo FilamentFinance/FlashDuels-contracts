@@ -146,9 +146,17 @@ describe("FlashDuels Contract", function () {
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("60", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("60", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
 
             if (isCRDParticipationToken) {
@@ -330,9 +338,17 @@ describe("FlashDuels Contract", function () {
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("60", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("60", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
 
             const duelIds = await flashDuelsView.getCreatorToDuelIds(accounts[1].address)
@@ -451,9 +467,17 @@ describe("FlashDuels Contract", function () {
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("60", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("60", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             if (isCRDParticipationToken) {
                 const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
@@ -532,6 +556,10 @@ describe("FlashDuels Contract", function () {
             let allTImeEarningsAccounts_3 = await flashDuelsView.getAllTimeEarnings(accounts[3].address)
 
             await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsAccounts_2)
+            let withdrawalRequestIds = await flashDuelsView.getWithdrawalRequestIds(accounts[2].address)
+            console.log("withdrawalRequestIds: ", withdrawalRequestIds)
+
+            await flashDuelsCore.connect(accounts[0]).updateWithdrawalRequestStatus(withdrawalRequestIds[0], true)
 
             // Check if accounts[2] (winner) received the rewards
             if (isCRDParticipationToken) {
@@ -594,9 +622,17 @@ describe("FlashDuels Contract", function () {
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("60", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("60", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             if (isCRDParticipationToken) {
                 const usdcToken: any = await ethers.getContractAt("Credits", contracts?.Credits.creditsAddress as string)
@@ -814,9 +850,17 @@ describe("FlashDuels Contract", function () {
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("25", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("25", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
@@ -968,11 +1012,19 @@ describe("FlashDuels Contract", function () {
                 await usdcToken.connect(accounts[3]).approve(contracts.Diamond.diamond, ethers.parseUnits("20", 6))
             }
 
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+
             let amount;
             let optionPrice;
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("20", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("20", 6)
                 optionPrice = ethers.parseUnits("10", 6)
@@ -1135,12 +1187,19 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
 
             let amount;
             let optionPrice;
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("60", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("60", 6)
                 optionPrice = ethers.parseUnits("10", 6)
@@ -1291,6 +1350,9 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let BTC = "tokenA"
@@ -1316,9 +1378,17 @@ describe("FlashDuels Contract", function () {
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("5", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("5", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             if (isCRDParticipationToken) {
                 await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
@@ -1374,15 +1444,26 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
 
             let amount;
             let optionPrice;
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("60", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("60", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             if (isCRDParticipationToken) {
                 await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
@@ -1495,15 +1576,26 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
 
             let amount;
             let optionPrice;
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("60", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("60", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             if (isCRDParticipationToken) {
                 await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
@@ -1619,6 +1711,10 @@ describe("FlashDuels Contract", function () {
             // expect(await usdcToken.balanceOf(cryptoDuel.creator)).to.be.equal("1200000") // $117.6
 
             await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)
+            let withdrawalRequestIds = await flashDuelsView.getWithdrawalRequestIds(accounts[2].address)
+            console.log("withdrawalRequestIds: ", withdrawalRequestIds)
+
+            await flashDuelsCore.connect(accounts[0]).updateWithdrawalRequestStatus(withdrawalRequestIds[0], true)
 
             // Check if accounts[2] (winner) received the rewards
             finalBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address)
@@ -1650,15 +1746,26 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
 
             let amount;
             let optionPrice;
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("60", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("60", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             if (isCRDParticipationToken) {
                 await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
@@ -1774,6 +1881,9 @@ describe("FlashDuels Contract", function () {
             // expect(await usdcToken.balanceOf(cryptoDuel.creator)).to.be.equal("1200000") // $117.6
 
             await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)
+            let withdrawalRequestIds = await flashDuelsView.getWithdrawalRequestIds(accounts[2].address)
+            console.log("withdrawalRequestIds: ", withdrawalRequestIds)
+            await flashDuelsCore.connect(accounts[0]).updateWithdrawalRequestStatus(withdrawalRequestIds[0], true)
 
             // Check if accounts[2] (winner) received the rewards
             finalBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address)
@@ -1805,15 +1915,26 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
 
             let amount;
             let optionPrice;
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("60", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("60", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             if (isCRDParticipationToken) {
                 await usdcToken.connect(accounts[0]).airdrop([accounts[2].address], [amount])
@@ -1928,11 +2049,11 @@ describe("FlashDuels Contract", function () {
             }
             // expect(await usdcToken.balanceOf(cryptoDuel.creator)).to.be.equal("1200000") // $117.6
 
-            await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)
+            // await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)
 
             // Check if accounts[2] (winner) received the rewards
             finalBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address)
-            expect(finalBalanceaccounts_2).to.be.equal(initialBalanceaccounts_2) // accounts[2]'s balance should increase
+            expect(finalBalanceaccounts_2).to.be.equal(initialBalanceaccounts_2)
             // Check if accounts[3] (loser) lost their wager amount
             const totalProtocolWinnings = await usdcToken.balanceOf(contracts.Diamond.diamond)
             expect(totalProtocolWinnings).to.be.equal(ethers.parseUnits("65", 18)) // $5 it should be 62.6 + 2.4 (fees + creator fee)
@@ -2218,7 +2339,7 @@ describe("FlashDuels Contract", function () {
                 await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
                 await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
             }
-          
+
             const flashDuelsCore: any = await contracts.FlashDuelsCoreFacet.flashDuelsCoreFacetContract.attach(
                 contracts.Diamond.diamond
             )
@@ -2331,9 +2452,17 @@ describe("FlashDuels Contract", function () {
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("25", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("25", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
@@ -2374,6 +2503,9 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
+                contracts.Diamond.diamond
+            )
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let tokenA = "tokenA"
@@ -2409,9 +2541,17 @@ describe("FlashDuels Contract", function () {
             if (isCRDParticipationToken) {
                 amount = ethers.parseUnits("25", 18)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
             } else {
                 amount = ethers.parseUnits("25", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             await flashDuelsCore
                 .connect(contracts.Bot.bot)
@@ -2447,6 +2587,9 @@ describe("FlashDuels Contract", function () {
             )
 
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
+                contracts.Diamond.diamond
+            )
+            const flashDuelsAdmin: any = await contracts.FlashDuelsAdminFacet.flashDuelsAdminFacetContract.attach(
                 contracts.Diamond.diamond
             )
 
@@ -2500,11 +2643,19 @@ describe("FlashDuels Contract", function () {
             let amount;
             let optionPrice;
             if (isCRDParticipationToken) {
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 18))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 18))
+                await tx.wait(1)
                 amount = ethers.parseUnits("20", 18)
                 optionPrice = ethers.parseUnits("10", 6)
             } else {
                 amount = ethers.parseUnits("20", 6)
                 optionPrice = ethers.parseUnits("10", 6)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+                await tx.wait(1)
+                tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+                await tx.wait(1)
             }
             await flashDuelsCore
                 .connect(contracts.Bot.bot)

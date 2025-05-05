@@ -11,11 +11,6 @@
     },
     {
         "inputs": [],
-        "name": "FlashDuelsCoreFacet__AmountShouldBeLessThanEqualEarnings",
-        "type": "error"
-    },
-    {
-        "inputs": [],
         "name": "FlashDuelsCoreFacet__BootstrapPeriodNotEnded",
         "type": "error"
     },
@@ -56,6 +51,16 @@
     },
     {
         "inputs": [],
+        "name": "FlashDuelsCoreFacet__InsufficientBalance",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__InvalidAmount",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "FlashDuelsCoreFacet__InvalidBot",
         "type": "error"
     },
@@ -67,6 +72,11 @@
     {
         "inputs": [],
         "name": "FlashDuelsCoreFacet__InvalidDuelDuration",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__InvalidRequestId",
         "type": "error"
     },
     {
@@ -87,6 +97,11 @@
     {
         "inputs": [],
         "name": "FlashDuelsCoreFacet__RefundDistributionAlreadyCompleted",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsCoreFacet__RequestAlreadyProcessed",
         "type": "error"
     },
     {
@@ -122,6 +137,11 @@
     {
         "inputs": [],
         "name": "InvalidInitialization",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamond__MustBeContractOwner",
         "type": "error"
     },
     {
@@ -723,6 +743,99 @@
         "type": "event"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "requestId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "WithdrawalApproved",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "requestId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "WithdrawalCancelled",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "requestId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "WithdrawalRequested",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "internalType": "enum DuelCategory",
@@ -1006,6 +1119,24 @@
             }
         ],
         "name": "startDuel",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_requestId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "_isApproved",
+                "type": "bool"
+            }
+        ],
+        "name": "updateWithdrawalRequestStatus",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

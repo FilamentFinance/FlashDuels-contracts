@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {AppStorage, Duel, CryptoDuel, Sale, PendingDuel, DuelCategory, ParticipationTokenType} from "../AppStorage.sol";
+import {AppStorage, Duel, CryptoDuel, Sale, PendingDuel, DuelStatus, DuelCategory, ParticipationTokenType, WithdrawalStatus, WithdrawalRequest} from "../AppStorage.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {LibFlashDuels} from "../libraries/LibFlashDuels.sol";
@@ -335,5 +335,102 @@ contract FlashDuelsViewFacet is PausableUpgradeable {
     /// @return The minimum wager trade size.
     function getMinWagerTradeSize() public view returns (uint256) {
         return s.minWagerTradeSize;
+    }
+
+    /// @notice Calculates the total liquidity across all live duels in the protocol
+    /// @return The total amount of liquidity (in USDC or CRD) across all live duels
+    function getTotalProtocolLiquidity() public view returns (uint256) {
+        uint256 totalLiquidity = 0;
+
+        // Iterate through all live duel IDs
+        for (uint256 i = 0; i < s.liveDuelIds.length; i++) {
+            string memory duelId = s.liveDuelIds[i];
+            if (s.isLiveDuel[duelId]) {
+                totalLiquidity += s.totalWagerOnDuel[duelId];
+            }
+        }
+
+        return totalLiquidity;
+    }
+
+    /// @notice Returns all currently live duel IDs
+    /// @return Array of live duel IDs
+    function getLiveDuelIds() public view returns (string[] memory) {
+        return s.liveDuelIds;
+    }
+
+    /// @notice Checks if a duel is currently live
+    /// @param _duelId The duel ID to check
+    /// @return True if the duel is live, false otherwise
+    function isDuelLive(string memory _duelId) public view returns (bool) {
+        return s.isLiveDuel[_duelId];
+    }
+
+    /// @notice Returns the maximum liquidity cap per duel
+    /// @return The maximum liquidity cap per duel
+    function getMaxLiquidityCapPerDuel() public view returns (uint256) {
+        return s.maxLiquidityCapPerDuel;
+    }
+
+    /// @notice Returns the maximum liquidity cap across protocol
+    /// @return The maximum liquidity cap across protocol
+    function getMaxLiquidityCapAcrossProtocol() public view returns (uint256) {
+        return s.maxLiquidityCapAcrossProtocol;
+    }
+
+    /// @notice Get all pending withdrawal requests for a user
+    /// @param _user The address of the user
+    /// @return Array of request IDs
+    function getWithdrawalRequestIds(address _user) external view returns (uint256[] memory) {
+        return s.withdrawalRequestIds[_user];
+    }
+
+    /// @notice Get paginated withdrawal request IDs for a user
+    /// @param _user The address of the user
+    /// @param _offset The starting index for pagination
+    /// @param _limit The maximum number of items to return
+    /// @return Array of request IDs for the specified page
+    /// @return Total number of withdrawal requests for the user
+    function getWithdrawalRequestIdsPaginated(
+        address _user,
+        uint256 _offset,
+        uint256 _limit
+    ) external view returns (uint256[] memory, uint256) {
+        uint256[] memory allRequests = s.withdrawalRequestIds[_user];
+        uint256 totalRequests = allRequests.length;
+
+        // If offset is beyond array length, return empty array
+        if (_offset >= totalRequests) {
+            return (new uint256[](0), totalRequests);
+        }
+
+        // Calculate actual limit (don't exceed array length)
+        uint256 actualLimit = _limit;
+        if (_offset + _limit > totalRequests) {
+            actualLimit = totalRequests - _offset;
+        }
+
+        // Create new array for the page
+        uint256[] memory pageRequests = new uint256[](actualLimit);
+
+        // Copy the requested elements
+        for (uint256 i = 0; i < actualLimit; i++) {
+            pageRequests[i] = allRequests[_offset + i];
+        }
+
+        return (pageRequests, totalRequests);
+    }
+
+    /// @notice Get details of a withdrawal request
+    /// @param _requestId The ID of the withdrawal request
+    /// @return user The address of the user who made the request
+    /// @return amount The amount requested
+    /// @return timestamp The time the request was created
+    /// @return status The current status of the request
+    function getUserWithdrawalRequest(
+        uint256 _requestId
+    ) external view returns (address user, uint256 amount, uint256 timestamp, WithdrawalStatus status) {
+        WithdrawalRequest storage request = s.withdrawalRequests[_requestId];
+        return (request.user, request.amount, request.timestamp, request.status);
     }
 }
