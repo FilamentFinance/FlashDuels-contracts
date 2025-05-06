@@ -26,13 +26,13 @@ const main = async () => {
 
     let maxAutoWithdraw = await viewFacet.getMaxAutoWithdraw();
     console.log("Before Max Auto Withdraw: ", maxAutoWithdraw); // 0
-    const newMaxAutoWithdraw = ethers.parseUnits("5", 18);
+    const newMaxAutoWithdraw = ethers.parseUnits("5000", 18);
 
     tx = await flashDuelsAdminFacet.setMaxAutoWithdraw(newMaxAutoWithdraw);
     await tx.wait(1)
 
     maxAutoWithdraw = await viewFacet.getMaxAutoWithdraw();
-    console.log("After Max Auto Withdraw: ", maxAutoWithdraw); // 5 * 1e18
+    console.log("After Max Auto Withdraw: ", maxAutoWithdraw); // 5000 * 1e18
 
 }
 
