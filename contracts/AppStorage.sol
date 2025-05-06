@@ -212,6 +212,9 @@ error FlashDuelsCoreFacet__TransferFailed();
 /// @notice Thrown when no funds are available
 error FlashDuelsCoreFacet__NoFundsAvailable();
 
+/// @notice Thrown when the owner or bot is invalid
+error FlashDuelsCoreFacet__InvalidOwnerOrBot();
+
 /// @notice Thrown when the bot is invalid in marketplace facet
 error FlashDuelsMarketplaceFacet__InvalidBot();
 

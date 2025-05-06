@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {AppStorage, Duel, CryptoDuel, DuelCategory, DuelDuration, TriggerType, TriggerCondition, DuelStatus, ParticipationTokenType, CreateDuelRequested, PendingDuel, DuelJoined, CryptoDuelJoined, DuelStarted, DuelSettled, DuelCancelled, RefundIssued, WithdrawEarning, WithdrawCreatorEarning, CreateDuelFeeUpdated, PartialDuelSettled, PartialWinningsDistributed, WinningsDistributionCompleted, PartialRefundsDistributed, RefundsDistributionCompleted, CryptoDuelCreated, DuelApprovedAndCreated, FlashDuelsCoreFacet__InvalidBot, FlashDuelsCoreFacet__InvalidDuelCategory, FlashDuelsCoreFacet__InvalidDuelDuration, FlashDuelsCoreFacet__BootstrapPeriodNotEnded, FlashDuelsCoreFacet__ThresholdMet, FlashDuelsCoreFacet__DuelDoesNotExist, FlashDuelsCoreFacet__DuelIsNotLive, FlashDuelsCoreFacet__USDCTransferFailed, FlashDuelsCoreFacet__CreditsTransferFailed, FlashDuelsCoreFacet__TokenTransferFailed, FlashDuelsCoreFacet__LessThanMinimumWager, FlashDuelsCoreFacet__InvalidAmount, FlashDuelsCoreFacet__DuelHasAlreadyStartedOrSettled, FlashDuelsCoreFacet__ThresholdNotMet, FlashDuelsCoreFacet__DuelIsNotLiveOrSettled, FlashDuelsCoreFacet__DuelIsNotExpired, FlashDuelsCoreFacet__ResolvingTimeExpired, FlashDuelsCoreFacet__DistributionAlreadyCompleted, FlashDuelsCoreFacet__NoPayoutToDistribute, FlashDuelsCoreFacet__RefundDistributionAlreadyCompleted, FlashDuelsCoreFacet__InsufficientBalance, FlashDuelsCoreFacet__TransferFailed, FlashDuelsCoreFacet__NoFundsAvailable, WithdrawalStatus, WithdrawalRequest, FlashDuelsCoreFacet__InvalidRequestId, FlashDuelsCoreFacet__RequestAlreadyProcessed, WithdrawalRequested, WithdrawalApproved, WithdrawalCancelled} from "../AppStorage.sol";
+import {AppStorage, Duel, CryptoDuel, DuelCategory, DuelDuration, TriggerType, TriggerCondition, DuelStatus, ParticipationTokenType, CreateDuelRequested, PendingDuel, DuelJoined, CryptoDuelJoined, DuelStarted, DuelSettled, DuelCancelled, RefundIssued, WithdrawEarning, WithdrawCreatorEarning, CreateDuelFeeUpdated, PartialDuelSettled, PartialWinningsDistributed, WinningsDistributionCompleted, PartialRefundsDistributed, RefundsDistributionCompleted, CryptoDuelCreated, DuelApprovedAndCreated, FlashDuelsCoreFacet__InvalidBot, FlashDuelsCoreFacet__InvalidDuelCategory, FlashDuelsCoreFacet__InvalidDuelDuration, FlashDuelsCoreFacet__BootstrapPeriodNotEnded, FlashDuelsCoreFacet__ThresholdMet, FlashDuelsCoreFacet__DuelDoesNotExist, FlashDuelsCoreFacet__DuelIsNotLive, FlashDuelsCoreFacet__USDCTransferFailed, FlashDuelsCoreFacet__CreditsTransferFailed, FlashDuelsCoreFacet__TokenTransferFailed, FlashDuelsCoreFacet__LessThanMinimumWager, FlashDuelsCoreFacet__InvalidAmount, FlashDuelsCoreFacet__DuelHasAlreadyStartedOrSettled, FlashDuelsCoreFacet__ThresholdNotMet, FlashDuelsCoreFacet__DuelIsNotLiveOrSettled, FlashDuelsCoreFacet__DuelIsNotExpired, FlashDuelsCoreFacet__ResolvingTimeExpired, FlashDuelsCoreFacet__DistributionAlreadyCompleted, FlashDuelsCoreFacet__NoPayoutToDistribute, FlashDuelsCoreFacet__RefundDistributionAlreadyCompleted, FlashDuelsCoreFacet__InsufficientBalance, FlashDuelsCoreFacet__TransferFailed, FlashDuelsCoreFacet__NoFundsAvailable, WithdrawalStatus, WithdrawalRequest, FlashDuelsCoreFacet__InvalidRequestId, FlashDuelsCoreFacet__RequestAlreadyProcessed, WithdrawalRequested, WithdrawalApproved, WithdrawalCancelled, FlashDuelsCoreFacet__InvalidOwnerOrBot} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -33,6 +33,16 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @dev Uses the LibDiamond library to enforce contract ownership.
     modifier onlyOwner() {
         LibDiamond.enforceIsContractOwner();
+        _;
+    }
+
+    /// @notice Modifier to restrict function access to only the contract owner or the bot address.
+    /// @dev Uses the LibDiamond library to enforce contract ownership.
+    modifier onlyOwnerOrBot() {
+        require(
+            msg.sender == LibDiamond.contractOwner() || msg.sender == s.bot,
+            FlashDuelsCoreFacet__InvalidOwnerOrBot()
+        );
         _;
     }
 
@@ -664,7 +674,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @notice Update the status of a withdrawal request (approve/reject)
     /// @param _requestId The ID of the withdrawal request to update
     /// @param _isApproved Whether to approve (true) or reject (false) the request
-    function updateWithdrawalRequestStatus(uint256 _requestId, bool _isApproved) external nonReentrant onlyOwner {
+    function updateWithdrawalRequestStatus(uint256 _requestId, bool _isApproved) external nonReentrant onlyOwnerOrBot {
         WithdrawalRequest storage request = s.withdrawalRequests[_requestId];
         require(request.user != address(0), FlashDuelsCoreFacet__InvalidRequestId());
         require(request.status == WithdrawalStatus.Pending, FlashDuelsCoreFacet__RequestAlreadyProcessed());
