@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {AppStorage, Duel, CryptoDuel, DuelCategory, DuelDuration, TriggerType, TriggerCondition, DuelStatus, ParticipationTokenType, CreateDuelRequested, PendingDuel, DuelJoined, CryptoDuelJoined, DuelStarted, DuelSettled, DuelCancelled, RefundIssued, WithdrawEarning, WithdrawCreatorEarning, CreateDuelFeeUpdated, PartialDuelSettled, PartialWinningsDistributed, WinningsDistributionCompleted, PartialRefundsDistributed, RefundsDistributionCompleted, CryptoDuelCreated, DuelApprovedAndCreated, FlashDuelsCoreFacet__InvalidBot, FlashDuelsCoreFacet__InvalidDuelCategory, FlashDuelsCoreFacet__InvalidDuelDuration, FlashDuelsCoreFacet__BootstrapPeriodNotEnded, FlashDuelsCoreFacet__ThresholdMet, FlashDuelsCoreFacet__DuelDoesNotExist, FlashDuelsCoreFacet__DuelIsNotLive, FlashDuelsCoreFacet__USDCTransferFailed, FlashDuelsCoreFacet__CreditsTransferFailed, FlashDuelsCoreFacet__TokenTransferFailed, FlashDuelsCoreFacet__LessThanMinimumWager, FlashDuelsCoreFacet__DuelHasAlreadyStartedOrSettled, FlashDuelsCoreFacet__ThresholdNotMet, FlashDuelsCoreFacet__DuelIsNotLiveOrSettled, FlashDuelsCoreFacet__DuelIsNotExpired, FlashDuelsCoreFacet__ResolvingTimeExpired, FlashDuelsCoreFacet__DistributionAlreadyCompleted, FlashDuelsCoreFacet__NoPayoutToDistribute, FlashDuelsCoreFacet__RefundDistributionAlreadyCompleted, FlashDuelsCoreFacet__AmountShouldBeLessThanEqualEarnings, FlashDuelsCoreFacet__TransferFailed, FlashDuelsCoreFacet__NoFundsAvailable} from "../AppStorage.sol";
+import {AppStorage, Duel, CryptoDuel, DuelCategory, DuelDuration, TriggerType, TriggerCondition, DuelStatus, ParticipationTokenType, CreateDuelRequested, PendingDuel, DuelJoined, CryptoDuelJoined, DuelStarted, DuelSettled, DuelCancelled, RefundIssued, WithdrawEarning, WithdrawCreatorEarning, CreateDuelFeeUpdated, PartialDuelSettled, PartialWinningsDistributed, WinningsDistributionCompleted, PartialRefundsDistributed, RefundsDistributionCompleted, CryptoDuelCreated, DuelApprovedAndCreated, FlashDuelsCoreFacet__InvalidBot, FlashDuelsCoreFacet__InvalidDuelCategory, FlashDuelsCoreFacet__InvalidDuelDuration, FlashDuelsCoreFacet__BootstrapPeriodNotEnded, FlashDuelsCoreFacet__ThresholdMet, FlashDuelsCoreFacet__DuelDoesNotExist, FlashDuelsCoreFacet__DuelIsNotLive, FlashDuelsCoreFacet__USDCTransferFailed, FlashDuelsCoreFacet__CreditsTransferFailed, FlashDuelsCoreFacet__TokenTransferFailed, FlashDuelsCoreFacet__LessThanMinimumWager, FlashDuelsCoreFacet__InvalidAmount, FlashDuelsCoreFacet__DuelHasAlreadyStartedOrSettled, FlashDuelsCoreFacet__ThresholdNotMet, FlashDuelsCoreFacet__DuelIsNotLiveOrSettled, FlashDuelsCoreFacet__DuelIsNotExpired, FlashDuelsCoreFacet__ResolvingTimeExpired, FlashDuelsCoreFacet__DistributionAlreadyCompleted, FlashDuelsCoreFacet__NoPayoutToDistribute, FlashDuelsCoreFacet__RefundDistributionAlreadyCompleted, FlashDuelsCoreFacet__InsufficientBalance, FlashDuelsCoreFacet__TransferFailed, FlashDuelsCoreFacet__NoFundsAvailable, WithdrawalStatus, WithdrawalRequest, FlashDuelsCoreFacet__InvalidRequestId, FlashDuelsCoreFacet__RequestAlreadyProcessed, WithdrawalRequested, WithdrawalApproved, WithdrawalCancelled, FlashDuelsCoreFacet__InvalidOwnerOrBot} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -33,6 +33,16 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
     /// @dev Uses the LibDiamond library to enforce contract ownership.
     modifier onlyOwner() {
         LibDiamond.enforceIsContractOwner();
+        _;
+    }
+
+    /// @notice Modifier to restrict function access to only the contract owner or the bot address.
+    /// @dev Uses the LibDiamond library to enforce contract ownership.
+    modifier onlyOwnerOrBot() {
+        require(
+            msg.sender == LibDiamond.contractOwner() || msg.sender == s.bot,
+            FlashDuelsCoreFacet__InvalidOwnerOrBot()
+        );
         _;
     }
 
@@ -169,10 +179,19 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
             FlashDuelsCoreFacet__DuelIsNotLive()
         );
 
+        // Check if adding this amount would exceed the duel's liquidity cap
+        require(s.totalWagerOnDuel[_duelId] + _amount <= s.maxLiquidityCapPerDuel, "Duel liquidity cap exceeded");
+        // Check if adding this amount would exceed the protocol's total liquidity cap
+        uint256 totalProtocolLiquidity = IFlashDuelsView(address(this)).getTotalProtocolLiquidity();
+        require(totalProtocolLiquidity + _amount <= s.maxLiquidityCapAcrossProtocol, "Protocol liquidity cap exceeded");
+
         // Transfer the wager amount in USDC to the contract
         if (s.participationTokenType == ParticipationTokenType.USDC) {
             // USDC: 6 decimals
-            require(_amount >= _optionPrice && _amount >= s.minWagerTradeSize, FlashDuelsCoreFacet__LessThanMinimumWager());
+            require(
+                _amount >= _optionPrice && _amount >= s.minWagerTradeSize,
+                FlashDuelsCoreFacet__LessThanMinimumWager()
+            );
             require(
                 IERC20(s.usdc).transferFrom(_user, address(this), _amount),
                 FlashDuelsCoreFacet__TokenTransferFailed()
@@ -182,7 +201,10 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         } else {
             // Credits: 18 decimals
             // Convert Credits to USD equivalent (18 decimals -> 6 decimals) for comparison
-            require((_amount / 1e12) >= _optionPrice && _amount >= s.minWagerTradeSize, FlashDuelsCoreFacet__LessThanMinimumWager());
+            require(
+                (_amount / 1e12) >= _optionPrice && _amount >= s.minWagerTradeSize,
+                FlashDuelsCoreFacet__LessThanMinimumWager()
+            );
             require(
                 IERC20(s.credits).transferFrom(_user, address(this), _amount),
                 FlashDuelsCoreFacet__TokenTransferFailed()
@@ -195,6 +217,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // Increment wager for the selected topic
         s.totalWagerForOption[_duelId][option] += _amount;
         s.userWager[_user][_duelId][option] += _amount;
+        s.totalWagerOnDuel[_duelId] += _amount;
 
         if (!s.userExistsInOption[_duelId][option][_user]) {
             // Push user to the array
@@ -260,10 +283,20 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
             duel.duelStatus == DuelStatus.BootStrapped || duel.duelStatus == DuelStatus.Live,
             FlashDuelsCoreFacet__DuelIsNotLive()
         );
+
+        // Check if adding this amount would exceed the duel's liquidity cap
+        require(s.totalWagerOnDuel[_duelId] + _amount <= s.maxLiquidityCapPerDuel, "Duel liquidity cap exceeded");
+        // Check if adding this amount would exceed the protocol's total liquidity cap
+        uint256 totalProtocolLiquidity = IFlashDuelsView(address(this)).getTotalProtocolLiquidity();
+        require(totalProtocolLiquidity + _amount <= s.maxLiquidityCapAcrossProtocol, "Protocol liquidity cap exceeded");
+
         // Transfer the wager amount in USDC to the contract
         if (s.participationTokenType == ParticipationTokenType.USDC) {
             // USDC: 6 decimals
-            require(_amount >= _optionPrice && _amount >= s.minWagerTradeSize, FlashDuelsCoreFacet__LessThanMinimumWager());
+            require(
+                _amount >= _optionPrice && _amount >= s.minWagerTradeSize,
+                FlashDuelsCoreFacet__LessThanMinimumWager()
+            );
             require(
                 IERC20(s.usdc).transferFrom(_user, address(this), _amount),
                 FlashDuelsCoreFacet__TokenTransferFailed()
@@ -273,7 +306,10 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         } else {
             // Credits: 18 decimals
             // Convert Credits to USD equivalent (18 decimals -> 6 decimals) for comparison
-            require((_amount / 1e12) >= _optionPrice && _amount >= s.minWagerTradeSize, FlashDuelsCoreFacet__LessThanMinimumWager());
+            require(
+                (_amount / 1e12) >= _optionPrice && _amount >= s.minWagerTradeSize,
+                FlashDuelsCoreFacet__LessThanMinimumWager()
+            );
             require(
                 IERC20(s.credits).transferFrom(_user, address(this), _amount),
                 FlashDuelsCoreFacet__TokenTransferFailed()
@@ -286,6 +322,7 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         // Increment wager for the selected topic
         s.totalWagerForOption[_duelId][option] += _amount;
         s.userWager[_user][_duelId][option] += _amount;
+        s.totalWagerOnDuel[_duelId] += _amount;
 
         if (!s.userExistsInOption[_duelId][option][_user]) {
             // Push user to the array
@@ -351,8 +388,13 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         duel.expiryTime = block.timestamp + duelDuration;
         duel.duelStatus = DuelStatus.Live;
 
+        // Add to live duels tracking
+        s.isLiveDuel[_duelId] = true;
+        s.liveDuelIds.push(_duelId);
+
         emit DuelStarted(_duelId, block.timestamp, duel.expiryTime);
     }
+
     /// @notice Starts the crypto duel with the specified ID.
     /// @param _duelId The ID of the duel to start.
     /// @param _startTokenPrice The start price of the token.
@@ -396,6 +438,10 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         cryptoDuel.expiryTime = block.timestamp + duelDuration;
         cryptoDuel.duelStatus = DuelStatus.Live;
 
+        // Add to live duels tracking
+        s.isLiveDuel[_duelId] = true;
+        s.liveDuelIds.push(_duelId);
+
         emit DuelStarted(_duelId, block.timestamp, cryptoDuel.expiryTime);
     }
 
@@ -411,6 +457,18 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
         uint256 expiryTime = duel.expiryTime;
         require(block.timestamp >= expiryTime, FlashDuelsCoreFacet__DuelIsNotExpired());
         require(block.timestamp <= expiryTime + s.resolvingPeriod, FlashDuelsCoreFacet__ResolvingTimeExpired());
+
+        // Remove from live duels tracking
+        s.isLiveDuel[_duelId] = false;
+        // Find and remove from liveDuelIds array
+        for (uint256 i = 0; i < s.liveDuelIds.length; i++) {
+            if (keccak256(bytes(s.liveDuelIds[i])) == keccak256(bytes(_duelId))) {
+                // Replace with last element and pop
+                s.liveDuelIds[i] = s.liveDuelIds[s.liveDuelIds.length - 1];
+                s.liveDuelIds.pop();
+                break;
+            }
+        }
 
         string[] memory options = s.duelIdToOptions[_duelId];
         string memory winningOption = options[_optionIndex];
@@ -487,6 +545,18 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
             block.timestamp <= cryptoDuel.expiryTime + s.resolvingPeriod,
             FlashDuelsCoreFacet__ResolvingTimeExpired()
         );
+
+        // Remove from live duels tracking
+        s.isLiveDuel[_duelId] = false;
+        // Find and remove from liveDuelIds array
+        for (uint256 i = 0; i < s.liveDuelIds.length; i++) {
+            if (keccak256(bytes(s.liveDuelIds[i])) == keccak256(bytes(_duelId))) {
+                // Replace with last element and pop
+                s.liveDuelIds[i] = s.liveDuelIds[s.liveDuelIds.length - 1];
+                s.liveDuelIds.pop();
+                break;
+            }
+        }
 
         // Determine the winning option and total wager of the losing side
         (string memory winningOption, uint256 totalWagerLooser, uint256 optionIndex) = _determineWinningOptionAndWager(
@@ -579,17 +649,64 @@ contract FlashDuelsCoreFacet is PausableUpgradeable, ReentrancyGuardUpgradeable 
 
     /// @notice Withdraws earnings for the caller.
     /// @param _amount The amount to withdraw.
-    /// @dev This function allows users to withdraw their accumulated earnings
     function withdrawEarnings(uint256 _amount) external nonReentrant {
-        uint256 _allTimeEarnings = s.allTimeEarnings[msg.sender];
-        require(_amount <= _allTimeEarnings, FlashDuelsCoreFacet__AmountShouldBeLessThanEqualEarnings());
-        if (s.participationTokenType == ParticipationTokenType.USDC) {
-            require(IERC20(s.usdc).transfer(msg.sender, _amount), FlashDuelsCoreFacet__TransferFailed());
+        require(_amount > 0, FlashDuelsCoreFacet__InvalidAmount());
+        require(_amount <= s.allTimeEarnings[msg.sender], FlashDuelsCoreFacet__InsufficientBalance());
+
+        // If amount is less than or equal to maxAutoWithdrawAmount, process immediately
+        if (_amount <= s.maxAutoWithdrawAmount) {
+            _processWithdrawal(msg.sender, _amount);
         } else {
-            require(IERC20(s.credits).transfer(msg.sender, _amount), FlashDuelsCoreFacet__TransferFailed());
+            // Create withdrawal request for manual approval
+            uint256 requestId = s.withdrawalRequestCounter++;
+            s.withdrawalRequests[requestId] = WithdrawalRequest({
+                user: msg.sender,
+                amount: _amount,
+                timestamp: block.timestamp,
+                status: WithdrawalStatus.Pending
+            });
+            s.withdrawalRequestIds[msg.sender].push(requestId);
+
+            emit WithdrawalRequested(msg.sender, _amount, requestId, block.timestamp);
         }
-        s.allTimeEarnings[msg.sender] -= _amount;
-        emit WithdrawEarning(msg.sender, _amount, block.timestamp);
+    }
+
+    /// @notice Update the status of a withdrawal request (approve/reject)
+    /// @param _requestId The ID of the withdrawal request to update
+    /// @param _isApproved Whether to approve (true) or reject (false) the request
+    function updateWithdrawalRequestStatus(uint256 _requestId, bool _isApproved) external nonReentrant onlyOwnerOrBot {
+        WithdrawalRequest storage request = s.withdrawalRequests[_requestId];
+        require(request.user != address(0), FlashDuelsCoreFacet__InvalidRequestId());
+        require(request.status == WithdrawalStatus.Pending, FlashDuelsCoreFacet__RequestAlreadyProcessed());
+
+        if (_isApproved) {
+            require(request.amount <= s.allTimeEarnings[request.user], FlashDuelsCoreFacet__InsufficientBalance());
+            request.status = WithdrawalStatus.Approved;
+            _processWithdrawal(request.user, request.amount);
+            emit WithdrawalApproved(request.user, request.amount, _requestId, block.timestamp);
+        } else {
+            request.status = WithdrawalStatus.Cancelled;
+            emit WithdrawalCancelled(request.user, request.amount, _requestId, block.timestamp);
+        }
+    }
+
+    /// @notice Internal function to process a withdrawal
+    /// @param _user The address of the user to process withdrawal for
+    /// @param _amount The amount to withdraw
+    function _processWithdrawal(address _user, uint256 _amount) internal {
+        // Effects
+        s.allTimeEarnings[_user] -= _amount;
+
+        // Interactions
+        bool success;
+        if (s.participationTokenType == ParticipationTokenType.USDC) {
+            success = IERC20(s.usdc).transfer(_user, _amount);
+        } else {
+            success = IERC20(s.credits).transfer(_user, _amount);
+        }
+        require(success, FlashDuelsCoreFacet__TransferFailed());
+
+        emit WithdrawEarning(_user, _amount, block.timestamp);
     }
 
     /// @notice Withdraws creator fees for the caller.

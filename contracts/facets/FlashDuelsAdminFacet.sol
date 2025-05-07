@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {AppStorage, Duel, DuelCategory, DuelDuration, DuelStatus, PendingDuel, DuelApprovedAndCreated, ParticipationTokenTypeUpdated, ParticipationTokenType, DuelRequestRevoked, DuelCreated, WithdrawProtocolFee, CreateDuelFeeUpdated, MinimumWagerThresholdUpdated, BotAddressUpdated, ProtocolTreasuryUpdated, BootstrapPeriodUpdated, ResolvingPeriodUpdated, WinnersChunkSizesUpdated, RefundChunkSizesUpdated, CreditsAddressUpdated, FlashDuelsAdminFacet__InvalidOwnerOrBot, FlashDuelsAdminFacet__InvalidProtocolAddress, FlashDuelsAdminFacet__InvalidCRDAddress, FlashDuelsAdminFacet__InvalidCreateDuelFee, FlashDuelsAdminFacet__InvalidMinimumWagerThreshold, FlashDuelsAdminFacet__InvalidBootstrapPeriod, FlashDuelsAdminFacet__InvalidResolvingPeriod, FlashDuelsAdminFacet__InvalidWinnersChunkSize, FlashDuelsAdminFacet__InvalidRefundChunkSize, FlashDuelsAdminFacet__InvalidDuelDuration, FlashDuelsAdminFacet__DuelAlreadyApproved, FlashDuelsAdminFacet__InvalidUSDCAmount, FlashDuelsAdminFacet__NoUSDCAmountToRefund, FlashDuelsAdminFacet__NoFundsAvailable, FlashDuelsAdminFacet__TransferFailed, FlashDuelsAdminFacet__InvalidCategory, FlashDuelsAdminFacet__InvalidBot, FlashDuelsAdminFacet__USDCRefundFailed, FlashDuelsAdminFacet__CreditsRefundFailed, FlashDuelsAdminFacet__InvalidPendingDuelsIndex, FlashDuelsAdminFacet__InvalidCRDAddress, FlashDuelsAdminFacet__InvalidCreateDuelFee, FlashDuelsAdminFacet__InvalidMinimumWagerThreshold, FlashDuelsAdminFacet__InvalidBootstrapPeriod, FlashDuelsAdminFacet__InvalidResolvingPeriod, FlashDuelsAdminFacet__InvalidWinnersChunkSize, FlashDuelsAdminFacet__InvalidRefundChunkSize, FlashDuelsAdminFacet__InvalidDuelDuration, FlashDuelsAdminFacet__DuelAlreadyApproved, FlashDuelsAdminFacet__InvalidUSDCAmount, FlashDuelsAdminFacet__NoUSDCAmountToRefund, FlashDuelsAdminFacet__NoFundsAvailable, FlashDuelsAdminFacet__TransferFailed, FlashDuelsAdminFacet__InvalidCategory, FlashDuelsAdminFacet__InvalidBot, FlashDuelsAdminFacet__USDCRefundFailed, FlashDuelsAdminFacet__CreditsRefundFailed, FlashDuelsAdminFacet__InvalidPendingDuelsIndex, FlashDuelsAdminFacet__InvalidMinWagerTradeSize, MinWagerTradeSizeUpdated} from "../AppStorage.sol";
+import {AppStorage, Duel, DuelCategory, DuelDuration, DuelStatus, PendingDuel, DuelApprovedAndCreated, ParticipationTokenTypeUpdated, ParticipationTokenType, DuelRequestRevoked, DuelCreated, WithdrawProtocolFee, CreateDuelFeeUpdated, MinimumWagerThresholdUpdated, BotAddressUpdated, ProtocolTreasuryUpdated, BootstrapPeriodUpdated, ResolvingPeriodUpdated, WinnersChunkSizesUpdated, RefundChunkSizesUpdated, CreditsAddressUpdated, FlashDuelsAdminFacet__InvalidOwnerOrBot, FlashDuelsAdminFacet__InvalidProtocolAddress, FlashDuelsAdminFacet__InvalidCRDAddress, FlashDuelsAdminFacet__InvalidCreateDuelFee, FlashDuelsAdminFacet__InvalidMinimumWagerThreshold, FlashDuelsAdminFacet__InvalidBootstrapPeriod, FlashDuelsAdminFacet__InvalidResolvingPeriod, FlashDuelsAdminFacet__InvalidWinnersChunkSize, FlashDuelsAdminFacet__InvalidRefundChunkSize, FlashDuelsAdminFacet__InvalidDuelDuration, FlashDuelsAdminFacet__DuelAlreadyApproved, FlashDuelsAdminFacet__InvalidUSDCAmount, FlashDuelsAdminFacet__NoUSDCAmountToRefund, FlashDuelsAdminFacet__NoFundsAvailable, FlashDuelsAdminFacet__TransferFailed, FlashDuelsAdminFacet__InvalidCategory, FlashDuelsAdminFacet__InvalidBot, FlashDuelsAdminFacet__USDCRefundFailed, FlashDuelsAdminFacet__CreditsRefundFailed, FlashDuelsAdminFacet__InvalidPendingDuelsIndex, FlashDuelsAdminFacet__InvalidCRDAddress, FlashDuelsAdminFacet__InvalidCreateDuelFee, FlashDuelsAdminFacet__InvalidMinimumWagerThreshold, FlashDuelsAdminFacet__InvalidBootstrapPeriod, FlashDuelsAdminFacet__InvalidResolvingPeriod, FlashDuelsAdminFacet__InvalidWinnersChunkSize, FlashDuelsAdminFacet__InvalidRefundChunkSize, FlashDuelsAdminFacet__InvalidDuelDuration, FlashDuelsAdminFacet__DuelAlreadyApproved, FlashDuelsAdminFacet__InvalidUSDCAmount, FlashDuelsAdminFacet__NoUSDCAmountToRefund, FlashDuelsAdminFacet__NoFundsAvailable, FlashDuelsAdminFacet__TransferFailed, FlashDuelsAdminFacet__InvalidCategory, FlashDuelsAdminFacet__InvalidBot, FlashDuelsAdminFacet__USDCRefundFailed, FlashDuelsAdminFacet__CreditsRefundFailed, FlashDuelsAdminFacet__InvalidPendingDuelsIndex, FlashDuelsAdminFacet__InvalidMinWagerTradeSize, MinWagerTradeSizeUpdated, MaxLiquidityCapPerDuelUpdated, MaxLiquidityCapAcrossProtocolUpdated, FlashDuelsAdminFacet__InvalidMaxLiquidityCapPerDuel, FlashDuelsAdminFacet__InvalidMaxLiquidityCapAcrossProtocol, FlashDuelsAdminFacet__InvalidMaxAutoWithdraw, MaxAutoWithdrawUpdated} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -168,6 +168,42 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
         }
         s.minWagerTradeSize = _minWagerTradeSize;
         emit MinWagerTradeSizeUpdated(_minWagerTradeSize);
+    }
+
+    /// @notice Sets the maximum liquidity cap per duel
+    /// @param _maxLiquidityCapPerDuel The maximum liquidity cap per duel
+    function setMaxLiquidityCapPerDuel(uint256 _maxLiquidityCapPerDuel) external onlyOwner {
+        if (s.participationTokenType == ParticipationTokenType.USDC) {
+            require(_maxLiquidityCapPerDuel >= 20000 * 1e6, FlashDuelsAdminFacet__InvalidMaxLiquidityCapPerDuel());
+        } else {
+            require(_maxLiquidityCapPerDuel >= 20000 * 1e18, FlashDuelsAdminFacet__InvalidMaxLiquidityCapPerDuel());
+        }
+        s.maxLiquidityCapPerDuel = _maxLiquidityCapPerDuel;
+        emit MaxLiquidityCapPerDuelUpdated(_maxLiquidityCapPerDuel);
+    }
+
+    /// @notice Sets the maximum liquidity cap across protocol
+    /// @param _maxLiquidityCapAcrossProtocol The maximum liquidity cap across protocol
+    function setMaxLiquidityCapAcrossProtocol(uint256 _maxLiquidityCapAcrossProtocol) external onlyOwner {
+        if (s.participationTokenType == ParticipationTokenType.USDC) {
+            require(_maxLiquidityCapAcrossProtocol >= 200000 * 1e6, FlashDuelsAdminFacet__InvalidMaxLiquidityCapAcrossProtocol());
+        } else {
+            require(_maxLiquidityCapAcrossProtocol >= 200000 * 1e18, FlashDuelsAdminFacet__InvalidMaxLiquidityCapAcrossProtocol());
+        }
+        s.maxLiquidityCapAcrossProtocol = _maxLiquidityCapAcrossProtocol;
+        emit MaxLiquidityCapAcrossProtocolUpdated(_maxLiquidityCapAcrossProtocol);
+    }
+
+    /// @notice Sets the maximum auto withdraw amount
+    /// @param _maxAutoWithdrawAmount The maximum auto withdraw amount
+    function setMaxAutoWithdraw(uint256 _maxAutoWithdrawAmount) external onlyOwner {
+        if (s.participationTokenType == ParticipationTokenType.USDC) {
+            require(_maxAutoWithdrawAmount >= 5 * 1e6, FlashDuelsAdminFacet__InvalidMaxAutoWithdraw());
+        } else {
+            require(_maxAutoWithdrawAmount >= 5 * 1e18, FlashDuelsAdminFacet__InvalidMaxAutoWithdraw());
+        }
+        s.maxAutoWithdrawAmount = _maxAutoWithdrawAmount;
+        emit MaxAutoWithdrawUpdated(_maxAutoWithdrawAmount);
     }
 
     /// @notice Creates a duel for an approved user

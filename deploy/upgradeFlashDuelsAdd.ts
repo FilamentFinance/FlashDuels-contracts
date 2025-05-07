@@ -38,10 +38,10 @@ async function main() {
     // await flashDuelsMarketplaceFacet.waitForDeployment()
     // console.log("FlashDuelsMarketplaceFacet deployed:", flashDuelsMarketplaceFacet.target)
 
-    const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
-    const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
-    await flashDuelsViewFacet.waitForDeployment()
-    console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
+    // const FlashDuelsViewFacet = await ethers.getContractFactory("FlashDuelsViewFacet")
+    // const flashDuelsViewFacet = await FlashDuelsViewFacet.deploy()
+    // await flashDuelsViewFacet.waitForDeployment()
+    // console.log("FlashDuelsViewFacet deployed:", flashDuelsViewFacet.target)
 
     // const OwnershipFacet = await ethers.getContractFactory("OwnershipFacet")
     // const ownershipFacet = await OwnershipFacet.deploy()
@@ -50,20 +50,27 @@ async function main() {
 
     // Prepare the cut transaction
     const cut: any = [
-        {
-            facetAddress: flashDuelsViewFacet.target,
-            action: FacetCutAction.Add, // 0 means Add
-            functionSelectors: [
-                "0x968ea5ce" // getMinWagerTradeSize()
-            ]
-        },
+        // {
+        //     facetAddress: flashDuelsViewFacet.target,
+        //     action: FacetCutAction.Add, // 0 means Add
+        //     functionSelectors: [
+        //         "0x61b4f167", // getMaxAutoWithdraw()
+        //     ]
+        // },
         {
             facetAddress: flashDuelsAdminFacet.target,
             action: FacetCutAction.Add, // 0 means Add
             functionSelectors: [
-                "0x662358be", // setMinWagerTradeSize(uint256)
+                "0x22de4957", // setMaxAutoWithdraw(uint256)
             ]
-        }
+        },
+        // {
+        //     facetAddress: flashDuelsCoreFacet.target,
+        //     action: FacetCutAction.Add, // 0 means Add
+        //     functionSelectors: [
+        //         "0xefe75b9c", // updateWithdrawalRequestStatus(uint256,bool)
+        //     ]
+        // }
     ]
 
     try {

@@ -19,6 +19,9 @@ const flashDuelsAdminFacetSelectors = [
     "0xf4c49a9e", // setCRDAddress(address)
     "0x69940054", // setParticipationTokenType(uint8)
     "0x662358be", // setMinWagerTradeSize(uint256)
+    "0x42bf3258", // setMaxLiquidityCapPerDuel(uint256)
+    "0x2f385fe6", // setMaxLiquidityCapAcrossProtocol(uint256)
+    "0x22de4957", // setMaxAutoWithdraw(uint256)
     "0x8088a328", // approveAndCreateDuel(address,uint8,uint256)
     "0x3100694f", // revokeCreateDuelRequest(address,uint8,uint256)
     "0x8795cccb" // withdrawProtocolFees()
@@ -35,6 +38,7 @@ const flashDuelsCoreFacetSelectors = [
     "0x2afa99d9", // settleCryptoDuel(string,int256)
     "0x3f3a631b", // cancelDuelIfThresholdNotMet(uint8,string)
     "0x6e70096e", // withdrawEarnings(uint256)
+    "0xefe75b9c", // updateWithdrawalRequestStatus(uint256,bool)
     "0xf1675271", // withdrawCreatorFee()
     "0xef82031a" // continueRefundsInChunks(string)
 ]
@@ -89,7 +93,16 @@ const flashDuelsViewFacetSelectors = [
     "0xc2fdda7d", // getBotAddress()
     "0x535eb845", // getCreditsAddress()
     "0x795c3677", // getParticipationTokenType()
-    "0x968ea5ce" // getMinWagerTradeSize()
+    "0x968ea5ce", // getMinWagerTradeSize()
+    "0x5fb1fb0f", // getTotalProtocolLiquidity()
+    "0x2a477d77", // getLiveDuelIds()
+    "0x48e20264", // isDuelLive(string)
+    "0x55c52bed", // getMaxLiquidityCapPerDuel()
+    "0xc2d71655", // getMaxLiquidityCapAcrossProtocol()
+    "0x550ec678", // getWithdrawalRequestIds(address)
+    "0xf813d8e6", // getWithdrawalRequestIdsPaginated(address,uint256,uint256)
+    "0x2e0cf294", // getUserWithdrawalRequest(uint256)
+    "0x61b4f167", // getMaxAutoWithdraw()
 ]
 
 const ownershipFacetSelectors = [

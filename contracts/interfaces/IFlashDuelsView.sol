@@ -16,4 +16,5 @@ interface IFlashDuelsView {
         string memory cryptoDuelId,
         uint256 optionIndex
     ) external view returns (address);
+    function getTotalProtocolLiquidity() external view returns (uint256);
 }
