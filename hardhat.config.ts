@@ -1,17 +1,19 @@
 import { HardhatUserConfig } from "hardhat/config"
 import "@nomicfoundation/hardhat-toolbox"
 import "@openzeppelin/hardhat-upgrades"
-// import "./tasks"
+import "./tasks"
 import * as dotenv from "dotenv"
 import "solidity-docgen"
 import "hardhat-abi-exporter"
 import "hardhat-contract-sizer"
 dotenv.config()
 
-const PRIVATE_KEY_ADMIN = process.env.PRIVATE_KEY_ADMIN || ""
-const PRIVATE_KEY_TWO = process.env.PRIVATE_KEY_TWO || ""
-const PRIVATE_KEY_SEQ = process.env.PRIVATE_KEY_SEQ || ""
+const PRIVATE_KEY_ADMIN_MAINNET = process.env.PRIVATE_KEY_ADMIN_MAINNET || ""
+const PRIVATE_KEY_ADMIN_TESTNET = process.env.PRIVATE_KEY_ADMIN_TESTNET || ""
+const PRIVATE_KEY_BOT_TESTNET = process.env.PRIVATE_KEY_BOT_TESTNET || ""
+const PRIVATE_KEY_BOT_MAINNET = process.env.PRIVATE_KEY_BOT_MAINNET || ""
 const SEITRACE_API_KEY = process.env.SEITRACE_API_KEY || ""
+
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -38,12 +40,12 @@ const config: HardhatUserConfig = {
         seiTestnet: {
             url: "https://evm-rpc-testnet.sei-apis.com",
             chainId: 1328,
-            accounts: [PRIVATE_KEY_ADMIN, PRIVATE_KEY_TWO, PRIVATE_KEY_SEQ]
+            accounts: [PRIVATE_KEY_ADMIN_TESTNET, PRIVATE_KEY_BOT_TESTNET]
         },
         seiMainnet: {
             url: "https://evm-rpc.sei-apis.com",
             chainId: 1329,
-            accounts: [PRIVATE_KEY_ADMIN, PRIVATE_KEY_TWO, PRIVATE_KEY_SEQ]
+            accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
         }
     },
     abiExporter: {
@@ -52,7 +54,20 @@ const config: HardhatUserConfig = {
         clear: true,
         flat: true,
         spacing: 4,
-        only: ["FlashDuels", "FLASHUSDC", "FlashDuelsMarketplace"]
+        only: [
+            "FLASHUSDC",
+            "OptionToken",
+            "Credits",
+            "FlashDuelsIncentives",
+            "Diamond",
+            "FlashDuelsAdminFacet",
+            "FlashDuelsCoreFacet",
+            "FlashDuelsMarketplaceFacet",
+            "FlashDuelsViewFacet",
+            "OwnershipFacet",
+            "DiamondLoupeFacet",
+            "DiamondCutFacet",
+        ]
     },
     sourcify: {
         enabled: false
@@ -80,7 +95,7 @@ const config: HardhatUserConfig = {
     contractSizer: {
         alphaSort: true,
         disambiguatePaths: false,
-        runOnCompile: false,
+        runOnCompile: true,
         strict: true
         // only: [":ERC20$"]
     }

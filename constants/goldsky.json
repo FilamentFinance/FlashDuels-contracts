@@ -1,0 +1,37 @@
+{
+    "version": "1",
+    "name": "flashduels",
+    "abis": {   
+        "adminfacet": { "path": "abis/FlashDuelsAdminFacet.json" },
+        "corefacet": { "path": "abis/FlashDuelsCoreFacet.json" },
+        "marketplacefacet": { "path": "abis/FlashDuelsMarketplaceFacet.json" },
+        "ownershipfacet": { "path": "abis/OwnershipFacet.json" }
+    },
+    "chains": ["sei-testnet"],
+    "instances": [
+        {
+            "abi": "adminfacet",
+            "address": "0xF513eaD7B64D9D9aF17122C10f9e7e3a106e6121",
+            "chain": "sei-testnet",
+            "startBlock": 151851250
+        },
+        {
+            "abi": "corefacet",
+            "address": "0xF513eaD7B64D9D9aF17122C10f9e7e3a106e6121",
+            "chain": "sei-testnet",
+            "startBlock": 151851250
+        },
+        {
+            "abi": "marketplacefacet",
+            "address": "0xF513eaD7B64D9D9aF17122C10f9e7e3a106e6121",
+            "chain": "sei-testnet",
+            "startBlock": 151851250
+        },
+        {
+            "abi": "ownershipfacet",
+            "address": "0xF513eaD7B64D9D9aF17122C10f9e7e3a106e6121",
+            "chain": "sei-testnet",
+            "startBlock": 151851250
+        }
+    ]
+}

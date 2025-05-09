@@ -1,0 +1,150 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_initializationContractAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes",
+                "name": "_calldata",
+                "type": "bytes"
+            }
+        ],
+        "name": "InitializationFunctionReverted",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotAddFunctionThatAlreadyExists",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotRemoveFunctionThatDoesNotExist",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotRemoveImmutableFunction",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotReplaceFunctionThatDoesNotExist",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotReplaceFunctionWithSameFunction",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__CanNotReplaceImmutableFunction",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__IncorrectFacetCutAction",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__NoSelectorsInFacetToCut",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamondCut__RemoveFacetAddressMustBeAddressZero",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamond__MustBeContractOwner",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "facetAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "enum IDiamondCut.FacetCutAction",
+                        "name": "action",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "bytes4[]",
+                        "name": "functionSelectors",
+                        "type": "bytes4[]"
+                    }
+                ],
+                "indexed": false,
+                "internalType": "struct IDiamondCut.FacetCut[]",
+                "name": "_diamondCut",
+                "type": "tuple[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "_init",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes",
+                "name": "_calldata",
+                "type": "bytes"
+            }
+        ],
+        "name": "DiamondCut",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "facetAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "enum IDiamondCut.FacetCutAction",
+                        "name": "action",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "bytes4[]",
+                        "name": "functionSelectors",
+                        "type": "bytes4[]"
+                    }
+                ],
+                "internalType": "struct IDiamondCut.FacetCut[]",
+                "name": "_diamondCut",
+                "type": "tuple[]"
+            },
+            {
+                "internalType": "address",
+                "name": "_init",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes",
+                "name": "_calldata",
+                "type": "bytes"
+            }
+        ],
+        "name": "diamondCut",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]

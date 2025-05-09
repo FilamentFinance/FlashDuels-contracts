@@ -1,13 +1,17 @@
 {
     "name": "flash-duels",
-    "description": "Flash Duels - Prediction Market",
+    "description": "FlashDuels - Prediction Market",
     "version": "1.0.0",
     "main": "",
     "keywords": [],
     "author": "",
     "license": "MIT",
     "scripts": {
-        "format": "yarn prettier --write ."
+        "format": "yarn prettier --write .",
+        "deploy-subgraph": "goldsky subgraph deploy flashduels/v1 --from-abi constants/goldsky.json",
+        "delete-subgraph": "goldsky subgraph delete flashduels-sei-testnet/v1",
+        "deploy-testnet-pipeline": "goldsky pipeline apply ./constants/flashduels-sei-testnet.yaml",
+        "monitor-testnet-pipeline": "goldsky pipeline monitor flashduels-sei-testnet"
     },
     "devDependencies": {
         "@chainlink/contracts": "^1.2.0",

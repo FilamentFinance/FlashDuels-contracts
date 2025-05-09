@@ -1,0 +1,788 @@
+[
+    {
+        "inputs": [],
+        "name": "EnforcedPause",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ExpectedPause",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__CreditsRefundFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__DuelAlreadyApproved",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidBootstrapPeriod",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidBot",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidCRDAddress",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidCategory",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidCreateDuelFee",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidDuelDuration",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMaxAutoWithdraw",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMaxLiquidityCapAcrossProtocol",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMaxLiquidityCapPerDuel",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMinWagerTradeSize",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMinimumWagerThreshold",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidOwnerOrBot",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidPendingDuelsIndex",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidProtocolAddress",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidRefundChunkSize",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidResolvingPeriod",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidUSDCAmount",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidWinnersChunkSize",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__NoFundsAvailable",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__NoUSDCAmountToRefund",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__TransferFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__USDCRefundFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidInitialization",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibDiamond__MustBeContractOwner",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LibFlashDuels__IDCollisionDetected",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "NotInitializing",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ReentrancyGuardReentrantCall",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newBootstrapPeriod",
+                "type": "uint256"
+            }
+        ],
+        "name": "BootstrapPeriodUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "newBotAddress",
+                "type": "address"
+            }
+        ],
+        "name": "BotAddressUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newFee",
+                "type": "uint256"
+            }
+        ],
+        "name": "CreateDuelFeeUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "newCreditsAddress",
+                "type": "address"
+            }
+        ],
+        "name": "CreditsAddressUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DuelCategory",
+                "name": "category",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DuelDuration",
+                "name": "duration",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "DuelApprovedAndCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "creator",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "duelId",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "createTime",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "createDuelFee",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DuelCategory",
+                "name": "category",
+                "type": "uint8"
+            }
+        ],
+        "name": "DuelCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "refundAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "name": "DuelRequestRevoked",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint64",
+                "name": "version",
+                "type": "uint64"
+            }
+        ],
+        "name": "Initialized",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newMaxAutoWithdraw",
+                "type": "uint256"
+            }
+        ],
+        "name": "MaxAutoWithdrawUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newMaxLiquidityCapAcrossProtocol",
+                "type": "uint256"
+            }
+        ],
+        "name": "MaxLiquidityCapAcrossProtocolUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newMaxLiquidityCapPerDuel",
+                "type": "uint256"
+            }
+        ],
+        "name": "MaxLiquidityCapPerDuelUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newMinWagerTradeSize",
+                "type": "uint256"
+            }
+        ],
+        "name": "MinWagerTradeSizeUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newThreshold",
+                "type": "uint256"
+            }
+        ],
+        "name": "MinimumWagerThresholdUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "enum ParticipationTokenType",
+                "name": "newParticipationTokenType",
+                "type": "uint8"
+            }
+        ],
+        "name": "ParticipationTokenTypeUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "Paused",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "newProtocolTreasury",
+                "type": "address"
+            }
+        ],
+        "name": "ProtocolTreasuryUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "refundChunkSize",
+                "type": "uint256"
+            }
+        ],
+        "name": "RefundChunkSizesUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newResolvingPeriod",
+                "type": "uint256"
+            }
+        ],
+        "name": "ResolvingPeriodUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "Unpaused",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "winnersChunkSize",
+                "type": "uint256"
+            }
+        ],
+        "name": "WinnersChunkSizesUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "protocolBalance",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "withdrawProtocolFeeTime",
+                "type": "uint256"
+            }
+        ],
+        "name": "WithdrawProtocolFee",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
+            {
+                "internalType": "enum DuelCategory",
+                "name": "_category",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_index",
+                "type": "uint256"
+            }
+        ],
+        "name": "approveAndCreateDuel",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "pause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "paused",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
+            {
+                "internalType": "enum DuelCategory",
+                "name": "_category",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_index",
+                "type": "uint256"
+            }
+        ],
+        "name": "revokeCreateDuelRequest",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_bot",
+                "type": "address"
+            }
+        ],
+        "name": "setBotAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_creditsAddress",
+                "type": "address"
+            }
+        ],
+        "name": "setCRDAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_fee",
+                "type": "uint256"
+            }
+        ],
+        "name": "setCreateDuelFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_maxAutoWithdrawAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMaxAutoWithdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_maxLiquidityCapAcrossProtocol",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMaxLiquidityCapAcrossProtocol",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_maxLiquidityCapPerDuel",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMaxLiquidityCapPerDuel",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_minWagerTradeSize",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMinWagerTradeSize",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_minThreshold",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMinimumWagerThreshold",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "enum ParticipationTokenType",
+                "name": "_tokenType",
+                "type": "uint8"
+            }
+        ],
+        "name": "setParticipationTokenType",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_protocolTreasury",
+                "type": "address"
+            }
+        ],
+        "name": "setProtocolAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_refundChunkSize",
+                "type": "uint256"
+            }
+        ],
+        "name": "setRefundChunkSizes",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_newResolvingPeriod",
+                "type": "uint256"
+            }
+        ],
+        "name": "setResolvingPeriod",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_winnersChunkSize",
+                "type": "uint256"
+            }
+        ],
+        "name": "setWinnersChunkSizes",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "unpause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_bootstrapPeriod",
+                "type": "uint256"
+            }
+        ],
+        "name": "updateBootstrapPeriod",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "withdrawProtocolFees",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]

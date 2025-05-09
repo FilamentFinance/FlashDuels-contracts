@@ -1,8 +1,9 @@
 import { ethers, network } from "hardhat"
 import * as helpers from "@nomicfoundation/hardhat-network-helpers"
-import { FlashDuels, FLASHUSDC } from "../typechain-types"
-import FlashDuelsABI from "../constants/abis/FlashDuels.json"
+import { FlashDuelsAdminFacet, FlashDuelsViewFacet, FLASHUSDC } from "../typechain-types"
 import FLASHUSDCABI from "../constants/abis/FLASHUSDC.json"
+import FlashDuelsAdminFacetABI from "../constants/abis/FlashDuelsAdminFacet.json"
+import FlashDuelsViewFacetABI from "../constants/abis/FlashDuelsViewFacet.json"
 import netMap from "../constants/networkMapping.json"
 import { forkedChain, networkConfig } from "../helper-hardhat-config"
 
@@ -19,20 +20,16 @@ const main = async () => {
         ;[deployer, , sequencer, liquidator] = await ethers.getSigners()
     }
 
-    const flashDuels: FlashDuels = new ethers.Contract(netMap[networkName].FlashDuels, FlashDuelsABI, deployer)
     const flashUSDC: FLASHUSDC = new ethers.Contract(netMap[networkName].FLASHUSDC, FLASHUSDCABI, deployer)
+    console.log(netMap[networkName].FlashDuelsAdminFacet)
 
-    const pythSupportedTokens: any = []
-    const pythSupportedTokensAggrgators: any = []
+    const adminFacet: FlashDuelsAdminFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsAdminFacetABI, deployer)
 
-    tx = await flashDuels.setSupportedTokens(pythSupportedTokens)
-    await tx.wait(1)
-    console.log("Set Pyth Supported tokens")
+    const viewFacet: FlashDuelsViewFacet = new ethers.Contract(netMap[networkName].Diamond, FlashDuelsViewFacetABI, deployer)
 
-    tx = await flashDuels.setPriceAggregators(pythSupportedTokens, pythSupportedTokensAggrgators)
-    await tx.wait(1)
+    const protocolAddress = await viewFacet.getProtocolTreasury()
+    console.log("Protocol Address: ", protocolAddress)
 
-    console.log("Set Pyth Supported tokens aggrgator")
 
     tx = await flashDuels.setProtocolAddress(networkConfig[networkName].protocolTreasury)
     await tx.wait(1)

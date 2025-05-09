@@ -18,11 +18,12 @@ const main = async () => {
 
     const protocolfeeaddress = "0x91C2352245065B9e5d2514a313b60c1f01BfF60F"
     const battlefinalizer = "0x81F20658e0265d89f4Cca7BAf8FB3933B4FcA6Be"
-    const Betting = await ethers.getContractFactory("Betting")
+    const contractName = "";
+    const Betting = await ethers.getContractFactory(contractName);
     const betting = await Betting.deploy(protocolfeeaddress, battlefinalizer)
     console.log("Betting deployed to:", betting.target)
 
-    let contracts = [{ name: "Betting", address: betting.target }]
+    let contracts = [{ name: "", address: betting.target }]
 
     updateContractsJson(contracts)
     console.table(contracts)

@@ -6,10 +6,19 @@ export interface networkConfigItem {
     usdcAdmin?: string
     bot?: string
     protocolTreasury?: string
+    StartBlock?: number,
+    creditsMaxSupply?: string,
+    credits?: string
+    participatingToken: ParticipationTokenType
 }
 
 export interface networkConfigInfo {
     [key: string]: networkConfigItem
+}
+
+export enum ParticipationTokenType {
+    USDC,
+    CRD
 }
 
 export const networkConfig: networkConfigInfo = {
@@ -19,7 +28,9 @@ export const networkConfig: networkConfigInfo = {
         deployer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         usdcAdmin: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
         bot: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-        protocolTreasury: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        protocolTreasury: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
+        creditsMaxSupply: "1000000000000000000000000", // 1 Million
+        participatingToken: ParticipationTokenType.USDC
     },
     localhost: {
         chainId: 31337,
@@ -27,23 +38,28 @@ export const networkConfig: networkConfigInfo = {
         deployer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         usdcAdmin: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
         bot: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-        protocolTreasury: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+        protocolTreasury: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
+        participatingToken: ParticipationTokenType.USDC
     },
     seiTestnet: {
         chainId: 1328,
         goldskySlug: "sei-testnet",
-        deployer: "0x91C2352245065B9e5d2514a313b60c1f01BfF60F",
-        usdcAdmin: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
-        bot: "0x02d4Bf54Fe8bA630fFc2862a6393C462967D5a1D",
-        protocolTreasury: "0x81F20658e0265d89f4Cca7BAf8FB3933B4FcA6Be"
+        deployer: "0x46eB6E3b93feAcb0C2823303498e2D430402C500",
+        usdcAdmin: "0x46eB6E3b93feAcb0C2823303498e2D430402C500",
+        bot: "0x8489d212fFeAE043A65b77763c42723325872c8d",
+        protocolTreasury: "0x2f26916898c5Aa188676613676ba863d2f1eF597",
+        creditsMaxSupply: "1000000000000000000000000", // 1 Million
+        participatingToken: ParticipationTokenType.CRD
     },
     seiMainnet: {
         chainId: 1329,
         goldskySlug: "sei",
-        deployer: "0xc060695ecd8ee28d1cf11cdd27c7f368e86986c5",
+        deployer: "0x154995E448455D1a731ecA77219a4ea425767f0D",
         usdc: "0x3894085Ef7Ff0f0aeDf52E2A2704928d1Ec074F1",
-        bot: "",
-        protocolTreasury: ""
+        bot: "0x16372a30A0b6554Bcb81fed6665B0e628B47FB3a",
+        protocolTreasury: "0xF4ddE68ed3cbF149fc22db422029e96F4F66f660",
+        credits: "0x19657A407403c23796331DDeA8870787a1A1D6C7",
+        participatingToken: ParticipationTokenType.USDC
     }
 }
 
