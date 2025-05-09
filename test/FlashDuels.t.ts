@@ -92,6 +92,11 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
+
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
@@ -218,6 +223,11 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
+
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
@@ -300,6 +310,11 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
+
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
@@ -361,6 +376,10 @@ describe("FlashDuels Contract", function () {
             let allTImeEarningsAccounts_3 = await flashDuelsView.getAllTimeEarnings(accounts[3].address)
 
             await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsAccounts_2)
+            let withdrawalRequestIds = await flashDuelsView.getWithdrawalRequestIds(accounts[2].address)
+            console.log("withdrawalRequestIds: ", withdrawalRequestIds)
+
+            await flashDuelsCore.connect(accounts[0]).updateWithdrawalRequestStatus(withdrawalRequestIds[0], true)
 
             // Check if accounts[2] (winner) received the rewards
             finalBalanceAccounts_2 = await usdcToken.balanceOf(accounts[2].address)
@@ -387,6 +406,11 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
 
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
@@ -517,6 +541,11 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
+
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
@@ -616,6 +645,11 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
 
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
 
@@ -792,6 +826,11 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
+
             const amount = ethers.parseUnits("60", 6)
             const optionPrice = ethers.parseUnits("10", 6)
 
@@ -920,6 +959,11 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
+
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             let BTC = "tokenA"
             // let receipt = await flashDuelsCore.connect(accounts[1]).createCryptoDuel(
@@ -980,6 +1024,10 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
             const amount = ethers.parseUnits("60", 6)
             const optionPrice = ethers.parseUnits("10", 6)
 
@@ -1074,6 +1122,11 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
+
             const amount = ethers.parseUnits("60", 6)
             const optionPrice = ethers.parseUnits("10", 6)
 
@@ -1165,6 +1218,11 @@ describe("FlashDuels Contract", function () {
             // expect(await usdcToken.balanceOf(cryptoDuel.creator)).to.be.equal("1200000") // $117.6
 
             await flashDuelsCore.connect(accounts[2]).withdrawEarnings(allTImeEarningsaccounts_2)
+
+            let withdrawalRequestIds = await flashDuelsView.getWithdrawalRequestIds(accounts[2].address)
+            console.log("withdrawalRequestIds: ", withdrawalRequestIds)
+
+            await flashDuelsCore.connect(accounts[0]).updateWithdrawalRequestStatus(withdrawalRequestIds[0], true)
 
             // Check if accounts[2] (winner) received the rewards
             finalBalanceaccounts_2 = await usdcToken.balanceOf(accounts[2].address)
@@ -1439,6 +1497,11 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
+
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
@@ -1507,6 +1570,11 @@ describe("FlashDuels Contract", function () {
                 contracts.Diamond.diamond
             )
 
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
+
             // const minWager = ethers.parseUnits("10", 6) // 10 USDC
             await usdcToken.connect(accounts[0]).mint(accounts[1].address, ethers.parseUnits("10", 6))
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
@@ -1571,6 +1639,11 @@ describe("FlashDuels Contract", function () {
             const flashDuelsView: any = await contracts.FlashDuelsViewFacet.flashDuelsViewFacetContract.attach(
                 contracts.Diamond.diamond
             )
+
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapPerDuel(ethers.parseUnits("20000", 6))
+            await tx.wait(1)
+            tx = await flashDuelsAdmin.connect(accounts[0]).setMaxLiquidityCapAcrossProtocol(ethers.parseUnits("200000", 6))
+            await tx.wait(1)
 
             await usdcToken.connect(accounts[1]).approve(contracts.Diamond.diamond, ethers.parseUnits("10", 6))
 

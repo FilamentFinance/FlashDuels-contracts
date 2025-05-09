@@ -27,7 +27,7 @@ const main = async () => {
 
     const flashUSDC = new ethers.Contract(netMap[networkName].FLASHUSDC, FLASHUSDCABI, deployer)
 
-    tx = await flashUSDC.changeAdmin("0x2Eb671E6e0cd965A79A80caF35c5123b7a5D8ebb");
+    tx = await flashUSDC.changeAdmin("0x8489d212fFeAE043A65b77763c42723325872c8d");
     await tx.wait(1)
     console.log("done")
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {BPS, AppStorage, Duel, DuelStatus, Sale, SaleCreated, TokensPurchased, SaleCancelled, ParticipationTokenType, DuelDuration, DuelCategory, CryptoDuel, FlashDuelsMarketplaceFacet__InvalidBot, FlashDuelsMarketplaceFacet__InvalidOption, FlashDuelsMarketplaceFacet__AmountMustBeGreaterThanZero, FlashDuelsMarketplaceFacet__PricePerTokenMustBeGreaterThanZero, FlashDuelsMarketplaceFacet__SellerCannotBuyOwnTokens, FlashDuelsMarketplaceFacet__BuyerCannotBeTheBot,  FlashDuelsMarketplaceFacet__NotEnoughTokensAvailable,  FlashDuelsMarketplaceFacet__DuelHasExpired, FlashDuelsMarketplaceFacet__SellingNotAllowedForShortDurationDuels, FlashDuelsMarketplaceFacet__MarketBuyNotAllowedForShortDurationDuels, FlashDuelsMarketplaceFacet__MarketBuyNotAllowedYet, FlashDuelsMarketplaceFacet__NotTheSeller, FlashDuelsMarketplaceFacet__NoActiveSale, FlashDuelsMarketplaceFacet__MismatchedArrayLengths, FlashDuelsMarketplaceFacet__InsufficientTokenBalance, FlashDuelsMarketplaceFacet__InsufficientAllowance, FlashDuelsMarketplaceFacet__DuelEnded} from "../AppStorage.sol";
+import {BPS, AppStorage, Duel, DuelStatus, Sale, SaleCreated, TokensPurchased, SaleCancelled, ParticipationTokenType, DuelDuration, DuelCategory, CryptoDuel, FlashDuelsMarketplaceFacet__InvalidBot, FlashDuelsMarketplaceFacet__InvalidOption, FlashDuelsMarketplaceFacet__AmountMustBeGreaterThanZero, FlashDuelsMarketplaceFacet__PricePerTokenMustBeGreaterThanZero, FlashDuelsMarketplaceFacet__SellerCannotBuyOwnTokens, FlashDuelsMarketplaceFacet__BuyerCannotBeTheBot, FlashDuelsMarketplaceFacet__NotEnoughTokensAvailable, FlashDuelsMarketplaceFacet__DuelNotBootStrappedOrLive, FlashDuelsMarketplaceFacet__SellingNotAllowedForShortDurationDuels, FlashDuelsMarketplaceFacet__MarketBuyNotAllowedForShortDurationDuels, FlashDuelsMarketplaceFacet__MarketBuyNotAllowedYet, FlashDuelsMarketplaceFacet__NotTheSeller, FlashDuelsMarketplaceFacet__NoActiveSale, FlashDuelsMarketplaceFacet__MismatchedArrayLengths, FlashDuelsMarketplaceFacet__InsufficientTokenBalance, FlashDuelsMarketplaceFacet__InsufficientAllowance, FlashDuelsMarketplaceFacet__DuelEnded} from "../AppStorage.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -62,10 +62,10 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         address diamondContract = address(this);
         if (duelCategory == DuelCategory.Crypto) {
             CryptoDuel memory cryptoDuel = IFlashDuelsView(diamondContract).getCryptoDuel(duelId);
-            _validateDuelSelling(cryptoDuel.expiryTime, cryptoDuel.duelDuration);
+            _validateDuelSelling(cryptoDuel.duelStatus, cryptoDuel.duelDuration);
         } else {
             Duel memory flashDuel = IFlashDuelsView(diamondContract).getDuel(duelId);
-            _validateDuelSelling(flashDuel.expiryTime, flashDuel.duelDuration);
+            _validateDuelSelling(flashDuel.duelStatus, flashDuel.duelDuration);
         }
         require(
             token == IFlashDuelsView(diamondContract).getOptionIndexToOptionToken(duelId, optionIndex),
@@ -75,7 +75,10 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         require(totalPrice > 0, FlashDuelsMarketplaceFacet__PricePerTokenMustBeGreaterThanZero());
         IERC20 erc20 = IERC20(token);
         require(erc20.balanceOf(msg.sender) >= quantity, FlashDuelsMarketplaceFacet__InsufficientTokenBalance());
-        require(erc20.allowance(msg.sender, address(this)) >= quantity, FlashDuelsMarketplaceFacet__InsufficientAllowance());
+        require(
+            erc20.allowance(msg.sender, address(this)) >= quantity,
+            FlashDuelsMarketplaceFacet__InsufficientAllowance()
+        );
         s.sales[token][s.saleCounter] = Sale({seller: msg.sender, quantity: quantity, totalPrice: totalPrice});
         emit SaleCreated(s.saleCounter, msg.sender, token, quantity, totalPrice, block.timestamp);
         ++s.saleCounter;
@@ -227,11 +230,17 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
     }
 
     /// @notice Validates the duel selling timing rules
-    /// @param expiryTime The expiry time of the duel
+    /// @param duelStatus The status of the duel
     /// @param duelDuration The duration of the duel
     /// @dev This internal function ensures selling is only allowed for valid duels
-    function _validateDuelSelling(uint256 expiryTime, DuelDuration duelDuration) private view {
-        require(expiryTime > block.timestamp, FlashDuelsMarketplaceFacet__DuelHasExpired());
+    function _validateDuelSelling(DuelStatus duelStatus, DuelDuration duelDuration) private pure {
+        // if (duelStatus == DuelStatus.Settled || duelStatus == DuelStatus.Cancelled) {
+        //     revert FlashDuelsMarketplaceFacet__DuelEnded(duelId);
+        // }
+        require(
+            duelStatus == DuelStatus.Live || duelStatus == DuelStatus.BootStrapped,
+            FlashDuelsMarketplaceFacet__DuelNotBootStrappedOrLive()
+        );
 
         if (duelDuration == DuelDuration.FiveMinutes || duelDuration == DuelDuration.FifteenMinutes) {
             revert FlashDuelsMarketplaceFacet__SellingNotAllowedForShortDurationDuels();
@@ -253,7 +262,7 @@ contract FlashDuelsMarketplaceFacet is ReentrancyGuardUpgradeable {
         if (duelStatus == DuelStatus.Settled || duelStatus == DuelStatus.Cancelled) {
             revert FlashDuelsMarketplaceFacet__DuelEnded(duelId);
         }
-        require(expiryTime > block.timestamp, FlashDuelsMarketplaceFacet__DuelHasExpired());
+        // require(expiryTime > block.timestamp, FlashDuelsMarketplaceFacet__DuelHasExpired());
 
         // No market buy for 5 mins and 15 mins duels
         if (duelDuration == DuelDuration.FiveMinutes || duelDuration == DuelDuration.FifteenMinutes) {

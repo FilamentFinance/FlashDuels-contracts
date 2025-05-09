@@ -16,8 +16,7 @@ import {IDiamondCut} from "../interfaces/IDiamondCut.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
 import {IERC165} from "../interfaces/IERC165.sol";
 import {IERC173} from "../interfaces/IERC173.sol";
-import {AppStorage} from "../AppStorage.sol";
-
+import {AppStorage, ParticipationTokenType} from "../AppStorage.sol";
 // It is expected that this contract is customized if you want to deploy your diamond
 // with data from a deployment script. Use the init function to initialize state variables
 // of your diamond. Add parameters to the init function if you need to.
@@ -67,14 +66,19 @@ contract DiamondInit is Initializable, ReentrancyGuardUpgradeable, PausableUpgra
         s.bot = _bot;
         s.credits = _credits;
         s.bootstrapPeriod = 30 minutes;
-        s.protocolFeePercentage = 200; // 2%
-        s.creatorFeePercentage = 200; // 2%
-        s.resolvingPeriod = 48 hours;
-        s.createDuelFee = 5 * 1e6; // 5 USDC , 5*10^18 (for CRD tokens)
-        s.minThreshold = 50 * 1e6; // 50 USDC, 50*10^18 (for CRD tokens)
+        s.protocolFeePercentage = 100; // 1%
+        s.creatorFeePercentage = 100; // 1%
+        s.resolvingPeriod = 72 hours;
+        s.createDuelFee = 5 * 1e6; // 5 USDC , 5 * 10**18 (for CRD tokens)
+        s.minThreshold = 50 * 1e6; // 50 USDC, 50 * 10**18 (for CRD tokens)
         s.winnersChunkSize = 50;
         s.refundChunkSize = 50;
         s.sellerFees = 3; // 0.03%
         s.buyerFees = 5; // 0.05%
+        s.participationTokenType = ParticipationTokenType.USDC; // 0 for USDC, 1 for CRD
+        s.minWagerTradeSize = 5 * 1e6; // 5 USDC, 5 * 10**18 (for CRD tokens)
+        s.maxLiquidityCapPerDuel = 20000 * 1e6; // 20000 USDC, 20000 * 10**18 (for CRD tokens)
+        s.maxLiquidityCapAcrossProtocol = 200000 * 1e6; // 200000 USDC, 200000 * 10**18 (for CRD tokens)
+        s.maxAutoWithdrawAmount = 5000 * 1e6; // 5000 USDC, 5000 * 10**18 (for CRD tokens)
     }
 }

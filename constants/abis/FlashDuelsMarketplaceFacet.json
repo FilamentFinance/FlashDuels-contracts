@@ -49,7 +49,7 @@
     },
     {
         "inputs": [],
-        "name": "FlashDuelsMarketplaceFacet__DuelHasExpired",
+        "name": "FlashDuelsMarketplaceFacet__DuelNotBootStrappedOrLive",
         "type": "error"
     },
     {

@@ -51,6 +51,26 @@
     },
     {
         "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMaxAutoWithdraw",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMaxLiquidityCapAcrossProtocol",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMaxLiquidityCapPerDuel",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "FlashDuelsAdminFacet__InvalidMinWagerTradeSize",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "FlashDuelsAdminFacet__InvalidMinimumWagerThreshold",
         "type": "error"
     },
@@ -316,6 +336,58 @@
             {
                 "indexed": false,
                 "internalType": "uint256",
+                "name": "newMaxAutoWithdraw",
+                "type": "uint256"
+            }
+        ],
+        "name": "MaxAutoWithdrawUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newMaxLiquidityCapAcrossProtocol",
+                "type": "uint256"
+            }
+        ],
+        "name": "MaxLiquidityCapAcrossProtocolUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newMaxLiquidityCapPerDuel",
+                "type": "uint256"
+            }
+        ],
+        "name": "MaxLiquidityCapPerDuelUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newMinWagerTradeSize",
+                "type": "uint256"
+            }
+        ],
+        "name": "MinWagerTradeSizeUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
                 "name": "newThreshold",
                 "type": "uint256"
             }
@@ -552,6 +624,58 @@
             }
         ],
         "name": "setCreateDuelFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_maxAutoWithdrawAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMaxAutoWithdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_maxLiquidityCapAcrossProtocol",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMaxLiquidityCapAcrossProtocol",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_maxLiquidityCapPerDuel",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMaxLiquidityCapPerDuel",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_minWagerTradeSize",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMinWagerTradeSize",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

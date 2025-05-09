@@ -54,6 +54,13 @@ enum ParticipationTokenType {
     CRD
 }
 
+/// @notice Enum representing the status of a withdrawal request
+enum WithdrawalStatus {
+    Pending,
+    Approved,
+    Cancelled
+}
+
 /// ============ Errors ============ ///
 /// @notice Thrown when the owner or bot address is invalid
 error FlashDuelsAdminFacet__InvalidOwnerOrBot();
@@ -115,6 +122,18 @@ error FlashDuelsAdminFacet__CreditsRefundFailed();
 /// @notice Thrown when the pending duels index is invalid
 error FlashDuelsAdminFacet__InvalidPendingDuelsIndex();
 
+/// @notice Thrown when the minimum wager trade size is invalid
+error FlashDuelsAdminFacet__InvalidMinWagerTradeSize();
+
+/// @notice Thrown when the max liquidity cap per duel is invalid
+error FlashDuelsAdminFacet__InvalidMaxLiquidityCapPerDuel();
+
+/// @notice Thrown when the max liquidity cap across protocol is invalid
+error FlashDuelsAdminFacet__InvalidMaxLiquidityCapAcrossProtocol();
+
+/// @notice Thrown when the max auto withdraw is invalid
+error FlashDuelsAdminFacet__InvalidMaxAutoWithdraw();
+
 /// @notice Thrown when the bot is invalid in core facet
 error FlashDuelsCoreFacet__InvalidBot();
 
@@ -172,14 +191,29 @@ error FlashDuelsCoreFacet__NoPayoutToDistribute();
 /// @notice Thrown when refund distribution is already completed
 error FlashDuelsCoreFacet__RefundDistributionAlreadyCompleted();
 
-/// @notice Thrown when amount is greater than earnings
-error FlashDuelsCoreFacet__AmountShouldBeLessThanEqualEarnings();
+// /// @notice Thrown when amount is greater than earnings
+// error FlashDuelsCoreFacet__AmountShouldBeLessThanEqualEarnings();
+
+/// @notice Thrown when insufficient balance
+error FlashDuelsCoreFacet__InsufficientBalance();
+
+/// @notice Thrown when amount is invalid
+error FlashDuelsCoreFacet__InvalidAmount();
+
+/// @notice Thrown when the request is already processed
+error FlashDuelsCoreFacet__RequestAlreadyProcessed();
+
+/// @notice Thrown when the request id is invalid
+error FlashDuelsCoreFacet__InvalidRequestId();
 
 /// @notice Thrown when transfer fails
 error FlashDuelsCoreFacet__TransferFailed();
 
 /// @notice Thrown when no funds are available
 error FlashDuelsCoreFacet__NoFundsAvailable();
+
+/// @notice Thrown when the owner or bot is invalid
+error FlashDuelsCoreFacet__InvalidOwnerOrBot();
 
 /// @notice Thrown when the bot is invalid in marketplace facet
 error FlashDuelsMarketplaceFacet__InvalidBot();
@@ -202,8 +236,8 @@ error FlashDuelsMarketplaceFacet__BuyerCannotBeTheBot();
 /// @notice Thrown when the not enough tokens are available
 error FlashDuelsMarketplaceFacet__NotEnoughTokensAvailable();
 
-/// @notice Thrown when the duel has expired
-error FlashDuelsMarketplaceFacet__DuelHasExpired();
+// /// @notice Thrown when the duel has expired
+// error FlashDuelsMarketplaceFacet__DuelHasExpired();
 
 /// @notice Thrown when the selling is not allowed for short duration duels
 error FlashDuelsMarketplaceFacet__SellingNotAllowedForShortDurationDuels();
@@ -231,6 +265,9 @@ error FlashDuelsMarketplaceFacet__InsufficientAllowance();
 
 /// @notice Thrown when the duel ended
 error FlashDuelsMarketplaceFacet__DuelEnded(string duelId);
+
+/// @notice Thrown when the duel is not bootstrapped or live
+error FlashDuelsMarketplaceFacet__DuelNotBootStrappedOrLive();
 
 /// ============ Structs ============ ///
 /// @notice Represents a sale listing with details about the seller, quantity, strike, and total price.
@@ -301,6 +338,14 @@ struct PendingDuel {
     bool isApproved;
     /// @notice Amount of USDC for the duel
     uint256 usdcAmount;
+}
+
+/// @notice Struct to store withdrawal request details
+struct WithdrawalRequest {
+    address user;
+    uint256 amount;
+    uint256 timestamp;
+    WithdrawalStatus status;
 }
 
 /// ============ Events ============ ///
@@ -572,15 +617,62 @@ event ResolvingPeriodUpdated(uint256 newResolvingPeriod);
 /// @param newCreditsAddress The new address of the credits contract.
 event CreditsAddressUpdated(address newCreditsAddress);
 
+/// @notice Emitted when the minimum wager trade size is updated.
+/// @param newMinWagerTradeSize The new minimum wager trade size.
+event MinWagerTradeSizeUpdated(uint256 newMinWagerTradeSize);
+
+/// @notice Emitted when the maximum liquidity cap per duel is updated.
+/// @param newMaxLiquidityCapPerDuel The new maximum liquidity cap per duel.
+event MaxLiquidityCapPerDuelUpdated(uint256 newMaxLiquidityCapPerDuel);
+
+/// @notice Emitted when the maximum liquidity cap across protocol is updated.
+/// @param newMaxLiquidityCapAcrossProtocol The new maximum liquidity cap across protocol.
+event MaxLiquidityCapAcrossProtocolUpdated(uint256 newMaxLiquidityCapAcrossProtocol);
+
+/// @notice Emitted when the maximum auto withdraw is updated.
+/// @param newMaxAutoWithdraw The new maximum auto withdraw.
+event MaxAutoWithdrawUpdated(uint256 newMaxAutoWithdraw);
+
+/// @notice Emitted when a withdrawal request is created
+/// @param user The address of the user requesting withdrawal
+/// @param amount The amount requested for withdrawal
+/// @param requestId The unique ID of the withdrawal request
+/// @param timestamp The time the request was created
+event WithdrawalRequested(address indexed user, uint256 amount, uint256 requestId, uint256 timestamp);
+
+/// @notice Emitted when a withdrawal request is approved
+/// @param user The address of the user whose withdrawal was approved
+/// @param amount The amount approved for withdrawal
+/// @param requestId The unique ID of the withdrawal request
+/// @param timestamp The time the request was approved
+event WithdrawalApproved(address indexed user, uint256 amount, uint256 requestId, uint256 timestamp);
+
+/// @notice Emitted when a withdrawal request is cancelled
+/// @param user The address of the user who cancelled the withdrawal
+/// @param amount The amount that was cancelled
+/// @param requestId The unique ID of the withdrawal request
+/// @param timestamp The time the request was cancelled
+event WithdrawalCancelled(address indexed user, uint256 amount, uint256 requestId, uint256 timestamp);
+
 /// ============ AppStorage ============ ///
 struct AppStorage {
     /// ============ Protocol Settings ============ ///
+    /// @notice Maximum liquidity cap across protocol (200,000)
+    uint256 maxLiquidityCapAcrossProtocol;
     /// @notice Total protocol fees generated by the contract
     uint256 totalProtocolFeesGenerated;
+    /// @notice Counter for withdrawal requests
+    uint256 withdrawalRequestCounter;
+    /// @notice Maximum liquidity cap per duel (20,000)
+    uint256 maxLiquidityCapPerDuel;
+    /// @notice Maximum amount that can be withdrawn without approval (5000 USDC/CRD)
+    uint256 maxAutoWithdrawAmount;
     /// @notice Protocol fee percentage taken from the winnings (default 2%)
     uint256 protocolFeePercentage;
     /// @notice Fee percentage given to the duel creator (default 2%)
     uint256 creatorFeePercentage;
+    /// @notice Minimum wager trade size (5 * 1e6) for USDC, (5 * 1e18) for CRD
+    uint256 minWagerTradeSize;
     /// @notice Winners chunk size
     uint256 winnersChunkSize;
     /// @notice Refund chunk size
@@ -589,14 +681,14 @@ struct AppStorage {
     uint256 resolvingPeriod;
     /// @notice Time period for bootstrapping before a duel goes live (30 minutes by default)
     uint256 bootstrapPeriod;
-    /// @notice SellerFees
-    uint256 sellerFees; // 0.03%
-    /// @notice BuyerFees
-    uint256 buyerFees; // 0.05%
-    /// @notice Fee in USDC required to create a duel
+    /// @notice Fee in USDC required to create a duel (5 USDC/CRD)
     uint256 createDuelFee;
     /// @notice The minimum threshold for wagering, set to 50 USDC (or configurable)
     uint256 minThreshold;
+    /// @notice SellerFees (0.03%)
+    uint256 sellerFees;
+    /// @notice BuyerFees (0.05%)
+    uint256 buyerFees;
     /// @notice Sale Counter
     uint256 saleCounter;
     /// @notice Nonce used to generate unique duel IDs
@@ -611,6 +703,8 @@ struct AppStorage {
     /// @notice Address of the credits contract
     address credits;
     /// ============ Arrays ============ ///
+    /// @notice Array to track all live duel IDs
+    string[] liveDuelIds;
     /// @notice Storage for all pending duels
     PendingDuel[] allPendingDuels;
     /// ============ Enums ============ ///
@@ -637,6 +731,10 @@ struct AppStorage {
     mapping(string => mapping(string => address[])) duelUsersForOption;
     /// @notice Mapping of duelId to the token to the start price
     mapping(string => mapping(string => int256)) startPriceToken;
+    /// @notice Mapping of request ID to withdrawal request details
+    mapping(uint256 => WithdrawalRequest) withdrawalRequests;
+    /// @notice Mapping of user to their pending withdrawal request IDs
+    mapping(address => uint256[]) withdrawalRequestIds;
     /// @notice Mapping to track sales for each token by sale ID
     mapping(address => mapping(uint256 => Sale)) sales;
     /// @notice Mapping to track total fees earned by duel creators
@@ -653,6 +751,8 @@ struct AppStorage {
     mapping(string => string[]) duelIdToOptions;
     /// @notice Mapping to track total earnings for participants
     mapping(address => uint256) allTimeEarnings;
+    /// @notice Mapping to track total wager on a duel
+    mapping(string => uint256) totalWagerOnDuel;
     /// @notice Mapping to track total bets on duel
     mapping(string => uint256) totalBetsOnDuel;
     /// @notice Mapping of duel IDs to crypto duel information
@@ -663,6 +763,8 @@ struct AppStorage {
     mapping(string => uint256) refundProgress;
     /// @notice Mapping to track valid duel IDs to prevent duplicates
     mapping(string => bool) isValidDuelId;
+    /// @notice Mapping to track if a duel is live
+    mapping(string => bool) isLiveDuel;
     /// @notice Mapping of duel IDs to duel information
     mapping(string => Duel) duels;
 }

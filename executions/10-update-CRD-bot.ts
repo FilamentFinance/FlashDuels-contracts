@@ -17,7 +17,7 @@ const main = async () => {
     } else {
         ;[deployer, , sequencer, liquidator] = await ethers.getSigners()
     }
-    const botAddress = "0x2Eb671E6e0cd965A79A80caF35c5123b7a5D8ebb"
+    const botAddress = "0x8489d212fFeAE043A65b77763c42723325872c8d"
     const credits: Credits = new ethers.Contract(netMap[networkName].FlashDuelsCredits, CreditsABI, deployer)
 
     tx = await credits.botAddress()
