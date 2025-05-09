@@ -157,47 +157,47 @@ const main = async () => {
 
     console.log("=========Protocol Settings=========");
     const flashDuelsAdmin: any = await FlashDuelsAdminFacet.attach(diamond.target)
-    const credits: any = await Credits.attach(creditsAddress.target)
-
+    
     tx = await flashDuelsAdmin.setResolvingPeriod("1296000"); // 15 days (15 * 24 * 60 * 60)
     txr = await tx.wait(1);
     console.log("Resolving Period set to 15 days")
-
+    
     if(networkConfig[networkName].participatingToken === ParticipationTokenType.CRD) {
         console.log("Setting Participation Token Type to CRD");
         tx = await flashDuelsAdmin.setParticipationTokenType(ParticipationTokenType.CRD);
         await tx.wait(1)
-
+        
         console.log("Setting CRD specific parameters");
         tx = await flashDuelsAdmin.setCreateDuelFee(ethers.parseUnits("5", 18));
         await tx.wait(1)
         console.log("Create Duel Fee set to 5 CRD")
-
+        
         tx = await flashDuelsAdmin.setMinimumWagerThreshold(ethers.parseUnits("50", 18));
         await tx.wait(1)
         console.log("Minimum Threshold set to 50 CRD")
-
+        
         const newMinWagerTradeSize = ethers.parseUnits("5", 18);
         tx = await flashDuelsAdmin.setMinWagerTradeSize(newMinWagerTradeSize);
         await tx.wait(1)
         console.log("Minimum Wager Trade Size set to 5 CRD")
-
+        
         const newMaxLiquidityCapPerDuel = ethers.parseUnits("20000", 18);
         tx = await flashDuelsAdmin.setMaxLiquidityCapPerDuel(newMaxLiquidityCapPerDuel);
         await tx.wait(1)
         console.log("Max Liquidity Cap Per Duel set to 20000 CRD")
-
+        
         const newMaxLiquidityCapAcrossProtocol = ethers.parseUnits("200000", 18);
         tx = await flashDuelsAdmin.setMaxLiquidityCapAcrossProtocol(newMaxLiquidityCapAcrossProtocol);
         await tx.wait(1)
         console.log("Max Liquidity Cap Across Protocol set to 200000 CRD")
-
+        
         const newMaxAutoWithdraw = ethers.parseUnits("5000", 18);
         tx = await flashDuelsAdmin.setMaxAutoWithdraw(newMaxAutoWithdraw);
         await tx.wait(1)
         console.log("Max Auto Withdraw set to 5000 CRD")
-
+        
         console.log("Setting Bot Address for CRD")
+        const credits: any = await Credits.attach(creditsAddress.target)
         tx = await credits.setBotAddress(networkConfig[networkName].bot)
         await tx.wait()
         console.log("Bot Address set to:", networkConfig[networkName].bot)
