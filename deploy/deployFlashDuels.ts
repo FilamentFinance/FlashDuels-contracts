@@ -28,7 +28,7 @@ const main = async () => {
 
     if (networkName === "seiMainnet") {
         usdAddress = { target: networkConfig[networkName].usdc }
-        creditsAddress = { target: networkConfig[networkName].credits }
+        // creditsAddress = { target: networkConfig[networkName].credits }
     } else {
         console.log("Deploying USDC")
         let USDC = await ethers.getContractFactory("FLASHUSDC")
@@ -44,13 +44,13 @@ const main = async () => {
         tx = await flashUSDC.changeAdmin(networkConfig[networkName].bot);
         await tx.wait(1)
         console.log("USDC Admin changed to: ", networkConfig[networkName].bot);
-
-        Credits = await ethers.getContractFactory("Credits")
-        const flashDuelsCreditsContract = await upgrades.deployProxy(Credits, [networkConfig[networkName].creditsMaxSupply])
-        flashDuelsCredits = await flashDuelsCreditsContract.waitForDeployment()
-        console.log("FlashDuelsCredits deployed:", flashDuelsCredits.target)
-        creditsAddress = { target: flashDuelsCredits.target }
     }
+
+    Credits = await ethers.getContractFactory("Credits")
+    const flashDuelsCreditsContract = await upgrades.deployProxy(Credits, [networkConfig[networkName].creditsMaxSupply])
+    flashDuelsCredits = await flashDuelsCreditsContract.waitForDeployment()
+    console.log("FlashDuelsCredits deployed:", flashDuelsCredits.target)
+    creditsAddress = { target: flashDuelsCredits.target }
 
     const FlashDuelsIncentives = await ethers.getContractFactory("FlashDuelsIncentives")
     const flashDuelsIncentives = await FlashDuelsIncentives.deploy()
@@ -157,12 +157,12 @@ const main = async () => {
 
     console.log("=========Protocol Settings=========");
     const flashDuelsAdmin: any = await FlashDuelsAdminFacet.attach(diamond.target)
-    
+
     tx = await flashDuelsAdmin.setResolvingPeriod("1296000"); // 15 days (15 * 24 * 60 * 60)
     txr = await tx.wait(1);
     console.log("Resolving Period set to 15 days")
-    
-    if(networkConfig[networkName].participatingToken === ParticipationTokenType.CRD) {
+
+    if (networkConfig[networkName].participatingToken === ParticipationTokenType.CRD) {
         console.log("Setting Participation Token Type to CRD");
         tx = await flashDuelsAdmin.setParticipationTokenType(ParticipationTokenType.CRD);
         await tx.wait(1)
