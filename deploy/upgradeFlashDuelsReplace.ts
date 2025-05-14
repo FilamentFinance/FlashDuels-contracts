@@ -46,26 +46,26 @@ async function main() {
 
     // Prepare the cut transaction
     const cut: any = [
-        // {
-        //     facetAddress: flashDuelsAdminFacet.target,
-        //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
-        //     functionSelectors: flashDuelsAdminFacetSelectors
-        // },
+        {
+            facetAddress: flashDuelsAdminFacet.target,
+            action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
+            functionSelectors: flashDuelsAdminFacetSelectors
+        },
         {
             facetAddress: flashDuelsCoreFacet.target,
             action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
             functionSelectors: flashDuelsCoreFacetSelectors
         },
-        // {
-        //     facetAddress: flashDuelsMarketplaceFacet.target,
-        //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
-        //     functionSelectors: flashDuelsMarketplaceFacetSelectors
-        // },
-        // {
-        //     facetAddress: flashDuelsViewFacet.target,
-        //     action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
-        //     functionSelectors: flashDuelsViewFacetSelectors
-        // }
+        {
+            facetAddress: flashDuelsMarketplaceFacet.target,
+            action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
+            functionSelectors: flashDuelsMarketplaceFacetSelectors
+        },
+        {
+            facetAddress: flashDuelsViewFacet.target,
+            action: FacetCutAction.Replace, // 0 means Add ,  1 Replace function, 2 for Remove
+            functionSelectors: flashDuelsViewFacetSelectors
+        }
     ]
 
     try {
