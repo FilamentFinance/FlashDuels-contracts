@@ -33,7 +33,8 @@ enum DuelCategory {
     Sports,
     Twitter,
     NFTs,
-    News
+    News,
+    FormulaOne
 }
 
 /// @notice Enum representing trigger type
