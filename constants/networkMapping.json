@@ -66,5 +66,22 @@
         "StartBlock": 147061645,
         "Goldsky_Subgraph": "",
         "deploymentDate": "2025-05-13T18:35:20.165Z"
+    },
+    "baseMainnet": {
+        "FLASHUSDC": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "FlashDuelsCredits": "0xe5DFD5A449B4f9Fe56155480bD376506FBa77EbE",
+        "FlashDuelsIncentives": "0xddc834E0fd1d752B165FA17A7C0f5a97499e8F0C",
+        "FlashDuelsAdminFacet": "0x52fed6718FE0190a064AFD3796F9257D75Fc7DBE",
+        "FlashDuelsCoreFacet": "0x962338e20bfd580fe9a6268327cd1Ca23E04095F",
+        "FlashDuelsMarketplaceFacet": "0xB9DdD8AEd88c7486cf116E8D8d42d3732e04E9F2",
+        "FlashDuelsViewFacet": "0xaB338D0B05c0a389747BCbb9B4442bD0de238841",
+        "OwnershipFacet": "0x5B45977a036B7E9b50E3C2b38c6d7B5bB1018f70",
+        "DiamondCutFacet": "0x97680F9634eafEb362093698860b3E1cBa93F380",
+        "DiamondLoupeFacet": "0x475052cb17E40Bf05500a4b211A6Fc43deF74d50",
+        "DiamondInit": "0xc92bDb6293139141e8fd9750F54c8f99D1fC48Cc",
+        "Diamond": "0xF5816402a32bBF6f97A152886579e7C7cA056369",
+        "StartBlock": 30440995,
+        "Goldsky_Subgraph": "",
+        "deploymentDate": "2025-05-19T16:17:56.832Z"
     }
 }

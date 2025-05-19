@@ -59,7 +59,17 @@ export const networkConfig: networkConfigInfo = {
         bot: "0x16372a30A0b6554Bcb81fed6665B0e628B47FB3a",
         protocolTreasury: "0xF4ddE68ed3cbF149fc22db422029e96F4F66f660",
         creditsMaxSupply: "1000000000000000000000000", // 1 Million
-        participatingToken: ParticipationTokenType.USDC
+        participatingToken: ParticipationTokenType.CRD
+    },
+    baseMainnet: {
+        chainId: 8453,
+        goldskySlug: "base",
+        deployer: "0x154995E448455D1a731ecA77219a4ea425767f0D",
+        usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        bot: "0x160759D72eA832A35fa22F6a613cC1fB333B3221",
+        protocolTreasury: "0xF4ddE68ed3cbF149fc22db422029e96F4F66f660",
+        creditsMaxSupply: "1000000000000000000000000", // 1 Million
+        participatingToken: ParticipationTokenType.CRD
     }
 }
 

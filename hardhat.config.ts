@@ -46,6 +46,11 @@ const config: HardhatUserConfig = {
             url: "https://evm-rpc.sei-apis.com",
             chainId: 1329,
             accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
+        },
+        baseMainnet: {
+            url: "https://capable-crimson-frog.base-mainnet.quiknode.pro/8aee4f8ff7f7b1caec81d0d6f87c88046f62d515/",
+            chainId: 8453,
+            accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
         }
     },
     abiExporter: {
