@@ -46,6 +46,19 @@ const config: HardhatUserConfig = {
             url: "https://evm-rpc.sei-apis.com",
             chainId: 1329,
             accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
+<<<<<<< Updated upstream
+=======
+        },
+        baseMainnet: {
+            url: process.env.QUICKNODE_API_KEY_BASE || "",
+            chainId: 8453,
+            accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
+        },
+        baseSepolia: {
+            url: process.env.QUICKNODE_API_KEY_BASE_SEPOLIA || "",
+            chainId: 84532,
+            accounts: [PRIVATE_KEY_ADMIN_TESTNET, PRIVATE_KEY_BOT_TESTNET]
+>>>>>>> Stashed changes
         }
     },
     abiExporter: {
