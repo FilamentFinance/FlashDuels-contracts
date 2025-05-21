@@ -48,6 +48,16 @@ const config: HardhatUserConfig = {
             accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
         },
         baseMainnet: {
+            url: process.env.QUICKNODE_API_KEY_BASE || "",
+            chainId: 8453,
+            accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
+        },
+        baseSepolia: {
+            url: process.env.QUICKNODE_API_KEY_BASE_SEPOLIA || "",
+            chainId: 84532,
+            accounts: [PRIVATE_KEY_ADMIN_TESTNET, PRIVATE_KEY_BOT_TESTNET]
+        },
+        baseMainnet: {
             url: "https://capable-crimson-frog.base-mainnet.quiknode.pro/8aee4f8ff7f7b1caec81d0d6f87c88046f62d515/",
             chainId: 8453,
             accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
