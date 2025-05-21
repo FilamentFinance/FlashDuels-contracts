@@ -26,7 +26,7 @@ const main = async () => {
     }
     console.log("Deployer: ", owner)
 
-    if (networkName === "seiMainnet") {
+    if (networkName === "seiMainnet" || networkName === "baseMainnet") {
         usdAddress = { target: networkConfig[networkName].usdc }
         // creditsAddress = { target: networkConfig[networkName].credits }
     } else {

@@ -59,9 +59,6 @@ export const networkConfig: networkConfigInfo = {
         bot: "0x16372a30A0b6554Bcb81fed6665B0e628B47FB3a",
         protocolTreasury: "0xF4ddE68ed3cbF149fc22db422029e96F4F66f660",
         creditsMaxSupply: "1000000000000000000000000", // 1 Million
-<<<<<<< Updated upstream
-        participatingToken: ParticipationTokenType.USDC
-=======
         participatingToken: ParticipationTokenType.CRD
     },
     baseMainnet: {
@@ -83,7 +80,6 @@ export const networkConfig: networkConfigInfo = {
         protocolTreasury: "0x2f26916898c5Aa188676613676ba863d2f1eF597",
         creditsMaxSupply: "1000000000000000000000000", // 1 Million
         participatingToken: ParticipationTokenType.CRD
->>>>>>> Stashed changes
     }
 }
 

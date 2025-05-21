@@ -46,8 +46,6 @@ const config: HardhatUserConfig = {
             url: "https://evm-rpc.sei-apis.com",
             chainId: 1329,
             accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
-<<<<<<< Updated upstream
-=======
         },
         baseMainnet: {
             url: process.env.QUICKNODE_API_KEY_BASE || "",
@@ -58,7 +56,11 @@ const config: HardhatUserConfig = {
             url: process.env.QUICKNODE_API_KEY_BASE_SEPOLIA || "",
             chainId: 84532,
             accounts: [PRIVATE_KEY_ADMIN_TESTNET, PRIVATE_KEY_BOT_TESTNET]
->>>>>>> Stashed changes
+        },
+        baseMainnet: {
+            url: "https://capable-crimson-frog.base-mainnet.quiknode.pro/8aee4f8ff7f7b1caec81d0d6f87c88046f62d515/",
+            chainId: 8453,
+            accounts: [PRIVATE_KEY_ADMIN_MAINNET, PRIVATE_KEY_BOT_MAINNET]
         }
     },
     abiExporter: {

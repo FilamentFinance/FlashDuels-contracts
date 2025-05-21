@@ -66,8 +66,6 @@
         "StartBlock": 147061645,
         "Goldsky_Subgraph": "",
         "deploymentDate": "2025-05-13T18:35:20.165Z"
-<<<<<<< Updated upstream
-=======
     },
     "baseMainnet": {
         "FLASHUSDC": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
@@ -102,6 +100,5 @@
         "StartBlock": 26026256,
         "Goldsky_Subgraph": "",
         "deploymentDate": "2025-05-21T09:49:39.581Z"
->>>>>>> Stashed changes
     }
 }
