@@ -13,7 +13,10 @@ enum DuelDuration {
     OneHour,
     ThreeHours,
     SixHours,
-    TwelveHours
+    TwelveHours,
+    OneDay,
+    OneWeek,
+    OneMonth
 }
 
 /// @notice Enum representing the current status of a duel
@@ -34,7 +37,8 @@ enum DuelCategory {
     Twitter,
     NFTs,
     News,
-    FormulaOne
+    FormulaOne,
+    Trending
 }
 
 /// @notice Enum representing trigger type

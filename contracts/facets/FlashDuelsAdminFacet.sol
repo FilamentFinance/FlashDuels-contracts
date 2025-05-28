@@ -286,7 +286,10 @@ contract FlashDuelsAdminFacet is PausableUpgradeable, ReentrancyGuardUpgradeable
                 _duelDuration == DuelDuration.OneHour ||
                 _duelDuration == DuelDuration.ThreeHours ||
                 _duelDuration == DuelDuration.SixHours ||
-                _duelDuration == DuelDuration.TwelveHours,
+                _duelDuration == DuelDuration.TwelveHours ||
+                _duelDuration == DuelDuration.OneDay ||
+                _duelDuration == DuelDuration.OneWeek ||
+                _duelDuration == DuelDuration.OneMonth,
             FlashDuelsAdminFacet__InvalidDuelDuration()
         );
 
